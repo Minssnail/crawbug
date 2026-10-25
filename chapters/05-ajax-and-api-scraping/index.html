@@ -1,0 +1,2777 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="本章深入对比SSR与CSR渲染架构，系统讲解利用Chrome DevTools定位XHR/Fetch异步接口、JSON/JSONP/JMESPath数据解析、Page/Offset与Cursor瀑布流分页、复杂POST载荷、CORS跨域、GraphQL及WebSocket/SSE实时流采集技术。">
+      
+      
+        <meta name="author" content="AI教材编写组">
+      
+      
+        <link rel="canonical" href="https://minssnail.github.io/crawbug/chapters/05-ajax-and-api-scraping/">
+      
+      
+        <link rel="prev" href="../04-static-html-parsing/">
+      
+      
+        <link rel="next" href="../06-browser-automation-playwright/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.0">
+    
+    
+      
+        <title>异步加载与Web接口逆向采集 - 网络爬虫技术</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.57a0d79d.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.fb2fffe2.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../css/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="orange">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#web" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="网络爬虫技术" class="md-header__button md-logo" aria-label="网络爬虫技术" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            网络爬虫技术
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              异步加载与Web接口逆向采集
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/Minssnail/crawbug" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Minssnail/crawbug
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="网络爬虫技术" class="md-nav__button md-logo" aria-label="网络爬虫技术" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    网络爬虫技术
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/Minssnail/crawbug" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Minssnail/crawbug
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../about/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    About
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../course-description/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Course Description
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Chapters
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_4" id="__nav_4_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Chapters
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../01-intro-and-ethics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1. 网络爬虫导论与数据合规基石
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../02-web-and-http-fundamentals/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    2. Web前端基石与HTTP通信原理
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../03-python-http-requests/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    3. Python网络请求核心编程
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-static-html-parsing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    4. 静态网页结构化解析与正则提取
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    5. 异步加载与Web接口逆向采集
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    5. 异步加载与Web接口逆向采集
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#concepts-covered" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Concepts Covered
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-web" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. 现代Web渲染架构演进与异步通信基石
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. 现代Web渲染架构演进与异步通信基石">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-ssrcsr" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 服务端渲染SSR与客户端渲染CSR架构
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-ajaxxhrfetchapi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 AJAX异步通信原理与XHR/Fetch现代API对比
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#13-restfulweb" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.3 RESTful架构风格与Web接口设计
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-jsonjsonp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. JSON/JSONP序列化解析与深层路径抽取
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. JSON/JSONP序列化解析与深层路径抽取">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-jsonpythonjson" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 JSON数据序列化格式与Python内置json模块
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-jsonpathjmespath" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 JSONPath与JMESPath深层数据抽取
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-jsonp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3 JSONP跨域回调原理与字符串剥离
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-chrome-devtools" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Chrome DevTools接口逆向定位与分页规律破解
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Chrome DevTools接口逆向定位与分页规律破解">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-devtoolsxhrapi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 DevTools中XHR过滤器与全局搜索关键字反查API
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-offsetcursor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 页码/Offset分页、Cursor游标瀑布流与毫秒级时间戳
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-postx-requested-withcors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 复杂POST载荷、X-Requested-With与CORS跨域预检
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3.3 复杂POST载荷、X-Requested-With与CORS跨域预检">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#diagram-api-pagination-reverse-engineering-simulator" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagram: API Pagination Reverse Engineering Simulator
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-graphqlwebsocketsse" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. 新一代接口协议：GraphQL、WebSocket与SSE流式采集
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. 新一代接口协议：GraphQL、WebSocket与SSE流式采集">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-graphql" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 GraphQL查询语言与单端点接口采集
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-websocket" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 WebSocket全双工长连接实时数据抓取
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#43-sse" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3 SSE服务端推送事件流数据采集
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-apidom" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. 异步API直采与DOM解析工程选型评估
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. 异步API直采与DOM解析工程选型评估">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#diagram-web-scraping-protocol-and-strategy-decision-matrix" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagram: Web Scraping Protocol and Strategy Decision Matrix
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. 本章小结与思考练习
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. 本章小结与思考练习">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#61" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.1 核心要点回顾
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#62" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.2 思考与自测练习
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../06-browser-automation-playwright/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    6. 动态渲染网页与Playwright浏览器自动化
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../07-anti-scraping-and-countermeasures/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    7. 反爬虫机制原理与工程对抗策略
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../08-concurrent-and-async-scraping/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    8. 高性能并发与异步协程爬虫编程
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../09-data-cleaning-and-storage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    9. 数据清洗流水线与多源持久化存储
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../10-scrapy-industrial-framework/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    10. Scrapy工业级异步爬虫框架实战
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../11-ai-powered-scraping-and-datasets/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    11. 面向大模型与RAG的AI智能爬虫
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../12-engineering-deployment-and-capstone/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    12. 爬虫工程化运维部署与综合实训项目
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../learning-graph/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Learning Graph
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../sims/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MicroSims
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../license/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    License
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contact/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contact
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#concepts-covered" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Concepts Covered
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-web" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. 现代Web渲染架构演进与异步通信基石
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. 现代Web渲染架构演进与异步通信基石">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-ssrcsr" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 服务端渲染SSR与客户端渲染CSR架构
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-ajaxxhrfetchapi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 AJAX异步通信原理与XHR/Fetch现代API对比
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#13-restfulweb" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.3 RESTful架构风格与Web接口设计
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-jsonjsonp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. JSON/JSONP序列化解析与深层路径抽取
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. JSON/JSONP序列化解析与深层路径抽取">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-jsonpythonjson" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 JSON数据序列化格式与Python内置json模块
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-jsonpathjmespath" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 JSONPath与JMESPath深层数据抽取
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-jsonp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3 JSONP跨域回调原理与字符串剥离
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-chrome-devtools" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Chrome DevTools接口逆向定位与分页规律破解
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Chrome DevTools接口逆向定位与分页规律破解">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-devtoolsxhrapi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 DevTools中XHR过滤器与全局搜索关键字反查API
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-offsetcursor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 页码/Offset分页、Cursor游标瀑布流与毫秒级时间戳
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-postx-requested-withcors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 复杂POST载荷、X-Requested-With与CORS跨域预检
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3.3 复杂POST载荷、X-Requested-With与CORS跨域预检">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#diagram-api-pagination-reverse-engineering-simulator" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagram: API Pagination Reverse Engineering Simulator
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-graphqlwebsocketsse" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. 新一代接口协议：GraphQL、WebSocket与SSE流式采集
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. 新一代接口协议：GraphQL、WebSocket与SSE流式采集">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-graphql" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 GraphQL查询语言与单端点接口采集
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-websocket" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 WebSocket全双工长连接实时数据抓取
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#43-sse" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3 SSE服务端推送事件流数据采集
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-apidom" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. 异步API直采与DOM解析工程选型评估
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. 异步API直采与DOM解析工程选型评估">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#diagram-web-scraping-protocol-and-strategy-decision-matrix" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagram: Web Scraping Protocol and Strategy Decision Matrix
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. 本章小结与思考练习
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. 本章小结与思考练习">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#61" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.1 核心要点回顾
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#62" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.2 思考与自测练习
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+                
+
+
+
+  
+
+
+  <nav class="md-path" aria-label="Navigation" >
+    <ol class="md-path__list">
+      
+        
+  
+  
+    <li class="md-path__item">
+      <a href="../.." class="md-path__link">
+        
+  <span class="md-ellipsis">
+    Home
+  </span>
+
+      </a>
+    </li>
+  
+
+      
+      
+        
+  
+  
+    
+    
+      <li class="md-path__item">
+        <a href="../" class="md-path__link">
+          
+  <span class="md-ellipsis">
+    Chapters
+  </span>
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ol>
+  </nav>
+
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+    <a href="https://github.com/Minssnail/crawbug/blob/main/docs/chapters/05-ajax-and-api-scraping/index.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
+    </a>
+  
+  
+
+
+<h1 id="web">异步加载与Web接口逆向采集<a class="headerlink" href="#web" title="Permanent link">&para;</a></h1>
+<h2 id="summary">Summary<a class="headerlink" href="#summary" title="Permanent link">&para;</a></h2>
+<p>现代主流网站广泛采用前后端分离（SPA/CSR）架构，核心业务数据不再直接写入初始 HTML，而是通过异步 API 动态加载。本章深入对比服务端渲染（SSR）与客户端渲染（CSR），讲解如何利用 Chrome DevTools 的 XHR/Fetch 过滤器与全局关键字搜索快速定位隐藏的 JSON 数据接口。围绕页码/Offset 分页、Cursor 游标瀑布流分页、毫秒级时间戳、复杂 POST Payload、CORS 跨域、GraphQL 单端点查询以及 WebSocket/SSE 实时流数据展开实战，让学生掌握“绕过繁琐 DOM 解析、直取底层结构化 JSON”的高效采集范式。</p>
+<h2 id="concepts-covered">Concepts Covered<a class="headerlink" href="#concepts-covered" title="Permanent link">&para;</a></h2>
+<p>This chapter covers the following 20 concepts from the learning graph:</p>
+<table>
+<thead>
+<tr>
+<th>Concept</th>
+<th>Concept Impact Score</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>服务端渲染SSR与客户端渲染CSR架构</td>
+<td>307</td>
+</tr>
+<tr>
+<td>AJAX异步JavaScript与XML通信原理</td>
+<td>194</td>
+</tr>
+<tr>
+<td>XHR对象与Fetch现代异步API对比</td>
+<td>112</td>
+</tr>
+<tr>
+<td>RESTful架构风格与Web接口设计</td>
+<td>73</td>
+</tr>
+<tr>
+<td>JSON数据序列化格式与嵌套结构</td>
+<td>71</td>
+</tr>
+<tr>
+<td>Python内置json模块与字典互转</td>
+<td>63</td>
+</tr>
+<tr>
+<td>JSONPath与JMESPath深层数据抽取</td>
+<td>1</td>
+</tr>
+<tr>
+<td>JSONP跨域回调原理与字符串剥离</td>
+<td>1</td>
+</tr>
+<tr>
+<td>DevTools中XHR过滤器与接口快速定位</td>
+<td>107</td>
+</tr>
+<tr>
+<td>DevTools全局搜索关键字反查API</td>
+<td>45</td>
+</tr>
+<tr>
+<td>URL查询参数页码与Offset分页逆向</td>
+<td>54</td>
+</tr>
+<tr>
+<td>Cursor游标分页与瀑布流MaxID机制</td>
+<td>2</td>
+</tr>
+<tr>
+<td>时间戳参数Time与毫秒级构造</td>
+<td>25</td>
+</tr>
+<tr>
+<td>复杂POST请求Payload载荷逆向复向</td>
+<td>18</td>
+</tr>
+<tr>
+<td>API自定义请求头X-Requested-With分析</td>
+<td>1</td>
+</tr>
+<tr>
+<td>CORS跨域资源共享与Options预检请求</td>
+<td>1</td>
+</tr>
+<tr>
+<td>GraphQL查询语言与单端点接口采集</td>
+<td>1</td>
+</tr>
+<tr>
+<td>WebSocket全双工长连接实时数据抓取</td>
+<td>2</td>
+</tr>
+<tr>
+<td>SSE服务端推送事件流数据采集</td>
+<td>1</td>
+</tr>
+<tr>
+<td>异步API直采与DOM解析工程选型评估</td>
+<td>17</td>
+</tr>
+</tbody>
+</table>
+<h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">&para;</a></h2>
+<p>This chapter builds on concepts from:</p>
+<ul>
+<li><a href="../01-intro-and-ethics/">Chapter 1: 网络爬虫导论与数据合规基石</a></li>
+<li><a href="../02-web-and-http-fundamentals/">Chapter 2: Web前端基石与HTTP通信原理</a></li>
+<li><a href="../03-python-http-requests/">Chapter 3: Python网络请求核心编程</a></li>
+<li><a href="../04-static-html-parsing/">Chapter 4: 静态网页结构化解析与正则提取</a></li>
+</ul>
+<hr />
+<h2 id="1-web">1. 现代Web渲染架构演进与异步通信基石<a class="headerlink" href="#1-web" title="Permanent link">&para;</a></h2>
+<p>在前四章中，我们建立了一套清晰的静态网页采集工作流：向目标网址发送 HTTP 请求 <span class="arithmatex">\(\rightarrow\)</span> 获取完整的 HTML 文本 <span class="arithmatex">\(\rightarrow\)</span> 使用 CSS 选择器或 XPath 从 DOM 树中提取文字。然而，当你满怀信心地将这套代码应用到主流电商平台、短视频信息流、社交评论区或大模型开源排行榜时，往往会遭遇一个令人困惑的现象：<strong>在 Chrome 浏览器里明明能看到满屏的商品价格和用户评论，用 <code>F12</code> 元素检查器（Elements）也能点中对应的 <code>&lt;div&gt;</code> 标签，但用 Python 的 <code>requests</code> 或 <code>httpx</code> 请求回来的 <code>response.text</code> 里却空空如也，只剩下一行孤零零的 <code>&lt;div id="app"&gt;&lt;/div&gt;</code> 和几个 <code>&lt;script&gt;</code> 标签。</strong></p>
+<p>为什么浏览器看得到数据，而你的爬虫却抓不到？要彻底解开这个谜团，并且化劣势为优势——掌握比解析 HTML 快上十倍的<strong>“Web 接口直采（API Scraping）”</strong>绝技，我们必须先从现代 Web 前端架构的根本性演进讲起。</p>
+<h3 id="11-ssrcsr">1.1 服务端渲染SSR与客户端渲染CSR架构<a class="headerlink" href="#11-ssrcsr" title="Permanent link">&para;</a></h3>
+<p>在 Web 技术发展的不同阶段，网页数据的组装位置经历了从“服务器端”向“浏览器客户端”的重大迁移，由此形成了两种截然不同的架构模式：<strong>服务端渲染SSR与客户端渲染CSR架构（Server-Side Rendering vs. Client-Side Rendering）</strong>。</p>
+<ol>
+<li>
+<p><strong>服务端渲染（SSR, Server-Side Rendering）</strong><br />
+   在传统的 Web 开发模式（如早期的 PHP、JSP、Django 模板或现代 Next.js/Nuxt.js 的 SSR 模式）中，当浏览器向服务器请求 <code>https://news.example.edu/list</code> 时，Web 服务器会在后台直接查询数据库，将查询出的 20 条新闻标题、发布时间和正文摘要直接填入 HTML 模板的 <code>&lt;li&gt;</code> 和 <code>&lt;p&gt;</code> 标签中，拼装成一份<strong>包含完整业务数据的成品 HTML 文档</strong>返回给客户端。<br />
+<strong>爬虫视角</strong>：对于 SSR 页面，初次 HTTP 响应的 <code>View Page Source</code>（右键“查看网页源代码”）与 <code>Inspect</code>（F12“检查”面板中的实时 DOM 树）几乎完全一致。这是第 4 章静态 DOM 解析器（BeautifulSoup、parsel）的天然主场。</p>
+</li>
+<li>
+<p><strong>客户端渲染（CSR, Client-Side Rendering）与单页应用（SPA）</strong><br />
+   随着 Vue.js、React、Angular 等现代前端框架的普及，工业界广泛转向了<strong>前后端分离（Frontend-Backend Separation）</strong>架构。在这种模式下，当用户首次访问网址时，服务器返回的初始 HTML 只是一个不包含任何具体业务数据的<strong>“空壳骨架（HTML Skeleton）”</strong>（通常只有 <code>&lt;div id="app"&gt;&lt;/div&gt;</code>）以及打包好的 JavaScript 应用脚本（如 <code>app.bundle.js</code>）。随后，浏览器执行这段 JS 脚本，在后台悄悄向后端的数据接口（API）发起二次异步网络请求；后端 API 直接返回纯结构化的 <strong>JSON 数据</strong>；最后，前端 JS 引擎在浏览器内存中动态创建 DOM 节点，把 JSON 里的商品标题和价格“挂载（Mount）”到页面上呈现给用户。<br />
+<strong>爬虫视角</strong>：在 CSR 架构下，<code>requests.get(url)</code> 拿到的只是第 1 步那个还没有执行 JS 的空壳 HTML！但请换个角度思考：既然浏览器也是通过向后端某个 API 网址请求 JSON 数据才拿到内容的，<strong>如果我们能直接找到那个隐藏的 API 网址，用 Python 直接请求该 API，岂不是连复杂的 HTML 标签都不用解析，直接就能拿到最干净、最标准的 JSON 字典？</strong> 这正是本章“Web 接口逆向采集”的核心指导思想。</p>
+</li>
+</ol>
+<div class="admonition tip">
+<p class="admonition-title">3 秒快速鉴别网页是 SSR 还是 CSR</p>
+<p>在浏览器中打开目标网页，按快捷键 <code>Ctrl + U</code>（Windows）或右键选择<strong>“查看网页源代码（View Page Source）”</strong>，然后按 <code>Ctrl + F</code> 搜索页面上肉眼可见的某条具体数据（如某件商品的名称 <code>"RTX 4090"</code> 或某条评论文字）：</p>
+<ul>
+<li><strong>如果能搜到</strong>：说明数据直接包含在初始 HTML 响应中，属于 <strong>SSR（或静态内联 JSON）</strong>，可直接用第 3、4 章的方法抓取。</li>
+<li><strong>如果搜不到（只有 <code>&lt;div id="app"&gt;&lt;/div&gt;</code>）</strong>：说明数据是由后续 JavaScript 异步加载渲染的，属于 <strong>CSR 动态页面</strong>，应立即打开 DevTools 网络面板寻找异步 API 接口。</li>
+</ul>
+</div>
+<h3 id="12-ajaxxhrfetchapi">1.2 AJAX异步通信原理与XHR/Fetch现代API对比<a class="headerlink" href="#12-ajaxxhrfetchapi" title="Permanent link">&para;</a></h3>
+<p>支撑客户端渲染（CSR）在后台静默拉取数据的核心技术，便是 <strong>AJAX异步JavaScript与XML通信原理（Asynchronous JavaScript and XML）</strong>。在 AJAX 出现之前，网页要想获取新数据（比如翻到评论区第 2 页），必须重新刷新整个浏览器页面，导致屏幕闪烁并浪费大量带宽重复下载相同的导航栏与样式表。AJAX 的革命性在于：<strong>它允许浏览器中的 JavaScript 脚本在不刷新当前页面的前提下，在后台异步向服务器发送 HTTP 请求并接收响应数据，随后仅对网页的局部 DOM 区域进行无缝更新。</strong> 尽管早期的名字里带有“XML”，但在现代 Web 工程中，AJAX 传输的数据格式已经 99% 被更轻量、更易解析的 <strong>JSON</strong> 所取代。</p>
+<p>在浏览器底层，JavaScript 发起 AJAX 异步请求主要依赖两代标准接口：<strong>XHR对象与Fetch现代异步API对比（XMLHttpRequest vs. Fetch API）</strong>：</p>
+<ul>
+<li><strong>第一代标准：<code>XMLHttpRequest</code>（简称 XHR）</strong><br />
+  自 IE5 时代引入并沿用至今的经典异步通信对象。它采用基于事件回调（Event Callbacks，如 <code>xhr.onreadystatechange</code>）的编程模型。主流第三方网络库 <strong>Axios</strong>（Vue/React 项目中最常用的请求库）以及早期的 <code>jQuery.ajax</code> 底层封装的都是 <code>XMLHttpRequest</code> 对象。</li>
+<li><strong>第二代标准：<code>Fetch API</code>（现代原生异步接口）</strong><br />
+  HTML5 与 ES6 时代推出的现代替代方案，直接挂载在全局 <code>window.fetch()</code> 函数上。它原生基于 <code>Promise</code> 与 <code>async/await</code> 语法设计，支持流式响应读取（<code>ReadableStream</code>），代码更加简洁，且默认在跨域请求中采用更严格的凭证控制策略。</li>
+</ul>
+<p>对于爬虫工程师而言，虽然我们不需要手写前端页面，但理解 XHR 与 Fetch 的区别有两个直接的实战价值：第一，在 Chrome 开发者工具（DevTools）的 Network 面板中，这两类请求都被归类在 <strong><code>Fetch/XHR</code></strong> 过滤标签下；第二，后续在第 7 章进行 JavaScript 逆向调试（如 Hook 拦截加密参数或下 XHR 断点）时，必须清楚目标网站底层调用的究竟是 <code>XMLHttpRequest.prototype.send</code> 还是 <code>window.fetch</code>。</p>
+<h3 id="13-restfulweb">1.3 RESTful架构风格与Web接口设计<a class="headerlink" href="#13-restfulweb" title="Permanent link">&para;</a></h3>
+<p>当前后端分离成为主流后，后端工程师如何规范地设计成百上千个数据接口？工业界普遍遵循由 Roy Fielding 提出的 <strong>RESTful架构风格与Web接口设计（Representational State Transfer）</strong>。RESTful 的核心哲学是<strong>“万物皆资源（Resources），用 URL 定位资源名词，用 HTTP 请求方法（Verbs）表达对资源的操作动作”</strong>：</p>
+<ol>
+<li><strong>资源路径语义化（使用复数名词而非动词）</strong>：接口 URL 通常包含统一的前缀与版本号，例如 <code>/api/v1/courses</code> 代表课程资源集合，<code>/api/v1/courses/105</code> 代表编号为 <code>105</code> 的单门课程，<code>/api/v1/courses/105/reviews</code> 代表该课程下的评价列表。</li>
+<li><strong>HTTP 方法映射 CRUD 操作</strong>：</li>
+<li><code>GET</code>：查询/获取资源（爬虫 80% 以上的列表与详情采集均针对 <code>GET</code> 接口）；</li>
+<li><code>POST</code>：新建资源，或在复杂多条件筛选、加密参数传输时作为查询载体（爬虫中剩余 20% 的搜索与分页接口采用 <code>POST</code>）；</li>
+<li><code>PUT</code> / <code>PATCH</code>：全量替换或局部更新资源；</li>
+<li><code>DELETE</code>：删除资源。</li>
+<li><strong>无状态通信与标准响应结构</strong>：每次请求都包含服务器理解该请求所需的全部信息（如分页参数、身份 Token），响应体通常采用统一的 JSON 包装信封格式，例如 <code>{"code": 200, "message": "success", "data": {...}}</code>。</li>
+</ol>
+<p>熟悉 RESTful 命名规律后，爬虫工程师常常能实现“举一反三”：当你抓包发现某门课程详情的接口是 <code>GET https://api.example.edu/v2/courses/1001</code> 时，无需回到列表页点击，只需在循环中改变末尾的资源 ID（<code>1001</code>、<code>1002</code>、<code>1003</code>...），或者尝试访问 <code>GET https://api.example.edu/v2/courses?page=1&amp;size=50</code>，往往就能直接批量拉取整个数据库表！</p>
+<p>下表汇总对比了 SSR 与 CSR 渲染模式以及 XHR 与 Fetch 异步通信机制的核心技术特征：</p>
+<table>
+<thead>
+<tr>
+<th>对比维度</th>
+<th>服务端渲染 (SSR)</th>
+<th>客户端渲染 (CSR / SPA)</th>
+<th>XHR (<code>XMLHttpRequest</code>)</th>
+<th>现代 <code>Fetch API</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>核心工作原理</strong></td>
+<td>服务器将数据库数据填入 HTML 模板，返回完整成品网页</td>
+<td>服务器仅返回空壳 HTML 与 JS，由浏览器异步请求 API 并动态挂载 DOM</td>
+<td>基于事件监听对象（<code>onload</code>/<code>onerror</code>）发起异步 HTTP 请求</td>
+<td>基于 ES6 <code>Promise</code> 与 <code>ReadableStream</code> 的现代原生异步函数</td>
+</tr>
+<tr>
+<td><strong><code>Ctrl+U</code> 网页源码</strong></td>
+<td><strong>包含</strong>完整的业务文字与标签结构</td>
+<td><strong>不包含</strong>业务数据，仅有 <code>&lt;div id="app"&gt;&lt;/div&gt;</code> 等挂载点</td>
+<td>不适用（运行于 JS 内存）</td>
+<td>不适用（运行于 JS 内存）</td>
+</tr>
+<tr>
+<td><strong>最佳爬虫采集策略</strong></td>
+<td>直接请求网页 URL + CSS/XPath 静态 DOM 解析</td>
+<td><strong>逆向定位底层 JSON API 接口</strong>，用 <code>httpx</code> 直接请求 JSON</td>
+<td>在 DevTools 勾选 <code>Fetch/XHR</code> 过滤；可通过 <code>XHR Breakpoints</code> 断点拦截</td>
+<td>在 DevTools 勾选 <code>Fetch/XHR</code> 过滤；可通过重写 <code>window.fetch</code> 进行 Hook</td>
+</tr>
+<tr>
+<td><strong>数据结构化程度</strong></td>
+<td>低（数据散落在复杂的 HTML 视觉标签与样式类中）</td>
+<td><strong>极高</strong>（后端 API 直接返回类型明确的 JSON 键值字典）</td>
+<td>响应体通常通过 <code>xhr.responseText</code> 或 <code>JSON.parse()</code> 读取</td>
+<td>响应体通过 <code>await response.json()</code> 异步解析为对象</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="2-jsonjsonp">2. JSON/JSONP序列化解析与深层路径抽取<a class="headerlink" href="#2-jsonjsonp" title="Permanent link">&para;</a></h2>
+<p>一旦我们绕过表层的 HTML 页面，直接对接网站的后端 API，服务器返回给我们的将不再是满篇尖括号的 HTML，而是结构严谨的数据序列化文本。熟练处理 JSON、JSONP 以及多层嵌套字典的高效抽取，是接口采集的基本功。</p>
+<h3 id="21-jsonpythonjson">2.1 JSON数据序列化格式与Python内置json模块<a class="headerlink" href="#21-jsonpythonjson" title="Permanent link">&para;</a></h3>
+<p><strong>JSON数据序列化格式与嵌套结构（JavaScript Object Notation）</strong> 是目前全互联网 API 通信与大模型训练数据集（如 <code>.json</code> 与 <code>.jsonl</code>）的事实标准。JSON 是一种完全独立于编程语言的轻量级纯文本数据交换格式，仅由两种基本结构组合而成：<strong>对象（Object，用花括号 <code>{}</code> 包裹的无序键值对集合）</strong>与<strong>数组（Array，用方括号 <code>[]</code> 包裹的有序值列表）</strong>。</p>
+<p>在编写爬虫解析 JSON 时，务必牢记 <strong>JSON 规范与 Python 字典字面量的四处关键语法差异</strong>（这也是为什么不能直接用 Python 的 <code>eval()</code> 去解析 JSON 字符串的原因）：</p>
+<ol>
+<li><strong>键名与字符串必须使用双引号 <code>"</code></strong>：JSON 标准中严禁使用单引号 <code>'</code> 包裹键名或字符串，且对象或数组的最后一个元素后面<strong>绝不能有多余的尾随逗号（Trailing Comma）</strong>。</li>
+<li><strong>布尔值小写</strong>：JSON 中使用小写的 <code>true</code> 和 <code>false</code>，对应 Python 中的首字母大写 <code>True</code> 和 <code>False</code>。</li>
+<li><strong>空值表示</strong>：JSON 中使用 <code>null</code> 表示空值，对应 Python 中的 <code>None</code>。</li>
+<li><strong>注释限制</strong>：标准 JSON 格式不支持任何 <code>//</code> 或 <code>#</code> 注释。</li>
+</ol>
+<p>在 Python 中，我们通过<strong>Python内置json模块与字典互转</strong>来实现 JSON 文本与原生数据结构（<code>dict</code>/<code>list</code>）之间的双向转换，以及使用 HTTP 客户端自带的 <code>.json()</code> 快捷方法：</p>
+<ul>
+<li><strong><code>json.loads(s: str) -&gt; dict | list</code></strong>（Load String，反序列化）：将网络响应返回的 JSON 格式<strong>字符串</strong>解析为 Python 内存中的字典或列表。在 <code>requests</code> 或 <code>httpx</code> 中，调用 <code>response.json()</code> 底层自动执行的就是 <code>json.loads(response.text)</code>。</li>
+<li><strong><code>json.dumps(obj, ensure_ascii=False, indent=2) -&gt; str</code></strong>（Dump String，序列化）：将 Python 字典或列表转换为 JSON 格式<strong>字符串</strong>。注意：<strong>在保存中文语料时，必须设置 <code>ensure_ascii=False</code></strong>，否则所有中文字符都会被转义为难以阅读的 <code>\u4e2d\u6587</code> Unicode 编码！</li>
+<li><strong><code>json.load(fp)</code> 与 <code>json.dump(obj, fp, ensure_ascii=False)</code></strong>：直接针对打开的文件句柄 <code>fp</code> 进行读取或写入。</li>
+</ul>
+<h3 id="22-jsonpathjmespath">2.2 JSONPath与JMESPath深层数据抽取<a class="headerlink" href="#22-jsonpathjmespath" title="Permanent link">&para;</a></h3>
+<p>真实的工业级 API（例如微博动态接口、淘宝商品详情接口或 GraphQL 响应）返回的 JSON 往往具有极深的嵌套层级（动辄 6~10 层 <code>{ "data": { "result": { "cards": [ { "mblog": { "user": { "screen_name": "..." } } } ] } } }</code>）。如果完全使用 Python 原生的 <code>data["data"]["result"]["cards"][0]["mblog"]["user"]["screen_name"]</code> 逐层硬编码取值，只要某一条记录中间缺少某个键或者值为 <code>None</code>，程序就会立刻抛出 <code>KeyError</code> 或 <code>TypeError: 'NoneType' object is not subscriptable</code> 导致爬虫中断。</p>
+<p>为了优雅、安全地从深层嵌套 JSON 中批量提取字段（就像用 XPath 提取 HTML 一样），工程界广泛采用<strong>JSONPath与JMESPath深层数据抽取</strong>技术。其中，<strong>JMESPath</strong>（需安装 <code>pip install jmespath</code>，也是 AWS CLI 等工业级工具内置的 JSON 查询语言）语法极为精炼且天然具备空值安全保护——当路径上的某个键不存在时，它会平缓地返回 <code>None</code> 而不会抛出异常崩溃：</p>
+<ul>
+<li><strong>点号链式取值</strong>：<code>data.course.instructor.name</code> 直接穿透多层字典；</li>
+<li><strong>列表切片与通配符投影（<code>[*]</code>）</strong>：<code>data.items[*].title</code> 会自动遍历 <code>items</code> 数组中的每一个字典，提取出所有元素的 <code>title</code> 字段并组装为一个扁平的 Python 列表；</li>
+<li><strong>条件过滤表达式（<code>[?condition]</code>）</strong>：<code>data.items[?price &lt;</code>100<code>].title</code> 可以直接在抽取阶段过滤出价格低于 100 元的商品标题（注意字面量数值在 JMESPath 中用反引号 <code>`100`</code> 包裹，字符串用单引号 <code>'AI'</code> 包裹）；</li>
+<li><strong>多字段重塑字典（MultiSelect Hash）</strong>：<code>data.items[*].{id: item_id, name: title, author: user.nickname}</code> 能够在一次查询中把深层异构的 JSON 直接拍平（Flatten）为我们所需的标准字典列表！</li>
+</ul>
+<h3 id="23-jsonp">2.3 JSONP跨域回调原理与字符串剥离<a class="headerlink" href="#23-jsonp" title="Permanent link">&para;</a></h3>
+<p>在采集一些历史悠久的门户网站（如部分财经行情接口、早期政务查询系统、百度搜索建议词接口或新浪/东方财富的部分老接口）时，你常常会看到接口响应并不是以 <code>{</code> 开头的纯 JSON，而是长成下面这副模样：</p>
+<div class="language-javascript highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nx">jQuery1124089234789_1729400000123</span><span class="p">({</span><span class="s2">"code"</span><span class="o">:</span><span class="w"> </span><span class="mf">0</span><span class="p">,</span><span class="w"> </span><span class="s2">"msg"</span><span class="o">:</span><span class="w"> </span><span class="s2">"ok"</span><span class="p">,</span><span class="w"> </span><span class="s2">"items"</span><span class="o">:</span><span class="w"> </span><span class="p">[{</span><span class="s2">"symbol"</span><span class="o">:</span><span class="w"> </span><span class="s2">"SH600519"</span><span class="p">,</span><span class="w"> </span><span class="s2">"price"</span><span class="o">:</span><span class="w"> </span><span class="mf">1528.50</span><span class="p">}]});</span>
+</span></code></pre></div>
+<p>这种格式如果直接调用 <code>response.json()</code>，必然会触发 <code>json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)</code> 错误。这就是经典的 <strong>JSONP跨域回调原理与字符串剥离（JSON with Padding）</strong>。</p>
+<ul>
+<li><strong>为什么会有 JSONP？</strong> 在现代 CORS 跨域标准普及之前，浏览器的“同源策略（Same-Origin Policy）”严禁网页通过 <code>XMLHttpRequest</code> 请求不同域名下的接口，但却允许 <code>&lt;script src="https://api.other.com/quote?callback=myFunc"&gt;</code> 标签跨域加载 JavaScript 脚本。于是前后端约定：前端在 URL 参数里传一个回调函数名（如 <code>callback=jQuery123</code>），后端把真正的 JSON 数据作为参数塞进这个函数调用括号里返回（即 <code>jQuery123({...});</code>），浏览器加载后便会自动执行该函数拿到数据。</li>
+<li><strong>爬虫如何破解与剥离 JSONP？</strong> 爬虫不是浏览器，根本不需要执行什么 JS 回调函数！我们有两种处理方案：</li>
+<li><strong>首选技巧</strong>：直接尝试删掉 URL 查询参数里的 <code>callback=xxx</code>（或将其改为空），部分后端接口就会自动退化为返回纯净的 JSON；</li>
+<li><strong>通用剥离技巧</strong>：使用正则表达式 <code>re.search(r"^[^(]*?\((.*)\)[^)]*$", text, re.DOTALL)</code> 或字符串 <code>.find("(")</code> 与 <code>.rfind(")")</code> 定位最外层括号，精准剥离掉头部的函数名和尾部的 <code>);</code>，再将中间包裹的纯净 JSON 字符串交给 <code>json.loads()</code> 解析。</li>
+</ul>
+<p>下面这段完整可运行的 Python 代码综合演示了“剥离 JSONP 包装外壳”、“使用内置 <code>json</code> 模块反序列化”以及“利用 <code>jmespath</code> 从复杂多层嵌套的 AI 论文接口数据中一次性提取并拍平目标字段”的标准工程实现。在代码中，<code>strip_jsonp</code> 函数负责安全提取括号内的 JSON 主体，<code>extract_papers_with_jmespath</code> 则展示了列表投影与条件过滤的威力：</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="kn">import</span><span class="w"> </span><span class="nn">jmespath</span>  <span class="c1"># 需安装: pip install jmespath</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="c1"># 模拟从某学术门户采集到的带 JSONP 回调外壳的深层嵌套响应文本</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="n">RAW_JSONP_RESPONSE</span> <span class="o">=</span> <span class="s2">"""/**/callback_jsonp_1729412000({</span>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="s2">    "status": 200,</span>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="s2">    "meta": {"request_id": "req-9981", "total_count": 3},</span>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="s2">    "data": {</span>
+</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="s2">        "feed": {</span>
+</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="s2">            "papers": [</span>
+</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="s2">                {</span>
+</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="s2">                    "paper_id": "arXiv:2601.00101",</span>
+</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a><span class="s2">                    "title": "DeepSeek-R2: Scaling Reinforcement Learning for Reasoning",</span>
+</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a><span class="s2">                    "metrics": {"citations": 420, "is_open_access": true},</span>
+</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a><span class="s2">                    "authors": [{"name": "Liang W.", "org": "DeepSeek"}, {"name": "Chen Z.", "org": "PKU"}]</span>
+</span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a><span class="s2">                },</span>
+</span><span id="__span-1-19"><a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a><span class="s2">                {</span>
+</span><span id="__span-1-20"><a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a><span class="s2">                    "paper_id": "arXiv:2601.00205",</span>
+</span><span id="__span-1-21"><a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a><span class="s2">                    "title": "Legacy Rule-Based Web Scraper without LLM",</span>
+</span><span id="__span-1-22"><a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a><span class="s2">                    "metrics": {"citations": 12, "is_open_access": false},</span>
+</span><span id="__span-1-23"><a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a><span class="s2">                    "authors": [{"name": "Smith J.", "org": "LabX"}]</span>
+</span><span id="__span-1-24"><a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a><span class="s2">                },</span>
+</span><span id="__span-1-25"><a id="__codelineno-1-25" name="__codelineno-1-25" href="#__codelineno-1-25"></a><span class="s2">                {</span>
+</span><span id="__span-1-26"><a id="__codelineno-1-26" name="__codelineno-1-26" href="#__codelineno-1-26"></a><span class="s2">                    "paper_id": "arXiv:2601.00319",</span>
+</span><span id="__span-1-27"><a id="__codelineno-1-27" name="__codelineno-1-27" href="#__codelineno-1-27"></a><span class="s2">                    "title": "Autonomous Browser Agents with Multimodal Vision",</span>
+</span><span id="__span-1-28"><a id="__codelineno-1-28" name="__codelineno-1-28" href="#__codelineno-1-28"></a><span class="s2">                    "metrics": {"citations": 185, "is_open_access": true},</span>
+</span><span id="__span-1-29"><a id="__codelineno-1-29" name="__codelineno-1-29" href="#__codelineno-1-29"></a><span class="s2">                    "authors": [{"name": "Zhang Y.", "org": "Tsinghua"}]</span>
+</span><span id="__span-1-30"><a id="__codelineno-1-30" name="__codelineno-1-30" href="#__codelineno-1-30"></a><span class="s2">                }</span>
+</span><span id="__span-1-31"><a id="__codelineno-1-31" name="__codelineno-1-31" href="#__codelineno-1-31"></a><span class="s2">            ]</span>
+</span><span id="__span-1-32"><a id="__codelineno-1-32" name="__codelineno-1-32" href="#__codelineno-1-32"></a><span class="s2">        }</span>
+</span><span id="__span-1-33"><a id="__codelineno-1-33" name="__codelineno-1-33" href="#__codelineno-1-33"></a><span class="s2">    }</span>
+</span><span id="__span-1-34"><a id="__codelineno-1-34" name="__codelineno-1-34" href="#__codelineno-1-34"></a><span class="s2">});"""</span>
+</span><span id="__span-1-35"><a id="__codelineno-1-35" name="__codelineno-1-35" href="#__codelineno-1-35"></a>
+</span><span id="__span-1-36"><a id="__codelineno-1-36" name="__codelineno-1-36" href="#__codelineno-1-36"></a>
+</span><span id="__span-1-37"><a id="__codelineno-1-37" name="__codelineno-1-37" href="#__codelineno-1-37"></a><span class="k">def</span><span class="w"> </span><span class="nf">strip_jsonp</span><span class="p">(</span><span class="n">raw_text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+</span><span id="__span-1-38"><a id="__codelineno-1-38" name="__codelineno-1-38" href="#__codelineno-1-38"></a><span class="w">    </span><span class="sd">"""安全剥离 JSONP 回调函数外壳并反序列化为 Python 字典"""</span>
+</span><span id="__span-1-39"><a id="__codelineno-1-39" name="__codelineno-1-39" href="#__codelineno-1-39"></a>    <span class="n">cleaned</span> <span class="o">=</span> <span class="n">raw_text</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+</span><span id="__span-1-40"><a id="__codelineno-1-40" name="__codelineno-1-40" href="#__codelineno-1-40"></a>    <span class="c1"># 如果已经是标准 JSON 对象或数组，直接解析</span>
+</span><span id="__span-1-41"><a id="__codelineno-1-41" name="__codelineno-1-41" href="#__codelineno-1-41"></a>    <span class="k">if</span> <span class="n">cleaned</span><span class="o">.</span><span class="n">startswith</span><span class="p">((</span><span class="s2">"{"</span><span class="p">,</span> <span class="s2">"["</span><span class="p">)):</span>
+</span><span id="__span-1-42"><a id="__codelineno-1-42" name="__codelineno-1-42" href="#__codelineno-1-42"></a>        <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">cleaned</span><span class="p">)</span>
+</span><span id="__span-1-43"><a id="__codelineno-1-43" name="__codelineno-1-43" href="#__codelineno-1-43"></a>
+</span><span id="__span-1-44"><a id="__codelineno-1-44" name="__codelineno-1-44" href="#__codelineno-1-44"></a>    <span class="c1"># 匹配最外层左括号 '(' 到最后一个右括号 ')' 之间的 JSON 主体</span>
+</span><span id="__span-1-45"><a id="__codelineno-1-45" name="__codelineno-1-45" href="#__codelineno-1-45"></a>    <span class="n">match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s2">"^[^(]*?\((.*)\)[^)]*$"</span><span class="p">,</span> <span class="n">cleaned</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">re</span><span class="o">.</span><span class="n">DOTALL</span><span class="p">)</span>
+</span><span id="__span-1-46"><a id="__codelineno-1-46" name="__codelineno-1-46" href="#__codelineno-1-46"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">match</span><span class="p">:</span>
+</span><span id="__span-1-47"><a id="__codelineno-1-47" name="__codelineno-1-47" href="#__codelineno-1-47"></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"无法从响应文本中识别合法的 JSON 或 JSONP 结构"</span><span class="p">)</span>
+</span><span id="__span-1-48"><a id="__codelineno-1-48" name="__codelineno-1-48" href="#__codelineno-1-48"></a>    <span class="n">json_body</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+</span><span id="__span-1-49"><a id="__codelineno-1-49" name="__codelineno-1-49" href="#__codelineno-1-49"></a>    <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">json_body</span><span class="p">)</span>
+</span><span id="__span-1-50"><a id="__codelineno-1-50" name="__codelineno-1-50" href="#__codelineno-1-50"></a>
+</span><span id="__span-1-51"><a id="__codelineno-1-51" name="__codelineno-1-51" href="#__codelineno-1-51"></a>
+</span><span id="__span-1-52"><a id="__codelineno-1-52" name="__codelineno-1-52" href="#__codelineno-1-52"></a><span class="k">def</span><span class="w"> </span><span class="nf">extract_papers_with_jmespath</span><span class="p">(</span><span class="n">payload</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+</span><span id="__span-1-53"><a id="__codelineno-1-53" name="__codelineno-1-53" href="#__codelineno-1-53"></a><span class="w">    </span><span class="sd">"""使用 JMESPath 从深层嵌套字典中执行投影、拍平与条件过滤"""</span>
+</span><span id="__span-1-54"><a id="__codelineno-1-54" name="__codelineno-1-54" href="#__codelineno-1-54"></a>    <span class="c1"># 1. 提取所有论文并重塑为扁平字典结构（自动取第一作者姓名 authors[0].name）</span>
+</span><span id="__span-1-55"><a id="__codelineno-1-55" name="__codelineno-1-55" href="#__codelineno-1-55"></a>    <span class="n">flatten_expr</span> <span class="o">=</span> <span class="p">(</span>
+</span><span id="__span-1-56"><a id="__codelineno-1-56" name="__codelineno-1-56" href="#__codelineno-1-56"></a>        <span class="s2">"data.feed.papers[*].{"</span>
+</span><span id="__span-1-57"><a id="__codelineno-1-57" name="__codelineno-1-57" href="#__codelineno-1-57"></a>        <span class="s2">"id: paper_id, "</span>
+</span><span id="__span-1-58"><a id="__codelineno-1-58" name="__codelineno-1-58" href="#__codelineno-1-58"></a>        <span class="s2">"title: title, "</span>
+</span><span id="__span-1-59"><a id="__codelineno-1-59" name="__codelineno-1-59" href="#__codelineno-1-59"></a>        <span class="s2">"first_author: authors[0].name, "</span>
+</span><span id="__span-1-60"><a id="__codelineno-1-60" name="__codelineno-1-60" href="#__codelineno-1-60"></a>        <span class="s2">"citations: metrics.citations"</span>
+</span><span id="__span-1-61"><a id="__codelineno-1-61" name="__codelineno-1-61" href="#__codelineno-1-61"></a>        <span class="s2">"}"</span>
+</span><span id="__span-1-62"><a id="__codelineno-1-62" name="__codelineno-1-62" href="#__codelineno-1-62"></a>    <span class="p">)</span>
+</span><span id="__span-1-63"><a id="__codelineno-1-63" name="__codelineno-1-63" href="#__codelineno-1-63"></a>    <span class="n">all_papers</span> <span class="o">=</span> <span class="n">jmespath</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">flatten_expr</span><span class="p">,</span> <span class="n">payload</span><span class="p">)</span>
+</span><span id="__span-1-64"><a id="__codelineno-1-64" name="__codelineno-1-64" href="#__codelineno-1-64"></a>
+</span><span id="__span-1-65"><a id="__codelineno-1-65" name="__codelineno-1-65" href="#__codelineno-1-65"></a>    <span class="c1"># 2. 条件过滤：仅提取开源 (is_open_access == true) 且引用量 &gt;= 100 的高影响力论文标题</span>
+</span><span id="__span-1-66"><a id="__codelineno-1-66" name="__codelineno-1-66" href="#__codelineno-1-66"></a>    <span class="n">high_impact_expr</span> <span class="o">=</span> <span class="p">(</span>
+</span><span id="__span-1-67"><a id="__codelineno-1-67" name="__codelineno-1-67" href="#__codelineno-1-67"></a>        <span class="s2">"data.feed.papers[?metrics.is_open_access == `true` &amp;&amp; metrics.citations &gt;= `100`].title"</span>
+</span><span id="__span-1-68"><a id="__codelineno-1-68" name="__codelineno-1-68" href="#__codelineno-1-68"></a>    <span class="p">)</span>
+</span><span id="__span-1-69"><a id="__codelineno-1-69" name="__codelineno-1-69" href="#__codelineno-1-69"></a>    <span class="n">high_impact_titles</span> <span class="o">=</span> <span class="n">jmespath</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">high_impact_expr</span><span class="p">,</span> <span class="n">payload</span><span class="p">)</span>
+</span><span id="__span-1-70"><a id="__codelineno-1-70" name="__codelineno-1-70" href="#__codelineno-1-70"></a>
+</span><span id="__span-1-71"><a id="__codelineno-1-71" name="__codelineno-1-71" href="#__codelineno-1-71"></a>    <span class="k">return</span> <span class="p">{</span>
+</span><span id="__span-1-72"><a id="__codelineno-1-72" name="__codelineno-1-72" href="#__codelineno-1-72"></a>        <span class="s2">"flattened_records"</span><span class="p">:</span> <span class="n">all_papers</span><span class="p">,</span>
+</span><span id="__span-1-73"><a id="__codelineno-1-73" name="__codelineno-1-73" href="#__codelineno-1-73"></a>        <span class="s2">"high_impact_open_papers"</span><span class="p">:</span> <span class="n">high_impact_titles</span><span class="p">,</span>
+</span><span id="__span-1-74"><a id="__codelineno-1-74" name="__codelineno-1-74" href="#__codelineno-1-74"></a>    <span class="p">}</span>
+</span><span id="__span-1-75"><a id="__codelineno-1-75" name="__codelineno-1-75" href="#__codelineno-1-75"></a>
+</span><span id="__span-1-76"><a id="__codelineno-1-76" name="__codelineno-1-76" href="#__codelineno-1-76"></a>
+</span><span id="__span-1-77"><a id="__codelineno-1-77" name="__codelineno-1-77" href="#__codelineno-1-77"></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
+</span><span id="__span-1-78"><a id="__codelineno-1-78" name="__codelineno-1-78" href="#__codelineno-1-78"></a>    <span class="n">parsed_dict</span> <span class="o">=</span> <span class="n">strip_jsonp</span><span class="p">(</span><span class="n">RAW_JSONP_RESPONSE</span><span class="p">)</span>
+</span><span id="__span-1-79"><a id="__codelineno-1-79" name="__codelineno-1-79" href="#__codelineno-1-79"></a>    <span class="n">result</span> <span class="o">=</span> <span class="n">extract_papers_with_jmespath</span><span class="p">(</span><span class="n">parsed_dict</span><span class="p">)</span>
+</span><span id="__span-1-80"><a id="__codelineno-1-80" name="__codelineno-1-80" href="#__codelineno-1-80"></a>
+</span><span id="__span-1-81"><a id="__codelineno-1-81" name="__codelineno-1-81" href="#__codelineno-1-81"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"=== 1. JMESPath 拍平后的结构化数据集 ==="</span><span class="p">)</span>
+</span><span id="__span-1-82"><a id="__codelineno-1-82" name="__codelineno-1-82" href="#__codelineno-1-82"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="s2">"flattened_records"</span><span class="p">],</span> <span class="n">ensure_ascii</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+</span><span id="__span-1-83"><a id="__codelineno-1-83" name="__codelineno-1-83" href="#__codelineno-1-83"></a>
+</span><span id="__span-1-84"><a id="__codelineno-1-84" name="__codelineno-1-84" href="#__codelineno-1-84"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">=== 2. 筛选出的高引开源论文标题 ==="</span><span class="p">)</span>
+</span><span id="__span-1-85"><a id="__codelineno-1-85" name="__codelineno-1-85" href="#__codelineno-1-85"></a>    <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">title</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="s2">"high_impact_open_papers"</span><span class="p">],</span> <span class="n">start</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+</span><span id="__span-1-86"><a id="__codelineno-1-86" name="__codelineno-1-86" href="#__codelineno-1-86"></a>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  [</span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2">] </span><span class="si">{</span><span class="n">title</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</span></code></pre></div>
+<hr />
+<h2 id="3-chrome-devtools">3. Chrome DevTools接口逆向定位与分页规律破解<a class="headerlink" href="#3-chrome-devtools" title="Permanent link">&para;</a></h2>
+<p>知道了 CSR 网页的数据来自后台 JSON 接口，接下来的核心工程问题是：<strong>打开一个拥有上百个网络请求的复杂网页，如何像侦探一样在 30 秒内精准揪出真正承载业务数据的那个 API 请求，并破解它的翻页与参数构造规律？</strong></p>
+<h3 id="31-devtoolsxhrapi">3.1 DevTools中XHR过滤器与全局搜索关键字反查API<a class="headerlink" href="#31-devtoolsxhrapi" title="Permanent link">&para;</a></h3>
+<p>在 Chrome 或 Edge 浏览器中按 <code>F12</code> 打开开发者工具并切换到 <strong><code>Network</code>（网络）</strong> 面板，这是爬虫工程师最核心的逆向作战室。熟练结合 <strong>DevTools中XHR过滤器与接口快速定位</strong> 与 <strong>DevTools全局搜索关键字反查API</strong>，可以解决 95% 的接口寻址问题：</p>
+<ol>
+<li><strong>第一招：勾选 <code>Fetch/XHR</code> 过滤器 + 触发交互（顺藤摸瓜法）</strong>  </li>
+<li>打开 <code>Network</code> 面板，确认左上角录制按钮为红色亮起状态，勾选 <strong><code>Preserve log</code>（保留日志）</strong> 防止页面跳转清空记录。</li>
+<li>在过滤栏中点击 <strong><code>Fetch/XHR</code></strong>（立刻过滤掉占总数 80% 以上的图片 <code>Img</code>、样式表 <code>CSS</code>、字体 <code>Font</code> 等无关噪音）。</li>
+<li>点击左上角的 🚫（<code>Clear network log</code>）清空现有列表，然后在网页上点击“下一页”、“加载更多”或切换筛选分类。此时 <code>Network</code> 面板中刚刚新跳出来的 1~3 个请求，几乎 100% 就是我们要找的目标数据接口！点击该请求，切换到右侧的 <strong><code>Preview</code>（预览）</strong> 标签页，即可直观展开树状 JSON 验证数据。</li>
+<li><strong>第二招：使用全局搜索 <code>Ctrl + Shift + F</code> 反查关键字（以果推因法）</strong><br />
+   有时候网站在首屏加载时一次性发起了四五十个 XHR 请求，或者数据根本不是通过常规命名的接口返回的，挨个点开 <code>Preview</code> 查看犹如大海捞针。此时应当使用<strong>全局响应内容反查法</strong>：</li>
+<li>在网页上复制一段极具辨识度的具体文字（例如某件商品的独特型号 <code>"A100-SXM4-80GB"</code> 或某位用户的昵称）；</li>
+<li>将鼠标焦点放在 <code>Network</code> 面板内部，按下快捷键 <strong><code>Ctrl + Shift + F</code></strong>（Mac 为 <code>Cmd + Option + F</code>）唤出左侧的 <strong><code>Search</code>（网络全局搜索）</strong> 侧边栏；</li>
+<li>粘贴刚才复制的关键字并回车。DevTools 会瞬间扫描所有已捕获请求的响应体（Response Body），并直接列出包含该文字的请求名称及所在行号！点击匹配结果，即可一键跳转到对应的 API 请求。</li>
+<li><strong>第三招：一键生成 Python 代码（<code>Copy as cURL</code>）</strong><br />
+   定位到目标请求后，右键点击该请求 <span class="arithmatex">\(\rightarrow\)</span> <strong><code>Copy</code></strong> <span class="arithmatex">\(\rightarrow\)</span> <strong><code>Copy as cURL (bash)</code></strong>，即可将该请求的完整 URL、Method、所有 Request Headers、Cookie 以及 POST 请求体完整复制出来。你可以将其粘贴到开源转换工具（如 <code>curlconverter.com</code>）或直接对照编写 <code>httpx</code> 请求代码，快速验证哪个请求头或参数是必不可少的。</li>
+</ol>
+<h3 id="32-offsetcursor">3.2 页码/Offset分页、Cursor游标瀑布流与毫秒级时间戳<a class="headerlink" href="#32-offsetcursor" title="Permanent link">&para;</a></h3>
+<p>找到了第 1 页的 API 接口只是第一步，要批量采集全量数据，必须逆向分析该接口的查询参数（Query String Parameters）或载荷规律。现代 Web API 的分页与防缓存参数主要分为三大模式：</p>
+<ol>
+<li><strong>URL查询参数页码与Offset分页逆向（Page/Size vs. Offset/Limit）</strong><br />
+   这是传统分页组件（底部带有 <code>1, 2, 3 ... 50</code> 页码按钮）最常用的两套数学映射模型：</li>
+<li><strong>页码模式（<code>page</code> + <code>page_size</code>/<code>size</code>/<code>per_page</code>）</strong>：直接指定第几页和每页条数，例如 <code>?page=1&amp;size=20</code>、<code>?page=2&amp;size=20</code>。</li>
+<li>
+<p><strong>偏移量模式（<code>offset</code>/<code>start</code> + <code>limit</code>/<code>count</code>）</strong>：直接对应底层 SQL 数据库的 <code>LIMIT &lt;limit&gt; OFFSET &lt;offset&gt;</code> 语句，表示“跳过前 <code>offset</code> 条记录，向后取 <code>limit</code> 条记录”。假设每页固定返回 <span class="arithmatex">\(L = 20\)</span> 条数据，那么第 <span class="arithmatex">\(p\)</span> 页（<span class="arithmatex">\(p \ge 1\)</span>）的起始偏移量计算公式严格满足：
+     [ \text{offset} = (p - 1) \times L ]
+     因此，第 1 页为 <code>offset=0&amp;limit=20</code>，第 2 页为 <code>offset=20&amp;limit=20</code>，第 3 页为 <code>offset=40&amp;limit=20</code>。<br />
+<strong>实战提速技巧</strong>：许多后端接口默认 <code>limit=10</code> 或 <code>size=20</code>，但并未在服务端严格锁死上限。在爬虫中你可以尝试将 <code>limit</code> 调大到 <code>50</code> 或 <code>100</code>（如 <code>?offset=0&amp;limit=100</code>），如果服务器正常返回了 100 条记录，你的采集请求次数就能直接减少 80%！</p>
+</li>
+<li>
+<p><strong>Cursor游标分页与瀑布流MaxID机制（Cursor / MaxID / NextToken Pagination）</strong><br />
+   为什么刷抖音、小红书、微博、知乎或 X（Twitter）时，页面底部没有“第 1 页、第 2 页”的按钮，而是采用无限向下滚动的“瀑布流（Infinite Feed）”？<br />
+   因为在每秒都有成百上千条新内容发布的实时高并发系统中，如果使用传统的 <code>offset</code> 分页，当你正在看第 1 页（前 20 条）的短短 5 秒钟内，数据库顶部又新插入了 5 条新动态；此时你请求第 2 页（<code>offset=20</code>），原本排在第 16~20 名的 5 条旧动态就会被挤到第 21~25 名，导致你在第 2 页<strong>重复抓取到刚才已经看过的 5 条数据（数据漂移）</strong>，而且当 <code>offset</code> 达到百万级时，数据库执行深分页扫描（<code>OFFSET 1000000</code>）性能极差。<br />
+   为了解决深分页性能与数据漂移问题，现代信息流 API 全面采用 <strong>Cursor 游标分页（或 <code>max_id</code> / <code>next_cursor</code> / <code>search_after</code> 机制）</strong>：</p>
+</li>
+<li><strong>核心原理</strong>：第 1 次请求时不传游标（或传 <code>cursor=0</code>）；服务器返回前 20 条数据的同时，会在响应 JSON 的顶层元数据中附带一个指向本页最后一条记录位置的游标令牌（例如 <code>"next_cursor": "1729410882_99182"</code>、<code>"max_id": "5089123456"</code>，或者直接取 <code>data.items[-1].id</code>）以及一个布尔标志 <code>"has_more": true</code>。</li>
+<li>
+<p><strong>链式推进规则</strong>：爬虫必须采用 <code>while has_more:</code> 循环，<strong>从上一页的 JSON 响应中提取出 <code>next_cursor</code>，并将其作为下一页请求的参数发回给服务器</strong>，直到响应中的 <code>has_more</code> 变为 <code>false</code> 或 <code>next_cursor</code> 为空为止。这意味着游标分页必须前后串联执行，无法像 <code>offset</code> 分页那样预先生成 100 个 URL 并发抓取。</p>
+</li>
+<li>
+<p><strong>时间戳参数Time与毫秒级构造（Unix Timestamp Parameters）</strong><br />
+   在观察 API 的 URL 或请求头时，你经常会看到名为 <code>_t</code>、<code>ts</code>、<code>timestamp</code>、<code>t</code> 或 <code>_</code> 的一串 10 位或 13 位纯数字参数。这是从 <strong>UTC 时间 1970 年 1 月 1 日 00:00:00（Unix 纪元）</strong> 起经过的秒数或毫秒数，在接口中主要承担两大作用：一是防止浏览器或 CDN 缓存旧响应（Cache Busting），二是作为接口防重放攻击（Anti-Replay）的时效性校验基准（若请求时间戳与服务器当前时间相差超过 60 秒则直接拒绝请求）。在 Python 中构造这两种时间戳的标准公式如下：</p>
+</li>
+<li><strong>10 位秒级时间戳（Seconds）</strong>：<code>int(time.time())</code>，例如 <code>1729412000</code>；</li>
+<li><strong>13 位毫秒级时间戳（Milliseconds，JavaScript <code>Date.now()</code> 标准格式）</strong>：<code>int(time.time() * 1000)</code>，例如 <code>1729412000123</code>。</li>
+</ol>
+<h3 id="33-postx-requested-withcors">3.3 复杂POST载荷、X-Requested-With与CORS跨域预检<a class="headerlink" href="#33-postx-requested-withcors" title="Permanent link">&para;</a></h3>
+<p>除了 <code>GET</code> 查询参数，许多企业级搜索接口（如政府采购招标网、裁判文书检索、机票酒店多条件筛选）采用 <code>POST</code> 请求提交复杂的筛选条件，并在请求头与跨域机制上设下校验关卡：</p>
+<ol>
+<li><strong>复杂POST请求Payload载荷逆向复现</strong><br />
+   在 DevTools 的 <code>Payload</code>（载荷）面板中查看 <code>POST</code> 请求时，务必先看 <code>Headers</code> 里的 <code>Content-Type</code>，以此决定在 <code>httpx</code> 中使用 <strong><code>data=</code></strong> 还是 <strong><code>json=</code></strong> 参数：</li>
+<li>若 <code>Content-Type: application/x-www-form-urlencoded</code>，在 DevTools 中显示为 <code>Form Data</code>，代表键值对被编码为 <code>keyword=AI&amp;page=1&amp;sort=desc</code>，在 Python 中必须传入 <strong><code>data=payload_dict</code></strong>；</li>
+<li>若 <code>Content-Type: application/json</code>，在 DevTools 中显示为 <code>Request Payload</code>（可展开的 JSON 对象，常包含嵌套的过滤数组如 <code>{"filters": [{"field": "category", "values": ["LLM", "CV"]}], "page": {"num": 1, "size": 20}}</code>），在 Python 中必须传入 <strong><code>json=payload_dict</code></strong>，由 <code>httpx</code> 自动完成 JSON 序列化并附上正确的 <code>Content-Type</code> 头。</li>
+<li><strong>API自定义请求头X-Requested-With分析</strong><br />
+   很多时候你明明复制了正确的 URL 和参数，但服务器却返回了一段 HTML 错误页或 <code>403 Forbidden</code>。此时请仔细检查请求头中是否包含：
+   <div class="language-http highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="err">X-Requested-With: XMLHttpRequest</span>
+</span></code></pre></div>
+   这是 jQuery 等前端框架在发起 AJAX 请求时自动附加的标志性自定义请求头。许多传统后端框架（如 Django、Spring MVC、ThinkPHP）会通过检查 <code>request.headers.get("X-Requested-With") == "XMLHttpRequest"</code> 来判断当前请求究竟是普通的浏览器地址栏访问还是合法的前端 AJAX 调用。在爬虫的 <code>headers</code> 字典中补上这一行，往往就能瞬间通关！同时，请务必一并带上 <code>Referer</code>（标明该 API 是从哪个前端页面发起的）和 <code>Origin</code> 请求头。</li>
+<li><strong>CORS跨域资源共享与Options预检请求（Cross-Origin Resource Sharing &amp; Preflight）</strong><br />
+   当网页前端域名为 <code>https://www.shop.com</code>，而它请求的 API 域名为 <code>https://api.shop.com</code> 时，两者主机名不同，构成了<strong>跨域请求（Cross-Origin Request）</strong>。当浏览器发起带有自定义请求头（如 <code>Authorization</code>、<code>X-Sign</code>）或 <code>Content-Type: application/json</code> 的跨域请求时，你在 DevTools 的 <code>Network</code> 面板中常常会看到<strong>同一个 URL 连续出现了两条一模一样的请求</strong>：</li>
+<li>第一条请求的 Method 是 <strong><code>OPTIONS</code></strong>，状态码为 <code>204 No Content</code>，没有任何返回数据；</li>
+<li>第二条请求的 Method 才是真正的 <strong><code>POST</code> 或 <code>GET</code></strong>，携带着完整的 JSON 响应。<br />
+<strong>核心原理解析</strong>：第一条 <code>OPTIONS</code> 请求是浏览器为了遵守安全规范自动发出的<strong>“CORS 预检请求（Preflight Request）”</strong>，用来询问服务器：“我来自 <code>https://www.shop.com</code>，能否向你发送带有 <code>application/json</code> 的跨域请求？”服务器在响应头中返回 <code>Access-Control-Allow-Origin: https://www.shop.com</code> 表示允许后，浏览器才会发出第二条真正的业务请求。<br />
+<strong>爬虫避坑指南</strong>：<strong>同源策略（Same-Origin Policy）与 CORS 预检完全是浏览器为了保护用户安全而实施的客户端自我限制！</strong> 我们的 Python 爬虫直接运行在操作系统套接字之上，不受浏览器同源策略约束。因此，<strong>在编写爬虫时，完全忽略 DevTools 里的 <code>OPTIONS</code> 预检请求，只针对第二条真正的 <code>GET</code>/<code>POST</code> 请求编写代码即可</strong>（但有时需要在请求头中保留 <code>Origin: https://www.shop.com</code> 以通过后端的来源白名单校验）。</li>
+</ol>
+<p>在阅读下方的 Python 实战代码之前，我们先通过一个交互式分页仿真器，直观对比 <code>Offset/Limit</code> 偏移量分页与 <code>Cursor/MaxID</code> 瀑布流游标分页在请求参数构造上的核心差异。</p>
+<h4 id="diagram-api-pagination-reverse-engineering-simulator">Diagram: API Pagination Reverse Engineering Simulator<a class="headerlink" href="#diagram-api-pagination-reverse-engineering-simulator" title="Permanent link">&para;</a></h4>
+<pre class="mermaid"><code>sequenceDiagram
+    participant S as Python 逆向采集脚本
+    participant API as 服务端异步数据接口 (REST / GraphQL)
+    Note over S,API: 模式一：传统页码偏移翻页 (page / offset)
+    S-&gt;&gt;API: GET /api/articles?page=1&amp;size=20
+    API--&gt;&gt;S: 返回前 20 条 + total=500
+    Note over S,API: 模式二：游标瀑布流翻页 (Cursor / MaxID，防实时插队重复)
+    S-&gt;&gt;API: GET /api/feed?cursor=0&amp;limit=20
+    API--&gt;&gt;S: 返回 items + next_cursor="eyJpZCI6OTg1fQ==" + has_more=true
+    S-&gt;&gt;API: GET /api/feed?cursor=eyJpZCI6OTg1fQ==&amp;limit=20
+    API--&gt;&gt;S: 返回下一批紧邻记录 + next_cursor="..."</code></pre>
+<details>
+<summary>API Pagination Reverse Engineering Simulator</summary>
+<p>Type: microsim
+<strong>sim-id:</strong> api-pagination-simulator<br/>
+<strong>Library:</strong> p5.js<br/>
+<strong>Status:</strong> Specified<br/>
+<strong>Bloom Level:</strong> Apply<br/>
+<strong>Bloom Verb:</strong> construct<br/>
+<strong>Learning Objective:</strong> The learner will construct the exact query parameters (<code>offset</code>, <code>limit</code>, and <code>cursor</code>) required to fetch consecutive pages across both Offset/Limit pagination and Cursor-based waterfall pagination APIs.</p>
+<p><strong>Prerequisites:</strong> Query string parameters, Offset/Limit pagination formula (<span class="arithmatex">\(\text{offset} = (p - 1) \times L\)</span>), Cursor/MaxID waterfall pagination (<code>next_cursor</code>, <code>has_more</code>), 13-digit millisecond timestamp (all defined in Section 3.2 above).</p>
+<p><strong>Evidence of Mastery:</strong> Across 4 pagination construction challenges (2 in Offset/Limit mode and 2 in Cursor/MaxID waterfall mode), the learner inputs or selects the exact parameter values for the next HTTP API request based on the target page number or the previous JSON response envelope. Mastery is solving at least 3 of the 4 challenges correctly on the first attempt.</p>
+<p><strong>Misconceptions:</strong> (1) In Offset/Limit pagination with <code>limit=20</code>, Page 1 starts at <code>offset=1</code> and Page 3 starts at <code>offset=3</code> instead of <code>offset=0</code> and <code>offset=40</code>. (2) In Cursor waterfall pagination, the client can jump directly to Page 4 by multiplying the first cursor by 4 instead of reading <code>next_cursor</code> from the previous JSON response.</p>
+<p><strong>Instructional Rationale:</strong> Apply-level parameter construction requires learners to calculate numeric offsets from page numbers and extract dynamic cursor tokens from realistic JSON response envelopes before firing the simulated API request.</p>
+<p><strong>Content:</strong></p>
+<p>Adjustable exploration parameters in Offset Mode:
+| Quantity | Min | Max | Step | Default | Unit |
+|---|---|---|---|---|---|
+| Target Page <code>p</code> | 1 | 10 | 1 | 1 | page |
+| Page Size <code>limit</code> (<code>L</code>) | 10 | 50 | 10 | 20 | items |</p>
+<p>Total dataset size in simulator database: 75 AI open-source project records (IDs <code>proj_1001</code> through <code>proj_1075</code>).</p>
+<p>The 4 pagination construction challenges (fixed order):</p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Mode</th>
+<th>Scenario &amp; Previous Response Context Shown to Learner</th>
+<th>Correct Request Parameters</th>
+<th>Feedback &amp; Explanation (Why)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>Offset/Limit</code></td>
+<td>采集第 1 页数据，每页条数 <code>limit = 20</code>。请构造第 1 页的 <code>offset</code> 与 <code>limit</code> 参数。</td>
+<td><code>offset=0&amp;limit=20</code></td>
+<td>根据公式 <span class="arithmatex">\(\text{offset} = (p - 1) \times L\)</span>，当 <span class="arithmatex">\(p = 1, L = 20\)</span> 时，<span class="arithmatex">\(\text{offset} = (1 - 1) \times 20 = 0\)</span>（从第 0 条偏移即第 1 条记录开始读取）。</td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>Offset/Limit</code></td>
+<td>保持每页条数 <code>limit = 20</code> 不变，现在需要直接采集第 3 页（即第 41~60 条记录）。请构造 <code>offset</code> 与 <code>limit</code> 参数。</td>
+<td><code>offset=40&amp;limit=20</code></td>
+<td>当 <span class="arithmatex">\(p = 3, L = 20\)</span> 时，<span class="arithmatex">\(\text{offset} = (3 - 1) \times 20 = 40\)</span>，跳过前两页共 40 条记录。</td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>Cursor/MaxID</code></td>
+<td>瀑布流第 1 页响应返回：<code>{"has_more": true, "next_cursor": "cur_1020_ts17294100", "items": [{"id": "proj_1001"}, ..., {"id": "proj_1020"}]}</code>。请构造获取下一批瀑布流数据的 <code>cursor</code> 参数。</td>
+<td><code>cursor=cur_1020_ts17294100</code></td>
+<td>游标分页不按页码数字递增，必须从上一页 JSON 响应的 <code>next_cursor</code> 字段中原样提取游标令牌传入下一次请求。</td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>Cursor/MaxID</code></td>
+<td>瀑布流连续抓取到最后一批时，服务器返回：<code>{"has_more": false, "next_cursor": "", "items": [{"id": "proj_1061"}, ..., {"id": "proj_1075"}]}</code>。此时爬虫应当执行什么动作？</td>
+<td><code>STOP_CRAWLING</code> (<code>停止循环，分页已全部采集完毕</code>)</td>
+<td>当响应中的 <code>has_more</code> 为 <code>false</code> 且 <code>next_cursor</code> 为空字符串时，代表已到达瀑布流底部，继续请求将导致死循环或报错。</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Provenance:</strong> Matches the Offset formula <span class="arithmatex">\(\text{offset} = (p - 1) \times L\)</span> and Cursor waterfall state machine defined in Chapter 5 Section 3.2.</p>
+<p><strong>Rules:</strong> In Offset Mode, <code>offset = (p - 1) * L</code>, returning records from index <code>offset + 1</code> to <code>min(offset + L, 75)</code>. When <code>offset &gt;= 75</code>, the returned <code>items</code> array is empty <code>[]</code>. In Cursor Mode, each response returns 20 records, <code>next_cursor</code> is the token of the last record in the batch, and <code>has_more</code> is <code>true</code> when remaining records <code>&gt; 0</code> and <code>false</code> when remaining records <code>== 0</code>.</p>
+<p><strong>Learner Activity:</strong></p>
+<ol>
+<li>The learner reads Challenge 1 and Challenge 2 in Offset/Limit mode, sets <code>offset</code> and <code>limit</code>, and clicks <code>发送 API 请求 (Send Request)</code> to inspect the returned record slice.</li>
+<li>The learner transitions to Challenge 3 and Challenge 4 in Cursor waterfall mode, inspects the previous JSON response panel, and selects the next <code>cursor</code> parameter or loop termination action.</li>
+<li>After completing all 4 challenges, the learner can freely adjust <code>p</code> (1 to 10) and <code>limit</code> (10 to 50) to observe how increasing <code>limit</code> from 20 to 50 reduces total HTTP requests needed to cover all 75 records from 4 requests down to 2 requests.</li>
+</ol>
+<p><strong>Feedback:</strong> 4 challenges in fixed order, 2 attempts per challenge. Correct: "参数构造正确！服务器成功返回对应批次的 JSON 数据。" Incorrect: displays the <code>Feedback &amp; Explanation (Why)</code> text from the Content table above. After the second wrong attempt, the correct parameter string is filled in and explained. Score counter shows <code>分页逆向挑战得分: n / 4</code>.</p>
+<p><strong>Starting State:</strong> Challenge 1 (<code>Offset/Limit</code> Mode, Target Page <code>p = 1</code>, <code>limit = 20</code>) is active with input fields for <code>offset</code> and <code>limit</code>, showing the prompt: "任务 1/4：目标数据库共有 75 条开源项目记录，每页取 20 条，请构造请求第 1 页数据的 offset 与 limit 参数。"</p>
+<p><strong>Chapter Anchors:</strong> Section 3.2 specifies the exact formula <span class="arithmatex">\(\text{offset} = (p - 1) \times L\)</span> with the sequence <code>offset=0&amp;limit=20</code> (Page 1), <code>offset=20&amp;limit=20</code> (Page 2), <code>offset=40&amp;limit=20</code> (Page 3), and the <code>while has_more:</code> cursor loop using <code>next_cursor</code>.</p>
+</details>
+<p>下面这段 Python 代码展示了如何封装一个兼具 <strong><code>Offset/Limit</code> 分页</strong>与 <strong><code>Cursor</code> 游标瀑布流分页</strong>能力的工业级异步 API 采集器，并在请求中自动注入 13 位毫秒级时间戳 <code>_t</code>、自定义请求头 <code>X-Requested-With: XMLHttpRequest</code> 与复杂 JSON 筛选载荷：</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="kn">import</span><span class="w"> </span><span class="nn">httpx</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="k">def</span><span class="w"> </span><span class="nf">build_ajax_headers</span><span class="p">(</span><span class="n">origin_url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">referer_url</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="w">    </span><span class="sd">"""构造标准 AJAX 异步接口请求头，包含 X-Requested-With 与跨域来源标识"""</span>
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>    <span class="k">return</span> <span class="p">{</span>
+</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>        <span class="s2">"User-Agent"</span><span class="p">:</span> <span class="p">(</span>
+</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>            <span class="s2">"Mozilla/5.0 (Windows NT 10.0; Win64; x64) "</span>
+</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>            <span class="s2">"AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36"</span>
+</span><span id="__span-3-12"><a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a>        <span class="p">),</span>
+</span><span id="__span-3-13"><a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a>        <span class="s2">"Accept"</span><span class="p">:</span> <span class="s2">"application/json, text/plain, */*"</span><span class="p">,</span>
+</span><span id="__span-3-14"><a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a>        <span class="s2">"X-Requested-With"</span><span class="p">:</span> <span class="s2">"XMLHttpRequest"</span><span class="p">,</span>  <span class="c1"># 标识当前请求为前端 AJAX 异步调用</span>
+</span><span id="__span-3-15"><a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a>        <span class="s2">"Origin"</span><span class="p">:</span> <span class="n">origin_url</span><span class="p">,</span>
+</span><span id="__span-3-16"><a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a>        <span class="s2">"Referer"</span><span class="p">:</span> <span class="n">referer_url</span><span class="p">,</span>
+</span><span id="__span-3-17"><a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a>    <span class="p">}</span>
+</span><span id="__span-3-18"><a id="__codelineno-3-18" name="__codelineno-3-18" href="#__codelineno-3-18"></a>
+</span><span id="__span-3-19"><a id="__codelineno-3-19" name="__codelineno-3-19" href="#__codelineno-3-19"></a>
+</span><span id="__span-3-20"><a id="__codelineno-3-20" name="__codelineno-3-20" href="#__codelineno-3-20"></a><span class="k">def</span><span class="w"> </span><span class="nf">crawl_cursor_waterfall_mock</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+</span><span id="__span-3-21"><a id="__codelineno-3-21" name="__codelineno-3-21" href="#__codelineno-3-21"></a><span class="w">    </span><span class="sd">"""</span>
+</span><span id="__span-3-22"><a id="__codelineno-3-22" name="__codelineno-3-22" href="#__codelineno-3-22"></a><span class="sd">    演示基于 Cursor 游标与毫秒级时间戳的瀑布流 POST 接口连续采集逻辑</span>
+</span><span id="__span-3-23"><a id="__codelineno-3-23" name="__codelineno-3-23" href="#__codelineno-3-23"></a><span class="sd">    (使用内置 Mock Transport 模拟服务端分页响应，可直接脱机运行)</span>
+</span><span id="__span-3-24"><a id="__codelineno-3-24" name="__codelineno-3-24" href="#__codelineno-3-24"></a><span class="sd">    """</span>
+</span><span id="__span-3-25"><a id="__codelineno-3-25" name="__codelineno-3-25" href="#__codelineno-3-25"></a>    <span class="c1"># 模拟服务端数据库中的 3 批瀑布流数据</span>
+</span><span id="__span-3-26"><a id="__codelineno-3-26" name="__codelineno-3-26" href="#__codelineno-3-26"></a>    <span class="n">mock_batches</span> <span class="o">=</span> <span class="p">{</span>
+</span><span id="__span-3-27"><a id="__codelineno-3-27" name="__codelineno-3-27" href="#__codelineno-3-27"></a>        <span class="s2">"init"</span><span class="p">:</span> <span class="p">{</span>
+</span><span id="__span-3-28"><a id="__codelineno-3-28" name="__codelineno-3-28" href="#__codelineno-3-28"></a>            <span class="s2">"code"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+</span><span id="__span-3-29"><a id="__codelineno-3-29" name="__codelineno-3-29" href="#__codelineno-3-29"></a>            <span class="s2">"has_more"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+</span><span id="__span-3-30"><a id="__codelineno-3-30" name="__codelineno-3-30" href="#__codelineno-3-30"></a>            <span class="s2">"next_cursor"</span><span class="p">:</span> <span class="s2">"cur_batch_2_8891"</span><span class="p">,</span>
+</span><span id="__span-3-31"><a id="__codelineno-3-31" name="__codelineno-3-31" href="#__codelineno-3-31"></a>            <span class="s2">"items"</span><span class="p">:</span> <span class="p">[{</span><span class="s2">"id"</span><span class="p">:</span> <span class="s2">"post_101"</span><span class="p">,</span> <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"大模型RAG切片策略对比"</span><span class="p">},</span> <span class="p">{</span><span class="s2">"id"</span><span class="p">:</span> <span class="s2">"post_102"</span><span class="p">,</span> <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"vLLM推理加速实战"</span><span class="p">}],</span>
+</span><span id="__span-3-32"><a id="__codelineno-3-32" name="__codelineno-3-32" href="#__codelineno-3-32"></a>        <span class="p">},</span>
+</span><span id="__span-3-33"><a id="__codelineno-3-33" name="__codelineno-3-33" href="#__codelineno-3-33"></a>        <span class="s2">"cur_batch_2_8891"</span><span class="p">:</span> <span class="p">{</span>
+</span><span id="__span-3-34"><a id="__codelineno-3-34" name="__codelineno-3-34" href="#__codelineno-3-34"></a>            <span class="s2">"code"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+</span><span id="__span-3-35"><a id="__codelineno-3-35" name="__codelineno-3-35" href="#__codelineno-3-35"></a>            <span class="s2">"has_more"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+</span><span id="__span-3-36"><a id="__codelineno-3-36" name="__codelineno-3-36" href="#__codelineno-3-36"></a>            <span class="s2">"next_cursor"</span><span class="p">:</span> <span class="s2">"cur_batch_3_9920"</span><span class="p">,</span>
+</span><span id="__span-3-37"><a id="__codelineno-3-37" name="__codelineno-3-37" href="#__codelineno-3-37"></a>            <span class="s2">"items"</span><span class="p">:</span> <span class="p">[{</span><span class="s2">"id"</span><span class="p">:</span> <span class="s2">"post_103"</span><span class="p">,</span> <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"JSONPath与JMESPath评测"</span><span class="p">},</span> <span class="p">{</span><span class="s2">"id"</span><span class="p">:</span> <span class="s2">"post_104"</span><span class="p">,</span> <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Playwright反检测指南"</span><span class="p">}],</span>
+</span><span id="__span-3-38"><a id="__codelineno-3-38" name="__codelineno-3-38" href="#__codelineno-3-38"></a>        <span class="p">},</span>
+</span><span id="__span-3-39"><a id="__codelineno-3-39" name="__codelineno-3-39" href="#__codelineno-3-39"></a>        <span class="s2">"cur_batch_3_9920"</span><span class="p">:</span> <span class="p">{</span>
+</span><span id="__span-3-40"><a id="__codelineno-3-40" name="__codelineno-3-40" href="#__codelineno-3-40"></a>            <span class="s2">"code"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+</span><span id="__span-3-41"><a id="__codelineno-3-41" name="__codelineno-3-41" href="#__codelineno-3-41"></a>            <span class="s2">"has_more"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+</span><span id="__span-3-42"><a id="__codelineno-3-42" name="__codelineno-3-42" href="#__codelineno-3-42"></a>            <span class="s2">"next_cursor"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+</span><span id="__span-3-43"><a id="__codelineno-3-43" name="__codelineno-3-43" href="#__codelineno-3-43"></a>            <span class="s2">"items"</span><span class="p">:</span> <span class="p">[{</span><span class="s2">"id"</span><span class="p">:</span> <span class="s2">"post_105"</span><span class="p">,</span> <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Scrapy分布式Redis队列实践"</span><span class="p">}],</span>
+</span><span id="__span-3-44"><a id="__codelineno-3-44" name="__codelineno-3-44" href="#__codelineno-3-44"></a>        <span class="p">},</span>
+</span><span id="__span-3-45"><a id="__codelineno-3-45" name="__codelineno-3-45" href="#__codelineno-3-45"></a>    <span class="p">}</span>
+</span><span id="__span-3-46"><a id="__codelineno-3-46" name="__codelineno-3-46" href="#__codelineno-3-46"></a>
+</span><span id="__span-3-47"><a id="__codelineno-3-47" name="__codelineno-3-47" href="#__codelineno-3-47"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">mock_api_handler</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">httpx</span><span class="o">.</span><span class="n">Request</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">httpx</span><span class="o">.</span><span class="n">Response</span><span class="p">:</span>
+</span><span id="__span-3-48"><a id="__codelineno-3-48" name="__codelineno-3-48" href="#__codelineno-3-48"></a>        <span class="c1"># 校验 X-Requested-With 请求头</span>
+</span><span id="__span-3-49"><a id="__codelineno-3-49" name="__codelineno-3-49" href="#__codelineno-3-49"></a>        <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"X-Requested-With"</span><span class="p">)</span> <span class="o">!=</span> <span class="s2">"XMLHttpRequest"</span><span class="p">:</span>
+</span><span id="__span-3-50"><a id="__codelineno-3-50" name="__codelineno-3-50" href="#__codelineno-3-50"></a>            <span class="k">return</span> <span class="n">httpx</span><span class="o">.</span><span class="n">Response</span><span class="p">(</span><span class="mi">403</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="p">{</span><span class="s2">"code"</span><span class="p">:</span> <span class="mi">403</span><span class="p">,</span> <span class="s2">"msg"</span><span class="p">:</span> <span class="s2">"Missing X-Requested-With header"</span><span class="p">})</span>
+</span><span id="__span-3-51"><a id="__codelineno-3-51" name="__codelineno-3-51" href="#__codelineno-3-51"></a>        <span class="kn">import</span><span class="w"> </span><span class="nn">json</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">_json</span>
+</span><span id="__span-3-52"><a id="__codelineno-3-52" name="__codelineno-3-52" href="#__codelineno-3-52"></a>
+</span><span id="__span-3-53"><a id="__codelineno-3-53" name="__codelineno-3-53" href="#__codelineno-3-53"></a>        <span class="n">body</span> <span class="o">=</span> <span class="n">_json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">"utf-8"</span><span class="p">))</span>
+</span><span id="__span-3-54"><a id="__codelineno-3-54" name="__codelineno-3-54" href="#__codelineno-3-54"></a>        <span class="n">cursor_key</span> <span class="o">=</span> <span class="n">body</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"cursor"</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">"init"</span>
+</span><span id="__span-3-55"><a id="__codelineno-3-55" name="__codelineno-3-55" href="#__codelineno-3-55"></a>        <span class="k">return</span> <span class="n">httpx</span><span class="o">.</span><span class="n">Response</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="n">mock_batches</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cursor_key</span><span class="p">,</span> <span class="p">{</span><span class="s2">"code"</span><span class="p">:</span> <span class="mi">404</span><span class="p">}))</span>
+</span><span id="__span-3-56"><a id="__codelineno-3-56" name="__codelineno-3-56" href="#__codelineno-3-56"></a>
+</span><span id="__span-3-57"><a id="__codelineno-3-57" name="__codelineno-3-57" href="#__codelineno-3-57"></a>    <span class="n">headers</span> <span class="o">=</span> <span class="n">build_ajax_headers</span><span class="p">(</span><span class="s2">"https://feed.example.edu"</span><span class="p">,</span> <span class="s2">"https://feed.example.edu/explore"</span><span class="p">)</span>
+</span><span id="__span-3-58"><a id="__codelineno-3-58" name="__codelineno-3-58" href="#__codelineno-3-58"></a>    <span class="n">collected_items</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span id="__span-3-59"><a id="__codelineno-3-59" name="__codelineno-3-59" href="#__codelineno-3-59"></a>    <span class="n">current_cursor</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"init"</span>
+</span><span id="__span-3-60"><a id="__codelineno-3-60" name="__codelineno-3-60" href="#__codelineno-3-60"></a>    <span class="n">has_more</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+</span><span id="__span-3-61"><a id="__codelineno-3-61" name="__codelineno-3-61" href="#__codelineno-3-61"></a>    <span class="n">batch_num</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+</span><span id="__span-3-62"><a id="__codelineno-3-62" name="__codelineno-3-62" href="#__codelineno-3-62"></a>
+</span><span id="__span-3-63"><a id="__codelineno-3-63" name="__codelineno-3-63" href="#__codelineno-3-63"></a>    <span class="k">with</span> <span class="n">httpx</span><span class="o">.</span><span class="n">Client</span><span class="p">(</span><span class="n">transport</span><span class="o">=</span><span class="n">httpx</span><span class="o">.</span><span class="n">MockTransport</span><span class="p">(</span><span class="n">mock_api_handler</span><span class="p">),</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">)</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+</span><span id="__span-3-64"><a id="__codelineno-3-64" name="__codelineno-3-64" href="#__codelineno-3-64"></a>        <span class="k">while</span> <span class="n">has_more</span><span class="p">:</span>
+</span><span id="__span-3-65"><a id="__codelineno-3-65" name="__codelineno-3-65" href="#__codelineno-3-65"></a>            <span class="n">batch_num</span> <span class="o">+=</span> <span class="mi">1</span>
+</span><span id="__span-3-66"><a id="__codelineno-3-66" name="__codelineno-3-66" href="#__codelineno-3-66"></a>            <span class="c1"># 构造 13 位毫秒级时间戳参数</span>
+</span><span id="__span-3-67"><a id="__codelineno-3-67" name="__codelineno-3-67" href="#__codelineno-3-67"></a>            <span class="n">ts_ms</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">*</span> <span class="mi">1000</span><span class="p">)</span>
+</span><span id="__span-3-68"><a id="__codelineno-3-68" name="__codelineno-3-68" href="#__codelineno-3-68"></a>            <span class="c1"># 构造复杂 POST JSON Payload 载荷</span>
+</span><span id="__span-3-69"><a id="__codelineno-3-69" name="__codelineno-3-69" href="#__codelineno-3-69"></a>            <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span>
+</span><span id="__span-3-70"><a id="__codelineno-3-70" name="__codelineno-3-70" href="#__codelineno-3-70"></a>                <span class="s2">"cursor"</span><span class="p">:</span> <span class="n">current_cursor</span><span class="p">,</span>
+</span><span id="__span-3-71"><a id="__codelineno-3-71" name="__codelineno-3-71" href="#__codelineno-3-71"></a>                <span class="s2">"limit"</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+</span><span id="__span-3-72"><a id="__codelineno-3-72" name="__codelineno-3-72" href="#__codelineno-3-72"></a>                <span class="s2">"filters"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"category"</span><span class="p">:</span> <span class="s2">"AI_Engineering"</span><span class="p">,</span> <span class="s2">"sort"</span><span class="p">:</span> <span class="s2">"latest"</span><span class="p">},</span>
+</span><span id="__span-3-73"><a id="__codelineno-3-73" name="__codelineno-3-73" href="#__codelineno-3-73"></a>                <span class="s2">"_t"</span><span class="p">:</span> <span class="n">ts_ms</span><span class="p">,</span>
+</span><span id="__span-3-74"><a id="__codelineno-3-74" name="__codelineno-3-74" href="#__codelineno-3-74"></a>            <span class="p">}</span>
+</span><span id="__span-3-75"><a id="__codelineno-3-75" name="__codelineno-3-75" href="#__codelineno-3-75"></a>
+</span><span id="__span-3-76"><a id="__codelineno-3-76" name="__codelineno-3-76" href="#__codelineno-3-76"></a>            <span class="n">resp</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">post</span><span class="p">(</span>
+</span><span id="__span-3-77"><a id="__codelineno-3-77" name="__codelineno-3-77" href="#__codelineno-3-77"></a>                <span class="sa">f</span><span class="s2">"https://api.example.edu/v1/feed/stream?_t=</span><span class="si">{</span><span class="n">ts_ms</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+</span><span id="__span-3-78"><a id="__codelineno-3-78" name="__codelineno-3-78" href="#__codelineno-3-78"></a>                <span class="n">json</span><span class="o">=</span><span class="n">payload</span><span class="p">,</span>  <span class="c1"># 自动序列化为 application/json</span>
+</span><span id="__span-3-79"><a id="__codelineno-3-79" name="__codelineno-3-79" href="#__codelineno-3-79"></a>            <span class="p">)</span>
+</span><span id="__span-3-80"><a id="__codelineno-3-80" name="__codelineno-3-80" href="#__codelineno-3-80"></a>            <span class="n">resp</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>
+</span><span id="__span-3-81"><a id="__codelineno-3-81" name="__codelineno-3-81" href="#__codelineno-3-81"></a>            <span class="n">data</span> <span class="o">=</span> <span class="n">resp</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+</span><span id="__span-3-82"><a id="__codelineno-3-82" name="__codelineno-3-82" href="#__codelineno-3-82"></a>
+</span><span id="__span-3-83"><a id="__codelineno-3-83" name="__codelineno-3-83" href="#__codelineno-3-83"></a>            <span class="n">items</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"items"</span><span class="p">,</span> <span class="p">[])</span>
+</span><span id="__span-3-84"><a id="__codelineno-3-84" name="__codelineno-3-84" href="#__codelineno-3-84"></a>            <span class="n">collected_items</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
+</span><span id="__span-3-85"><a id="__codelineno-3-85" name="__codelineno-3-85" href="#__codelineno-3-85"></a>            <span class="nb">print</span><span class="p">(</span>
+</span><span id="__span-3-86"><a id="__codelineno-3-86" name="__codelineno-3-86" href="#__codelineno-3-86"></a>                <span class="sa">f</span><span class="s2">"[第 </span><span class="si">{</span><span class="n">batch_num</span><span class="si">}</span><span class="s2"> 批] 时间戳 _t=</span><span class="si">{</span><span class="n">ts_ms</span><span class="si">}</span><span class="s2"> | 传入游标=</span><span class="si">{</span><span class="n">current_cursor</span><span class="si">!r}</span><span class="s2"> "</span>
+</span><span id="__span-3-87"><a id="__codelineno-3-87" name="__codelineno-3-87" href="#__codelineno-3-87"></a>                <span class="sa">f</span><span class="s2">"-&gt; 获取 </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">items</span><span class="p">)</span><span class="si">}</span><span class="s2"> 条数据 | 下一页游标=</span><span class="si">{</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'next_cursor'</span><span class="p">)</span><span class="si">!r}</span><span class="s2">"</span>
+</span><span id="__span-3-88"><a id="__codelineno-3-88" name="__codelineno-3-88" href="#__codelineno-3-88"></a>            <span class="p">)</span>
+</span><span id="__span-3-89"><a id="__codelineno-3-89" name="__codelineno-3-89" href="#__codelineno-3-89"></a>
+</span><span id="__span-3-90"><a id="__codelineno-3-90" name="__codelineno-3-90" href="#__codelineno-3-90"></a>            <span class="c1"># 更新游标与循环终止条件</span>
+</span><span id="__span-3-91"><a id="__codelineno-3-91" name="__codelineno-3-91" href="#__codelineno-3-91"></a>            <span class="n">has_more</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"has_more"</span><span class="p">))</span>
+</span><span id="__span-3-92"><a id="__codelineno-3-92" name="__codelineno-3-92" href="#__codelineno-3-92"></a>            <span class="n">current_cursor</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"next_cursor"</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span>
+</span><span id="__span-3-93"><a id="__codelineno-3-93" name="__codelineno-3-93" href="#__codelineno-3-93"></a>            <span class="k">if</span> <span class="ow">not</span> <span class="n">current_cursor</span><span class="p">:</span>
+</span><span id="__span-3-94"><a id="__codelineno-3-94" name="__codelineno-3-94" href="#__codelineno-3-94"></a>                <span class="k">break</span>
+</span><span id="__span-3-95"><a id="__codelineno-3-95" name="__codelineno-3-95" href="#__codelineno-3-95"></a>
+</span><span id="__span-3-96"><a id="__codelineno-3-96" name="__codelineno-3-96" href="#__codelineno-3-96"></a>    <span class="k">return</span> <span class="n">collected_items</span>
+</span><span id="__span-3-97"><a id="__codelineno-3-97" name="__codelineno-3-97" href="#__codelineno-3-97"></a>
+</span><span id="__span-3-98"><a id="__codelineno-3-98" name="__codelineno-3-98" href="#__codelineno-3-98"></a>
+</span><span id="__span-3-99"><a id="__codelineno-3-99" name="__codelineno-3-99" href="#__codelineno-3-99"></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
+</span><span id="__span-3-100"><a id="__codelineno-3-100" name="__codelineno-3-100" href="#__codelineno-3-100"></a>    <span class="n">all_posts</span> <span class="o">=</span> <span class="n">crawl_cursor_waterfall_mock</span><span class="p">()</span>
+</span><span id="__span-3-101"><a id="__codelineno-3-101" name="__codelineno-3-101" href="#__codelineno-3-101"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">✅ 瀑布流游标采集完成，共获取 </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">all_posts</span><span class="p">)</span><span class="si">}</span><span class="s2"> 条动态："</span><span class="p">)</span>
+</span><span id="__span-3-102"><a id="__codelineno-3-102" name="__codelineno-3-102" href="#__codelineno-3-102"></a>    <span class="k">for</span> <span class="n">post</span> <span class="ow">in</span> <span class="n">all_posts</span><span class="p">:</span>
+</span><span id="__span-3-103"><a id="__codelineno-3-103" name="__codelineno-3-103" href="#__codelineno-3-103"></a>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  - </span><span class="si">{</span><span class="n">post</span><span class="p">[</span><span class="s1">'id'</span><span class="p">]</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">post</span><span class="p">[</span><span class="s1">'title'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</span></code></pre></div>
+<hr />
+<h2 id="4-graphqlwebsocketsse">4. 新一代接口协议：GraphQL、WebSocket与SSE流式采集<a class="headerlink" href="#4-graphqlwebsocketsse" title="Permanent link">&para;</a></h2>
+<p>随着前端交互复杂度的提升和生成式 AI 应用的爆发，传统的 RESTful <code>GET/POST</code> 接口已不再是唯一的通信形态。在 GitHub、知乎、Shopify 等平台中广泛使用的 <strong>GraphQL</strong>，在金融行情、直播间弹幕中使用的 <strong>WebSocket</strong>，以及在 ChatGPT、DeepSeek 等大模型对话界面中逐字吐出回答的 <strong>SSE（Server-Sent Events）</strong>，构成了现代爬虫工程师必须掌握的三大新一代接口协议。</p>
+<h3 id="41-graphql">4.1 GraphQL查询语言与单端点接口采集<a class="headerlink" href="#41-graphql" title="Permanent link">&para;</a></h3>
+<p>在传统 RESTful 架构中，获取一个用户的基本资料、他发布的文章列表以及每篇文章的前三条评论，往往需要连续请求 <code>/api/users/1</code>、<code>/api/users/1/posts</code> 等多个不同 URL 的接口，且每个接口都会返回几十个我们根本用不上的冗余字段（称为 Over-fetching）。</p>
+<p>由 Meta（Facebook）开源的 <strong>GraphQL查询语言与单端点接口采集</strong> 彻底颠覆了这一模式：</p>
+<ol>
+<li><strong>全站共享唯一端点（Single Endpoint）</strong>：整个网站的所有数据查询通常只通过同一个固定的 <code>POST</code> 地址（例如 <code>POST https://api.example.com/graphql</code>）完成。</li>
+<li><strong>按需声明字段（Ask for What You Need）</strong>：客户端在 <code>POST</code> 请求的 JSON 载荷中发送三个标准键：</li>
+<li><strong><code>operationName</code></strong>：当前查询操作的名称（如 <code>"GetRepositoryList"</code>）；</li>
+<li><strong><code>query</code></strong>：一段类 JSON 结构的 GraphQL 查询描述字符串，明确列出本次只需要服务器返回哪些字段（例如只要求返回仓库的 <code>name</code>、<code>stargazerCount</code> 和 <code>primaryLanguage { name }</code>）；</li>
+<li><strong><code>variables</code></strong>：一个标准的 Python 字典，存放分页游标（<code>after</code>）、每页条数（<code>first: 20</code>）或搜索关键词等动态变量。</li>
+<li><strong>爬虫逆向优势</strong>：在采集 GraphQL 接口时，我们<strong>完全不需要修改那段长长的 <code>query</code> 查询语法字符串</strong>，只需从 DevTools 的 <code>Payload</code> 面板中把 <code>query</code> 原封不动地复制为 Python 的多行字符串，然后在循环中仅修改 <strong><code>variables</code> 字典里的分页或筛选变量</strong>，即可用极简的代码精准获取高度定制化的结构化数据！甚至你还可以在 <code>query</code> 字符串中删掉不需要的耗时字段，让目标服务器响应得更快。</li>
+</ol>
+<h3 id="42-websocket">4.2 WebSocket全双工长连接实时数据抓取<a class="headerlink" href="#42-websocket" title="Permanent link">&para;</a></h3>
+<p>无论是 RESTful 还是 GraphQL，本质上都遵循 HTTP 的“客户端问一句、服务器答一句”半双工短连接模式。但如果要采集<strong>毫秒级跳动的股票/加密货币实时成交行情、体育赛事实时比分、在线多人协同状态或直播间高速滚动的弹幕流</strong>，让客户端每隔 0.1 秒发起一次 HTTP 轮询（Polling）会产生极其恐怖的请求头开销与延迟。</p>
+<p>为此，现代实时应用普遍采用 <strong>WebSocket全双工长连接实时数据抓取（RFC 6455）</strong>：</p>
+<ul>
+<li><strong>协议握手与升级（Handshake &amp; Upgrade）</strong>：客户端首先发起一个携带 <code>Connection: Upgrade</code> 和 <code>Upgrade: websocket</code> 请求头的特殊 HTTP 请求；服务器返回状态码 <strong><code>101 Switching Protocols</code></strong> 后，底层的 TCP 连接便保持不断开，正式升级为 <code>ws://</code>（明文）或 <strong><code>wss://</code>（TLS 加密，等同于 HTTPS）</strong> 全双工双向通道。</li>
+<li><strong>帧消息双向收发与心跳保活（Ping/Pong Heartbeat）</strong>：连接建立后，客户端和服务器可以随时主动向对方推送轻量级的数据帧（Text Frame 或 Binary Frame）。为了防止中间网关因长时间无数据交互而切断空闲连接，客户端通常需要每隔 15~30 秒向服务端发送一次心跳包（如 <code>{"type": "ping"}</code>）。</li>
+<li><strong>DevTools 逆向定位</strong>：在 <code>Network</code> 面板中点击 <strong><code>WS</code></strong>（WebSocket）过滤按钮，刷新页面即可看到状态码为 <code>101</code> 的长连接请求；点击该请求并切换到右侧的 <strong><code>Messages</code>（消息）</strong> 标签页，绿色向上箭头 <code>↑</code> 代表前端发出的订阅指令（如 <code>{"action": "subscribe", "channel": "ticker.BTC-USDT"}</code>），白色/橙色向下箭头 <code>↓</code> 则是服务器源源不断推送过来的实时数据帧！在 Python 中，我们使用 <code>websockets</code> 异步库即可轻松复现这一订阅与接收过程。</li>
+</ul>
+<h3 id="43-sse">4.3 SSE服务端推送事件流数据采集<a class="headerlink" href="#43-sse" title="Permanent link">&para;</a></h3>
+<p>当你使用 ChatGPT、Claude、DeepSeek 或通义千问等网页版 AI 助手时，为什么大模型的回答能够像打字机一样一个词一个词地实时流式输出（Streaming），但它并没有使用复杂的 WebSocket 协议？答案就是 <strong>SSE服务端推送事件流数据采集（Server-Sent Events）</strong>。</p>
+<p>SSE 是一种基于标准 HTTP 协议的<strong>“客户端单向发起请求 <span class="arithmatex">\(\rightarrow\)</span> 服务端持续单向推送文本事件流”</strong>的轻量级长连接技术，特别契合 AI 大模型流式生成、实时新闻快讯推送和后台任务进度条更新等“只需服务端往客户端推数据”的场景：</p>
+<ul>
+<li><strong>标志性响应头</strong>：服务器返回的 HTTP 状态码依然是普通的 <code>200 OK</code>，但响应头中固定包含：
+  <div class="language-http highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="err">Content-Type: text/event-stream; charset=utf-8</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="err">Cache-Control: no-cache</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="err">Connection: keep-alive</span>
+</span></code></pre></div></li>
+<li><strong>标准事件流报文格式</strong>：响应体由一个个以两个连续换行符 <code>\n\n</code> 分隔的事件块组成，每一行以 <code>event:</code>、<code>id:</code> 或最核心的 <strong><code>data:</code></strong> 前缀开头。在大模型接口中，每一行通常形如：
+  <div class="language-text highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>data: {"id": "chat-1", "delta": {"content": "网络"}}
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>data: {"id": "chat-1", "delta": {"content": "爬虫"}}
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>data: [DONE]
+</span></code></pre></div></li>
+<li><strong>Python 流式采集技巧</strong>：在采集 SSE 接口时，<strong>绝不能直接调用普通的 <code>httpx.get(url)</code> 等待整个响应结束</strong>（因为流式连接可能持续几十秒甚至永远不断开），而必须使用 <strong><code>with client.stream("POST", url, ...) as response:</code></strong> 开启流式读取模式，通过 <code>for line in response.iter_lines():</code> 逐行实时消费以 <code>data:</code> 开头的数据块，并在遇到 <code>data: [DONE]</code> 时主动退出循环。</li>
+</ul>
+<p>下面这段代码完整演示了如何使用 <code>httpx</code> 发送 <strong>GraphQL 单端点参数化查询</strong>，以及如何使用 <strong><code>client.stream()</code> 流式读取并拼接 SSE（<code>text/event-stream</code>）实时推送的大模型流式响应</strong>。代码内置了仿真传输层，无需外部网络即可直接运行验证：</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="kn">import</span><span class="w"> </span><span class="nn">httpx</span>
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>
+</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>
+</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="k">def</span><span class="w"> </span><span class="nf">fetch_graphql_repositories</span><span class="p">(</span><span class="n">client</span><span class="p">:</span> <span class="n">httpx</span><span class="o">.</span><span class="n">Client</span><span class="p">,</span> <span class="n">category</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">first</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="w">    </span><span class="sd">"""</span>
+</span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a><span class="sd">    演示 GraphQL 单端点接口采集：保持 query 字符串不变，仅通过 variables 字典传递动态参数</span>
+</span><span id="__span-6-9"><a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a><span class="sd">    """</span>
+</span><span id="__span-6-10"><a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a>    <span class="n">graphql_query</span> <span class="o">=</span> <span class="s2">"""</span>
+</span><span id="__span-6-11"><a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a><span class="s2">    query SearchAIRepos($category: String!, $first: Int!, $after: String) {</span>
+</span><span id="__span-6-12"><a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a><span class="s2">      searchRepos(category: $category, first: $first, after: $after) {</span>
+</span><span id="__span-6-13"><a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a><span class="s2">        pageInfo { hasNextPage endCursor }</span>
+</span><span id="__span-6-14"><a id="__codelineno-6-14" name="__codelineno-6-14" href="#__codelineno-6-14"></a><span class="s2">        nodes { name stars license }</span>
+</span><span id="__span-6-15"><a id="__codelineno-6-15" name="__codelineno-6-15" href="#__codelineno-6-15"></a><span class="s2">      }</span>
+</span><span id="__span-6-16"><a id="__codelineno-6-16" name="__codelineno-6-16" href="#__codelineno-6-16"></a><span class="s2">    }</span>
+</span><span id="__span-6-17"><a id="__codelineno-6-17" name="__codelineno-6-17" href="#__codelineno-6-17"></a><span class="s2">    """</span>
+</span><span id="__span-6-18"><a id="__codelineno-6-18" name="__codelineno-6-18" href="#__codelineno-6-18"></a>    <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span>
+</span><span id="__span-6-19"><a id="__codelineno-6-19" name="__codelineno-6-19" href="#__codelineno-6-19"></a>        <span class="s2">"operationName"</span><span class="p">:</span> <span class="s2">"SearchAIRepos"</span><span class="p">,</span>
+</span><span id="__span-6-20"><a id="__codelineno-6-20" name="__codelineno-6-20" href="#__codelineno-6-20"></a>        <span class="s2">"query"</span><span class="p">:</span> <span class="n">graphql_query</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span>
+</span><span id="__span-6-21"><a id="__codelineno-6-21" name="__codelineno-6-21" href="#__codelineno-6-21"></a>        <span class="s2">"variables"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"category"</span><span class="p">:</span> <span class="n">category</span><span class="p">,</span> <span class="s2">"first"</span><span class="p">:</span> <span class="n">first</span><span class="p">,</span> <span class="s2">"after"</span><span class="p">:</span> <span class="kc">None</span><span class="p">},</span>
+</span><span id="__span-6-22"><a id="__codelineno-6-22" name="__codelineno-6-22" href="#__codelineno-6-22"></a>    <span class="p">}</span>
+</span><span id="__span-6-23"><a id="__codelineno-6-23" name="__codelineno-6-23" href="#__codelineno-6-23"></a>    <span class="n">resp</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">"https://api.example.edu/graphql"</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="n">payload</span><span class="p">)</span>
+</span><span id="__span-6-24"><a id="__codelineno-6-24" name="__codelineno-6-24" href="#__codelineno-6-24"></a>    <span class="n">resp</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>
+</span><span id="__span-6-25"><a id="__codelineno-6-25" name="__codelineno-6-25" href="#__codelineno-6-25"></a>    <span class="n">result</span> <span class="o">=</span> <span class="n">resp</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+</span><span id="__span-6-26"><a id="__codelineno-6-26" name="__codelineno-6-26" href="#__codelineno-6-26"></a>    <span class="k">return</span> <span class="n">result</span><span class="p">[</span><span class="s2">"data"</span><span class="p">][</span><span class="s2">"searchRepos"</span><span class="p">][</span><span class="s2">"nodes"</span><span class="p">]</span>
+</span><span id="__span-6-27"><a id="__codelineno-6-27" name="__codelineno-6-27" href="#__codelineno-6-27"></a>
+</span><span id="__span-6-28"><a id="__codelineno-6-28" name="__codelineno-6-28" href="#__codelineno-6-28"></a>
+</span><span id="__span-6-29"><a id="__codelineno-6-29" name="__codelineno-6-29" href="#__codelineno-6-29"></a><span class="k">def</span><span class="w"> </span><span class="nf">consume_sse_stream</span><span class="p">(</span><span class="n">client</span><span class="p">:</span> <span class="n">httpx</span><span class="o">.</span><span class="n">Client</span><span class="p">,</span> <span class="n">prompt</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span id="__span-6-30"><a id="__codelineno-6-30" name="__codelineno-6-30" href="#__codelineno-6-30"></a><span class="w">    </span><span class="sd">"""</span>
+</span><span id="__span-6-31"><a id="__codelineno-6-31" name="__codelineno-6-31" href="#__codelineno-6-31"></a><span class="sd">    演示 SSE (text/event-stream) 服务端推送事件流的逐行流式采集与拼接</span>
+</span><span id="__span-6-32"><a id="__codelineno-6-32" name="__codelineno-6-32" href="#__codelineno-6-32"></a><span class="sd">    """</span>
+</span><span id="__span-6-33"><a id="__codelineno-6-33" name="__codelineno-6-33" href="#__codelineno-6-33"></a>    <span class="n">collected_tokens</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span id="__span-6-34"><a id="__codelineno-6-34" name="__codelineno-6-34" href="#__codelineno-6-34"></a>    <span class="c1"># 关键：使用 client.stream() 上下文管理器逐行读取事件流，避免阻塞等待全量响应</span>
+</span><span id="__span-6-35"><a id="__codelineno-6-35" name="__codelineno-6-35" href="#__codelineno-6-35"></a>    <span class="k">with</span> <span class="n">client</span><span class="o">.</span><span class="n">stream</span><span class="p">(</span>
+</span><span id="__span-6-36"><a id="__codelineno-6-36" name="__codelineno-6-36" href="#__codelineno-6-36"></a>        <span class="s2">"POST"</span><span class="p">,</span>
+</span><span id="__span-6-37"><a id="__codelineno-6-37" name="__codelineno-6-37" href="#__codelineno-6-37"></a>        <span class="s2">"https://api.example.edu/v1/chat/stream"</span><span class="p">,</span>
+</span><span id="__span-6-38"><a id="__codelineno-6-38" name="__codelineno-6-38" href="#__codelineno-6-38"></a>        <span class="n">json</span><span class="o">=</span><span class="p">{</span><span class="s2">"prompt"</span><span class="p">:</span> <span class="n">prompt</span><span class="p">,</span> <span class="s2">"stream"</span><span class="p">:</span> <span class="kc">True</span><span class="p">},</span>
+</span><span id="__span-6-39"><a id="__codelineno-6-39" name="__codelineno-6-39" href="#__codelineno-6-39"></a>        <span class="n">headers</span><span class="o">=</span><span class="p">{</span><span class="s2">"Accept"</span><span class="p">:</span> <span class="s2">"text/event-stream"</span><span class="p">},</span>
+</span><span id="__span-6-40"><a id="__codelineno-6-40" name="__codelineno-6-40" href="#__codelineno-6-40"></a>    <span class="p">)</span> <span class="k">as</span> <span class="n">response</span><span class="p">:</span>
+</span><span id="__span-6-41"><a id="__codelineno-6-41" name="__codelineno-6-41" href="#__codelineno-6-41"></a>        <span class="n">response</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>
+</span><span id="__span-6-42"><a id="__codelineno-6-42" name="__codelineno-6-42" href="#__codelineno-6-42"></a>        <span class="k">for</span> <span class="n">raw_line</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">iter_lines</span><span class="p">():</span>
+</span><span id="__span-6-43"><a id="__codelineno-6-43" name="__codelineno-6-43" href="#__codelineno-6-43"></a>            <span class="n">line</span> <span class="o">=</span> <span class="n">raw_line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+</span><span id="__span-6-44"><a id="__codelineno-6-44" name="__codelineno-6-44" href="#__codelineno-6-44"></a>            <span class="c1"># 忽略空行与以冒号开头的 SSE 心跳注释行 (: keep-alive)</span>
+</span><span id="__span-6-45"><a id="__codelineno-6-45" name="__codelineno-6-45" href="#__codelineno-6-45"></a>            <span class="k">if</span> <span class="ow">not</span> <span class="n">line</span> <span class="ow">or</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">":"</span><span class="p">):</span>
+</span><span id="__span-6-46"><a id="__codelineno-6-46" name="__codelineno-6-46" href="#__codelineno-6-46"></a>                <span class="k">continue</span>
+</span><span id="__span-6-47"><a id="__codelineno-6-47" name="__codelineno-6-47" href="#__codelineno-6-47"></a>            <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"data:"</span><span class="p">):</span>
+</span><span id="__span-6-48"><a id="__codelineno-6-48" name="__codelineno-6-48" href="#__codelineno-6-48"></a>                <span class="n">data_str</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="s2">"data:"</span><span class="p">)</span> <span class="p">:]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+</span><span id="__span-6-49"><a id="__codelineno-6-49" name="__codelineno-6-49" href="#__codelineno-6-49"></a>                <span class="k">if</span> <span class="n">data_str</span> <span class="o">==</span> <span class="s2">"[DONE]"</span><span class="p">:</span>
+</span><span id="__span-6-50"><a id="__codelineno-6-50" name="__codelineno-6-50" href="#__codelineno-6-50"></a>                    <span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">[SSE 流结束信号] 收到 [DONE]，停止读取。"</span><span class="p">)</span>
+</span><span id="__span-6-51"><a id="__codelineno-6-51" name="__codelineno-6-51" href="#__codelineno-6-51"></a>                    <span class="k">break</span>
+</span><span id="__span-6-52"><a id="__codelineno-6-52" name="__codelineno-6-52" href="#__codelineno-6-52"></a>                <span class="n">chunk_obj</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">data_str</span><span class="p">)</span>
+</span><span id="__span-6-53"><a id="__codelineno-6-53" name="__codelineno-6-53" href="#__codelineno-6-53"></a>                <span class="n">token</span> <span class="o">=</span> <span class="n">chunk_obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"delta"</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"content"</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span>
+</span><span id="__span-6-54"><a id="__codelineno-6-54" name="__codelineno-6-54" href="#__codelineno-6-54"></a>                <span class="nb">print</span><span class="p">(</span><span class="n">token</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s2">""</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="__span-6-55"><a id="__codelineno-6-55" name="__codelineno-6-55" href="#__codelineno-6-55"></a>                <span class="n">collected_tokens</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
+</span><span id="__span-6-56"><a id="__codelineno-6-56" name="__codelineno-6-56" href="#__codelineno-6-56"></a>
+</span><span id="__span-6-57"><a id="__codelineno-6-57" name="__codelineno-6-57" href="#__codelineno-6-57"></a>    <span class="k">return</span> <span class="s2">""</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">collected_tokens</span><span class="p">)</span>
+</span><span id="__span-6-58"><a id="__codelineno-6-58" name="__codelineno-6-58" href="#__codelineno-6-58"></a>
+</span><span id="__span-6-59"><a id="__codelineno-6-59" name="__codelineno-6-59" href="#__codelineno-6-59"></a>
+</span><span id="__span-6-60"><a id="__codelineno-6-60" name="__codelineno-6-60" href="#__codelineno-6-60"></a><span class="c1"># 构造本地 Mock 传输层用于演示 GraphQL 与 SSE 响应</span>
+</span><span id="__span-6-61"><a id="__codelineno-6-61" name="__codelineno-6-61" href="#__codelineno-6-61"></a><span class="k">def</span><span class="w"> </span><span class="nf">_mock_protocol_router</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">httpx</span><span class="o">.</span><span class="n">Request</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">httpx</span><span class="o">.</span><span class="n">Response</span><span class="p">:</span>
+</span><span id="__span-6-62"><a id="__codelineno-6-62" name="__codelineno-6-62" href="#__codelineno-6-62"></a>    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">url</span><span class="o">.</span><span class="n">path</span> <span class="o">==</span> <span class="s2">"/graphql"</span><span class="p">:</span>
+</span><span id="__span-6-63"><a id="__codelineno-6-63" name="__codelineno-6-63" href="#__codelineno-6-63"></a>        <span class="k">return</span> <span class="n">httpx</span><span class="o">.</span><span class="n">Response</span><span class="p">(</span>
+</span><span id="__span-6-64"><a id="__codelineno-6-64" name="__codelineno-6-64" href="#__codelineno-6-64"></a>            <span class="mi">200</span><span class="p">,</span>
+</span><span id="__span-6-65"><a id="__codelineno-6-65" name="__codelineno-6-65" href="#__codelineno-6-65"></a>            <span class="n">json</span><span class="o">=</span><span class="p">{</span>
+</span><span id="__span-6-66"><a id="__codelineno-6-66" name="__codelineno-6-66" href="#__codelineno-6-66"></a>                <span class="s2">"data"</span><span class="p">:</span> <span class="p">{</span>
+</span><span id="__span-6-67"><a id="__codelineno-6-67" name="__codelineno-6-67" href="#__codelineno-6-67"></a>                    <span class="s2">"searchRepos"</span><span class="p">:</span> <span class="p">{</span>
+</span><span id="__span-6-68"><a id="__codelineno-6-68" name="__codelineno-6-68" href="#__codelineno-6-68"></a>                        <span class="s2">"pageInfo"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"hasNextPage"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">"endCursor"</span><span class="p">:</span> <span class="s2">"cur_2"</span><span class="p">},</span>
+</span><span id="__span-6-69"><a id="__codelineno-6-69" name="__codelineno-6-69" href="#__codelineno-6-69"></a>                        <span class="s2">"nodes"</span><span class="p">:</span> <span class="p">[</span>
+</span><span id="__span-6-70"><a id="__codelineno-6-70" name="__codelineno-6-70" href="#__codelineno-6-70"></a>                            <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="s2">"crawl4ai"</span><span class="p">,</span> <span class="s2">"stars"</span><span class="p">:</span> <span class="mi">18500</span><span class="p">,</span> <span class="s2">"license"</span><span class="p">:</span> <span class="s2">"Apache-2.0"</span><span class="p">},</span>
+</span><span id="__span-6-71"><a id="__codelineno-6-71" name="__codelineno-6-71" href="#__codelineno-6-71"></a>                            <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="s2">"Scrapy"</span><span class="p">,</span> <span class="s2">"stars"</span><span class="p">:</span> <span class="mi">53200</span><span class="p">,</span> <span class="s2">"license"</span><span class="p">:</span> <span class="s2">"BSD-3-Clause"</span><span class="p">},</span>
+</span><span id="__span-6-72"><a id="__codelineno-6-72" name="__codelineno-6-72" href="#__codelineno-6-72"></a>                        <span class="p">],</span>
+</span><span id="__span-6-73"><a id="__codelineno-6-73" name="__codelineno-6-73" href="#__codelineno-6-73"></a>                    <span class="p">}</span>
+</span><span id="__span-6-74"><a id="__codelineno-6-74" name="__codelineno-6-74" href="#__codelineno-6-74"></a>                <span class="p">}</span>
+</span><span id="__span-6-75"><a id="__codelineno-6-75" name="__codelineno-6-75" href="#__codelineno-6-75"></a>            <span class="p">},</span>
+</span><span id="__span-6-76"><a id="__codelineno-6-76" name="__codelineno-6-76" href="#__codelineno-6-76"></a>        <span class="p">)</span>
+</span><span id="__span-6-77"><a id="__codelineno-6-77" name="__codelineno-6-77" href="#__codelineno-6-77"></a>    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">url</span><span class="o">.</span><span class="n">path</span> <span class="o">==</span> <span class="s2">"/v1/chat/stream"</span><span class="p">:</span>
+</span><span id="__span-6-78"><a id="__codelineno-6-78" name="__codelineno-6-78" href="#__codelineno-6-78"></a>        <span class="n">sse_lines</span> <span class="o">=</span> <span class="p">[</span>
+</span><span id="__span-6-79"><a id="__codelineno-6-79" name="__codelineno-6-79" href="#__codelineno-6-79"></a>            <span class="s2">": keep-alive heartbeat</span><span class="se">\n\n</span><span class="s2">"</span><span class="p">,</span>
+</span><span id="__span-6-80"><a id="__codelineno-6-80" name="__codelineno-6-80" href="#__codelineno-6-80"></a>            <span class="s1">'data: {"id": "1", "delta": {"content": "直接请求"}}</span><span class="se">\n\n</span><span class="s1">'</span><span class="p">,</span>
+</span><span id="__span-6-81"><a id="__codelineno-6-81" name="__codelineno-6-81" href="#__codelineno-6-81"></a>            <span class="s1">'data: {"id": "2", "delta": {"content": "底层 JSON 接口"}}</span><span class="se">\n\n</span><span class="s1">'</span><span class="p">,</span>
+</span><span id="__span-6-82"><a id="__codelineno-6-82" name="__codelineno-6-82" href="#__codelineno-6-82"></a>            <span class="s1">'data: {"id": "3", "delta": {"content": "比解析 DOM 快 10 倍！"}}</span><span class="se">\n\n</span><span class="s1">'</span><span class="p">,</span>
+</span><span id="__span-6-83"><a id="__codelineno-6-83" name="__codelineno-6-83" href="#__codelineno-6-83"></a>            <span class="s2">"data: [DONE]</span><span class="se">\n\n</span><span class="s2">"</span><span class="p">,</span>
+</span><span id="__span-6-84"><a id="__codelineno-6-84" name="__codelineno-6-84" href="#__codelineno-6-84"></a>        <span class="p">]</span>
+</span><span id="__span-6-85"><a id="__codelineno-6-85" name="__codelineno-6-85" href="#__codelineno-6-85"></a>        <span class="k">return</span> <span class="n">httpx</span><span class="o">.</span><span class="n">Response</span><span class="p">(</span>
+</span><span id="__span-6-86"><a id="__codelineno-6-86" name="__codelineno-6-86" href="#__codelineno-6-86"></a>            <span class="mi">200</span><span class="p">,</span>
+</span><span id="__span-6-87"><a id="__codelineno-6-87" name="__codelineno-6-87" href="#__codelineno-6-87"></a>            <span class="n">headers</span><span class="o">=</span><span class="p">{</span><span class="s2">"Content-Type"</span><span class="p">:</span> <span class="s2">"text/event-stream; charset=utf-8"</span><span class="p">},</span>
+</span><span id="__span-6-88"><a id="__codelineno-6-88" name="__codelineno-6-88" href="#__codelineno-6-88"></a>            <span class="n">content</span><span class="o">=</span><span class="s2">""</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">sse_lines</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">"utf-8"</span><span class="p">),</span>
+</span><span id="__span-6-89"><a id="__codelineno-6-89" name="__codelineno-6-89" href="#__codelineno-6-89"></a>        <span class="p">)</span>
+</span><span id="__span-6-90"><a id="__codelineno-6-90" name="__codelineno-6-90" href="#__codelineno-6-90"></a>    <span class="k">return</span> <span class="n">httpx</span><span class="o">.</span><span class="n">Response</span><span class="p">(</span><span class="mi">404</span><span class="p">)</span>
+</span><span id="__span-6-91"><a id="__codelineno-6-91" name="__codelineno-6-91" href="#__codelineno-6-91"></a>
+</span><span id="__span-6-92"><a id="__codelineno-6-92" name="__codelineno-6-92" href="#__codelineno-6-92"></a>
+</span><span id="__span-6-93"><a id="__codelineno-6-93" name="__codelineno-6-93" href="#__codelineno-6-93"></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
+</span><span id="__span-6-94"><a id="__codelineno-6-94" name="__codelineno-6-94" href="#__codelineno-6-94"></a>    <span class="k">with</span> <span class="n">httpx</span><span class="o">.</span><span class="n">Client</span><span class="p">(</span><span class="n">transport</span><span class="o">=</span><span class="n">httpx</span><span class="o">.</span><span class="n">MockTransport</span><span class="p">(</span><span class="n">_mock_protocol_router</span><span class="p">))</span> <span class="k">as</span> <span class="n">mock_client</span><span class="p">:</span>
+</span><span id="__span-6-95"><a id="__codelineno-6-95" name="__codelineno-6-95" href="#__codelineno-6-95"></a>        <span class="nb">print</span><span class="p">(</span><span class="s2">"=== 1. GraphQL 单端点查询结果 ==="</span><span class="p">)</span>
+</span><span id="__span-6-96"><a id="__codelineno-6-96" name="__codelineno-6-96" href="#__codelineno-6-96"></a>        <span class="n">repos</span> <span class="o">=</span> <span class="n">fetch_graphql_repositories</span><span class="p">(</span><span class="n">mock_client</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="s2">"WebScraping"</span><span class="p">)</span>
+</span><span id="__span-6-97"><a id="__codelineno-6-97" name="__codelineno-6-97" href="#__codelineno-6-97"></a>        <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">repos</span><span class="p">:</span>
+</span><span id="__span-6-98"><a id="__codelineno-6-98" name="__codelineno-6-98" href="#__codelineno-6-98"></a>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  📦 </span><span class="si">{</span><span class="n">r</span><span class="p">[</span><span class="s1">'name'</span><span class="p">]</span><span class="si">}</span><span class="s2"> (⭐ </span><span class="si">{</span><span class="n">r</span><span class="p">[</span><span class="s1">'stars'</span><span class="p">]</span><span class="si">}</span><span class="s2"> | 协议: </span><span class="si">{</span><span class="n">r</span><span class="p">[</span><span class="s1">'license'</span><span class="p">]</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
+</span><span id="__span-6-99"><a id="__codelineno-6-99" name="__codelineno-6-99" href="#__codelineno-6-99"></a>
+</span><span id="__span-6-100"><a id="__codelineno-6-100" name="__codelineno-6-100" href="#__codelineno-6-100"></a>        <span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">=== 2. SSE 实时事件流逐字采集 ==="</span><span class="p">)</span>
+</span><span id="__span-6-101"><a id="__codelineno-6-101" name="__codelineno-6-101" href="#__codelineno-6-101"></a>        <span class="nb">print</span><span class="p">(</span><span class="s2">"收到流式输出: "</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s2">""</span><span class="p">)</span>
+</span><span id="__span-6-102"><a id="__codelineno-6-102" name="__codelineno-6-102" href="#__codelineno-6-102"></a>        <span class="n">full_text</span> <span class="o">=</span> <span class="n">consume_sse_stream</span><span class="p">(</span><span class="n">mock_client</span><span class="p">,</span> <span class="s2">"为什么优先选API采集？"</span><span class="p">)</span>
+</span><span id="__span-6-103"><a id="__codelineno-6-103" name="__codelineno-6-103" href="#__codelineno-6-103"></a>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"完整拼接文本: </span><span class="si">{</span><span class="n">full_text</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</span></code></pre></div>
+<p>如果遇到真正需要双向发送订阅指令的 <strong>WebSocket (<code>wss://</code>)</strong> 实时行情或弹幕流接口，标准异步采集模板如下所示（使用 <code>websockets</code> 库，<code>pip install websockets</code>）：</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="c1"># import websockets  # 实际连接远程 wss:// 服务器时取消注释</span>
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>
+</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>
+</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">subscribe_realtime_ticker_demo</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="w">    </span><span class="sd">"""WebSocket 全双工长连接实时数据抓取标准工程模板"""</span>
+</span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>    <span class="n">wss_url</span> <span class="o">=</span> <span class="s2">"wss://stream.example.com/ws/market"</span>
+</span><span id="__span-7-9"><a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a>    <span class="n">subscribe_msg</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">({</span><span class="s2">"action"</span><span class="p">:</span> <span class="s2">"subscribe"</span><span class="p">,</span> <span class="s2">"channel"</span><span class="p">:</span> <span class="s2">"AI_INDEX_TICKER"</span><span class="p">})</span>
+</span><span id="__span-7-10"><a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"🔌 准备连接 WebSocket 端点: </span><span class="si">{</span><span class="n">wss_url</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</span><span id="__span-7-11"><a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"📤 发送订阅帧 (↑): </span><span class="si">{</span><span class="n">subscribe_msg</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</span><span id="__span-7-12"><a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a>
+</span><span id="__span-7-13"><a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a>    <span class="c1"># 真实环境下的标准异步上下文写法：</span>
+</span><span id="__span-7-14"><a id="__codelineno-7-14" name="__codelineno-7-14" href="#__codelineno-7-14"></a>    <span class="c1"># async with websockets.connect(wss_url, ping_interval=20) as ws:</span>
+</span><span id="__span-7-15"><a id="__codelineno-7-15" name="__codelineno-7-15" href="#__codelineno-7-15"></a>    <span class="c1">#     await ws.send(subscribe_msg)</span>
+</span><span id="__span-7-16"><a id="__codelineno-7-16" name="__codelineno-7-16" href="#__codelineno-7-16"></a>    <span class="c1">#     async for message in ws:</span>
+</span><span id="__span-7-17"><a id="__codelineno-7-17" name="__codelineno-7-17" href="#__codelineno-7-17"></a>    <span class="c1">#         data = json.loads(message)</span>
+</span><span id="__span-7-18"><a id="__codelineno-7-18" name="__codelineno-7-18" href="#__codelineno-7-18"></a>    <span class="c1">#         print("📥 收到实时推送帧 (↓):", data)</span>
+</span><span id="__span-7-19"><a id="__codelineno-7-19" name="__codelineno-7-19" href="#__codelineno-7-19"></a>
+</span><span id="__span-7-20"><a id="__codelineno-7-20" name="__codelineno-7-20" href="#__codelineno-7-20"></a>
+</span><span id="__span-7-21"><a id="__codelineno-7-21" name="__codelineno-7-21" href="#__codelineno-7-21"></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
+</span><span id="__span-7-22"><a id="__codelineno-7-22" name="__codelineno-7-22" href="#__codelineno-7-22"></a>    <span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">subscribe_realtime_ticker_demo</span><span class="p">())</span>
+</span></code></pre></div>
+<hr />
+<h2 id="5-apidom">5. 异步API直采与DOM解析工程选型评估<a class="headerlink" href="#5-apidom" title="Permanent link">&para;</a></h2>
+<p>学到这里，你手里已经握有了两套截然不同的数据采集武器：第 4 章的<strong>“HTML 静态/动态 DOM 解析”</strong>与本章的<strong>“Web 异步 API 接口直采”</strong>（以及下一章即将学习的 Playwright 无头浏览器渲染）。在真实的商业或科研采集项目中，面对一个全新的目标网站，优秀的工程师绝不是盲目动手写代码，而是先做一次<strong>异步API直采与DOM解析工程选型评估（API Scraping vs. DOM Parsing Trade-off Evaluation）</strong>。</p>
+<p>让我们从四个核心工程维度对这两种范式进行量化对比：</p>
+<ol>
+<li><strong>单次传输带宽与响应速度（Bandwidth &amp; Latency）</strong><br />
+   一份完整的电商商品列表 HTML 页面（加上内联脚本与冗余标签）体积通常在 <code>150 KB ~ 800 KB</code> 之间；而后端 API 返回的纯 JSON 数据包只包含核心业务字段，体积往往只有 <strong><code>5 KB ~ 25 KB</code></strong>，带宽消耗降低 90% 以上，单机并发吞吐量（QPS）轻松达到每秒数百次请求。</li>
+<li><strong>字段结构化质量与解析稳定性（Data Quality &amp; Maintenance）</strong><br />
+   HTML 是为了“视觉排版”设计的，价格可能被拆成 <code>&lt;span class="yen"&gt;¥&lt;/span&gt;&lt;b class="num"&gt;99&lt;/b&gt;</code>，且一旦前端设计师改版微调了 CSS 类名（如把 <code>.item-box</code> 改成 <code>.card-v2</code>），XPath/CSS 选择器就会大面积失效。相反，后端 API 是为了前后端以及手机 App 共同调用而设计的<strong>数据契约</strong>，不仅直接给出 <code>"price": 99.0</code> 的浮点数类型，而且常常包含网页 UI 上被折叠或隐藏的额外高价值字段（如精确到秒的创建时间 <code>created_at</code>、作者真实 UID、商品库存余量 <code>stock_count</code>），并且后端接口结构往往半年到数年都保持稳定不变！</li>
+<li><strong>逆向工程门槛与反爬对抗成本（Reverse Engineering Cost）</strong><br />
+   既然 API 直采这么好，为什么不把所有爬虫都写成 API 直采？因为部分高防网站会对 API 接口施加严密的<strong>参数签名加密（如 URL 中携带动态计算的 <code>sign</code>、<code>token</code>、<code>a_bogus</code>）</strong>或响应体 AES 加密。如果逆向破解一段混淆 JS 签名算法需要耗费你整整 5 天时间，而你只需要一次性采集 500 页数据，那么直接使用第 6 章的 Playwright 浏览器自动化（或配合 <code>page.on("response")</code> 拦截）显然比死磕 JS 加密算法更具工程性价比（ROI）。</li>
+<li><strong>五大黄金选型决策准则</strong>：</li>
+<li><strong>准则一</strong>：只要目标数据通过明文或简单参数（页码、<code>offset</code>、<code>cursor</code>、时间戳）的 RESTful/GraphQL JSON 接口传输，<strong>无脑优先选择“异步 API 直采”</strong>。</li>
+<li><strong>准则二</strong>：如果目标页面是纯静态或标准 SSR 页面（<code>Ctrl+U</code> 源码中直接包含完整文本，无独立 JSON 接口），<strong>选择“直接请求 HTML + <code>parsel</code>/<code>selectolax</code> 静态 DOM 解析”</strong>。</li>
+<li><strong>准则三</strong>：有些现代 SSR 框架（如 Next.js、Nuxt.js）虽然在首屏返回 HTML，但同时会在页面底部塞入一个 <code>&lt;script id="__NEXT_DATA__" type="application/json"&gt;{...}&lt;/script&gt;</code> 标签，里面装满了首屏完整的结构化 JSON 状态树！遇到这种情况，<strong>用 CSS 选择器取出 <code>script#__NEXT_DATA__::text</code> 再直接 <code>json.loads()</code></strong>，兼具静态请求的简单与 JSON 解析的精准！</li>
+<li><strong>准则四</strong>：对于实时行情、高频弹幕或 AI 流式输出，分别采用 <strong><code>websockets</code> 长连接</strong>或 <strong><code>httpx.stream()</code> SSE 流式采集</strong>。</li>
+<li><strong>准则五</strong>：当 API 接口存在极高强度的动态混淆签名（如复杂 WebAssembly/VMP 签名）且采集规模不大时，转入第 6 章的 <strong>Playwright 浏览器自动化与响应截获</strong>。</li>
+</ol>
+<p>下表总结了五大采集协议与技术路线的工程选型对照矩阵：</p>
+<table>
+<thead>
+<tr>
+<th>网页/接口形态</th>
+<th>协议与特征标志</th>
+<th>典型数据包大小</th>
+<th>解析方式</th>
+<th>吞吐性能</th>
+<th>逆向调试难度</th>
+<th>适用典型场景</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>传统 SSR 静态网页</strong></td>
+<td><code>GET</code> 返回 <code>text/html</code>，<code>Ctrl+U</code> 可搜到正文</td>
+<td>100~500 KB</td>
+<td><code>parsel</code> (CSS/XPath)</td>
+<td>高 (50~200 req/s)</td>
+<td>⭐ 极低</td>
+<td>传统新闻门户、政务公告、静态博客、百科词条</td>
+</tr>
+<tr>
+<td><strong>SSR 内联状态树 (<code>__NEXT_DATA__</code>)</strong></td>
+<td>HTML 底部内嵌 <code>&lt;script type="application/json"&gt;</code></td>
+<td>100~400 KB</td>
+<td>提取 <code>&lt;script&gt;</code> 文本后 <code>json.loads()</code></td>
+<td>高 (50~200 req/s)</td>
+<td>⭐⭐ 低</td>
+<td>基于 Next.js / Nuxt.js 构建的现代电商与资讯首屏</td>
+</tr>
+<tr>
+<td><strong>RESTful / AJAX JSON 接口</strong></td>
+<td><code>Fetch/XHR</code> 面板可见，<code>application/json</code></td>
+<td><strong>5~30 KB</strong></td>
+<td><code>resp.json()</code> + <code>jmespath</code></td>
+<td><strong>极高 (200~800 req/s)</strong></td>
+<td>⭐⭐ 中等（需分析分页与请求头）</td>
+<td>前后端分离 SPA 网站、移动端 H5 接口、评论与商品列表</td>
+</tr>
+<tr>
+<td><strong>GraphQL 单端点接口</strong></td>
+<td><code>POST /graphql</code>，载荷含 <code>query</code> 与 <code>variables</code></td>
+<td><strong>5~25 KB</strong></td>
+<td>修改 <code>variables</code> 字典 + <code>resp.json()</code></td>
+<td><strong>极高 (200~500 req/s)</strong></td>
+<td>⭐⭐ 中等（直接复用 <code>query</code>）</td>
+<td>GitHub、知乎、海外新型 SaaS 与开源社区</td>
+</tr>
+<tr>
+<td><strong>WebSocket / SSE 实时流</strong></td>
+<td><code>101 Switching Protocols</code> (<code>wss://</code>) 或 <code>text/event-stream</code></td>
+<td>帧级 (&lt; 1 KB/帧)</td>
+<td><code>websockets</code> 异步迭代或 <code>httpx.stream()</code></td>
+<td>实时毫秒级推送</td>
+<td>⭐⭐⭐ 较高（需维护长连接与心跳）</td>
+<td>金融股票实时行情、直播间弹幕流、大模型流式对话接口</td>
+</tr>
+</tbody>
+</table>
+<p>在进入本章小结之前，请通过下方的交互式工程选型决策器，根据 6 个真实网站的 DevTools 抓包特征为其匹配最优的数据采集技术方案。</p>
+<h4 id="diagram-web-scraping-protocol-and-strategy-decision-matrix">Diagram: Web Scraping Protocol and Strategy Decision Matrix<a class="headerlink" href="#diagram-web-scraping-protocol-and-strategy-decision-matrix" title="Permanent link">&para;</a></h4>
+<pre class="mermaid"><code>flowchart TD
+    Inspect["打开 Chrome DevTools 勘察目标站点"] --&gt; C1{"Ctrl+U 网页源码含核心数据?"}
+    C1 --&gt;|"是: 含完整 HTML 标签文本"| S1["方案 S1: 静态 HTML 请求 + CSS/XPath 解析"]
+    C1 --&gt;|"是: 含 __NEXT_DATA__ 内嵌脚本"| S1B["方案 S1-SSR: 提取 script JSON 直接反序列化"]
+    C1 --&gt;|"否: 空挂载点 div#app"| C2{"观察 Network 面板数据包类型"}
+    C2 --&gt;|"标准 application/json 响应"| S2["方案 S2: RESTful API 直采 + JMESPath 提取"]
+    C2 --&gt;|"带 callback 函数外壳"| S3["方案 S3: 正则剥离 JSONP 外壳 + json.loads"]
+    C2 --&gt;|"单一端点 POST /graphql"| S4["方案 S4: 复用 query 语法树 + 循环更新 variables"]
+    C2 --&gt;|"状态码 101 wss 长连接"| S5["方案 S5: websockets 异步订阅实时帧"]
+    C2 --&gt;|"响应头 text/event-stream"| S6["方案 S6: httpx.stream 逐行消费 SSE 事件流"]</code></pre>
+<details>
+<summary>Web Scraping Protocol and Strategy Decision Matrix</summary>
+<p>Type: diagram
+<strong>sim-id:</strong> api-vs-dom-decision-matrix<br/>
+<strong>Library:</strong> html<br/>
+<strong>Status:</strong> Specified<br/>
+<strong>Bloom Level:</strong> Evaluate<br/>
+<strong>Bloom Verb:</strong> select<br/>
+<strong>Learning Objective:</strong> The learner will select the optimal web scraping protocol and parsing strategy for 6 real-world target inspection profiles by evaluating their DevTools Network signatures, payload formats, and pagination mechanisms.</p>
+<p><strong>Prerequisites:</strong> SSR vs. CSR architecture, RESTful JSON API, JSONP padding, GraphQL (<code>query</code>/<code>variables</code>), WebSocket (<code>101 Switching Protocols</code>), SSE (<code>text/event-stream</code>), <code>__NEXT_DATA__</code> inline state (all defined in Sections 1–5 above).</p>
+<p><strong>Evidence of Mastery:</strong> For each of the 6 target website DevTools inspection cards, the learner selects one of 6 scraping strategy options. A selection is correct when it matches the <code>Optimal Strategy</code> column in Content. Mastery is selecting the correct strategy for at least 5 of the 6 targets on the first attempt.</p>
+<p><strong>Misconceptions:</strong> (1) Whenever a website uses React or Next.js, the scraper must launch a headless browser even if a clean JSON API or <code>&lt;script id="__NEXT_DATA__"&gt;</code> tag is directly available. (2) A response starting with <code>callback_1729({...})</code> can be parsed directly with <code>response.json()</code> without stripping the JSONP wrapper. (3) An <code>OPTIONS</code> preflight request seen in DevTools must be manually re-sent by the Python scraper before every <code>POST</code> request.</p>
+<p><strong>Instructional Rationale:</strong> Evaluate-level strategy selection trains learners to diagnose authentic DevTools diagnostic clues (<code>Ctrl+U</code> source view, <code>Content-Type</code>, HTTP status codes, and payload keys) and choose the highest-efficiency, lowest-overhead engineering approach.</p>
+<p><strong>Content:</strong></p>
+<p>The 6 selectable strategy options available to the learner:
+- <code>S1</code>: <code>静态 HTML 请求 + CSS/XPath 解析 (SSR DOM Parsing)</code>
+- <code>S2</code>: <code>RESTful JSON 接口直采 + JMESPath 抽取 (AJAX API Scraping)</code>
+- <code>S3</code>: <code>剥离外层回调函数壳 + json.loads 解析 (JSONP Stripping)</code>
+- <code>S4</code>: <code>复用 query 字符串 + 循环修改 variables 字典 (GraphQL POST)</code>
+- <code>S5</code>: <code>建立 wss:// 异步长连接 + 发送订阅帧与心跳 (WebSocket Streaming)</code>
+- <code>S6</code>: <code>使用 httpx.stream() 逐行读取 data: 事件块 (SSE Event Stream)</code></p>
+<p>The 6 target website inspection cards evaluated by the learner (fixed order):</p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Target Inspection Profile Shown to Learner</th>
+<th>Correct Strategy</th>
+<th>Feedback &amp; Engineering Rationale (Why)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><strong>某省政府政策公报网</strong>：按 <code>Ctrl+U</code> 查看网页源码可直接搜到所有公报标题与正文段落；<code>Network -&gt; Fetch/XHR</code> 面板为空。</td>
+<td><code>S1</code></td>
+<td>页面属于典型的服务端渲染（SSR）静态 HTML，无异步数据接口，直接使用 <code>httpx</code> + <code>parsel</code> (CSS/XPath) 解析即可。</td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>某垂直电商商品瀑布流页面</strong>：<code>Ctrl+U</code> 源码只有 <code>&lt;div id="app"&gt;&lt;/div&gt;</code>；向下滚动时 <code>Fetch/XHR</code> 面板捕获到 <code>GET /api/v2/goods?cursor=8920&amp;_t=1729412000123</code>，响应头为 <code>application/json</code>，内含 5 层嵌套字典。</td>
+<td><code>S2</code></td>
+<td>典型的客户端渲染（CSR）异步接口，直接用 <code>httpx</code> 携带游标与毫秒时间戳请求 JSON 接口，并配合 <code>jmespath</code> 抽取字段，速度比解析 DOM 快 10 倍以上。</td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>某老牌财经门户实时股票报价接口</strong>：请求 URL 为 <code>GET /quote?code=SH600519&amp;cb=jQuery183_991</code>，响应文本为 <code>jQuery183_991({"name":"贵州茅台","price":1528.5});</code>。</td>
+<td><code>S3</code></td>
+<td>响应体被包裹在 <code>jQuery183_991(...);</code> 函数调用中，属于典型的 JSONP 跨域格式，需先用正则剥离最外层括号后再调用 <code>json.loads()</code>。</td>
+</tr>
+<tr>
+<td>4</td>
+<td><strong>某开源代码托管平台趋势榜</strong>：翻页时始终向同一个地址 <code>POST /graphql</code> 发送请求，Payload 包含固定的 <code>operationName</code>、<code>query</code> 字符串以及随翻页变化的 <code>variables: {"first": 20, "after": "Y3Vyc29yOjIw"}</code>。</td>
+<td><code>S4</code></td>
+<td>标准的 GraphQL 单端点接口，无需改动复杂的 <code>query</code> 语法树，只需在 Python 中循环更新 <code>variables["after"]</code> 游标即可。</td>
+</tr>
+<tr>
+<td>5</td>
+<td><strong>某数字货币交易所毫秒级成交明细看板</strong>：<code>Network -&gt; WS</code> 面板中存在一条状态码为 <code>101 Switching Protocols</code> 的 <code>wss://</code> 连接，其 <code>Messages</code> 面板每秒收到数十条最新成交推送帧。</td>
+<td><code>S5</code></td>
+<td>状态码 <code>101</code> 与 <code>wss://</code> 协议表明该数据通过 WebSocket 全双工长连接实时推送，应使用 <code>websockets</code> 库建立长连接并发送订阅消息。</td>
+</tr>
+<tr>
+<td>6</td>
+<td><strong>某企业内部 AI 知识库智能问答接口</strong>：发起提问后收到状态码 <code>200</code>，响应头为 <code>Content-Type: text/event-stream</code>，响应体按行持续返回 <code>data: {"delta": "..."}</code> 直到出现 <code>data: [DONE]</code>。</td>
+<td><code>S6</code></td>
+<td><code>text/event-stream</code> 与 <code>data:</code> 前缀是服务端推送事件（SSE）的标准特征，应使用 <code>httpx.Client.stream()</code> 逐行迭代读取并拼接文本。</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Provenance:</strong> Synthesizes the architectural and protocol diagnostic criteria from Chapter 5 Sections 1.1, 2.3, 3.2, 4.1, 4.2, 4.3, and 5.</p>
+<p><strong>Rules:</strong> Each card accepts one committed strategy selection (<code>S1</code> through <code>S6</code>). A selection is correct when it matches the <code>Correct Strategy</code> column in Content.</p>
+<p><strong>Learner Activity:</strong></p>
+<ol>
+<li>The learner inspects Target Profile Card 1 (<code>某省政府政策公报网</code>), reviews its <code>Ctrl+U</code> and <code>DevTools Network</code> diagnostic clues, and selects one of the 6 scraping strategies (<code>S1</code>–<code>S6</code>).</li>
+<li>Upon submitting the selection, the matrix displays the engineering rationale and reveals the relative bandwidth and speed comparison for that target.</li>
+<li>The learner progresses through all 6 target profile cards and reviews the completed 6-case architecture summary table at the end.</li>
+</ol>
+<p><strong>Feedback:</strong> 6 target cards in fixed order, 2 attempts per card. Correct: "选型精准！" followed by the <code>Feedback &amp; Engineering Rationale (Why)</code> text. Incorrect: "选型有误：" followed by the diagnostic hint pointing out the key protocol clue in the card (<code>Ctrl+U</code> visibility, <code>jQuery(...)</code> wrapper, <code>/graphql</code> payload, <code>101 Switching Protocols</code>, or <code>text/event-stream</code>). After the second wrong attempt, the correct strategy is highlighted and explained. Score counter shows <code>工程选型评估得分: n / 6</code>.</p>
+<p><strong>Starting State:</strong> Target Profile Card 1 (<code>某省政府政策公报网</code>) is displayed with its DevTools inspection clues and the 6 selectable strategy buttons (<code>S1</code>–<code>S6</code>), posing the question: "请根据下方 DevTools 抓包诊断特征，为该采集目标选择最高效、最稳定的工程实现方案。"</p>
+<p><strong>Chapter Anchors:</strong> Matches the five golden selection criteria and the five-row protocol comparison table in Section 5, as well as the worked code examples for JSONP (<code>strip_jsonp</code>), Cursor waterfall (<code>crawl_cursor_waterfall_mock</code>), GraphQL (<code>fetch_graphql_repositories</code>), and SSE (<code>consume_sse_stream</code>).</p>
+</details>
+<hr />
+<h2 id="6">6. 本章小结与思考练习<a class="headerlink" href="#6" title="Permanent link">&para;</a></h2>
+<h3 id="61">6.1 核心要点回顾<a class="headerlink" href="#61" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>SSR 与 CSR 架构分水岭</strong>：服务端渲染（SSR）在初始 HTML 中直接包含业务数据（<code>Ctrl+U</code> 可见）；客户端渲染（CSR/SPA）仅返回空壳 HTML，依靠浏览器执行 JS 发起 AJAX（<code>XMLHttpRequest</code> 或现代 <code>Fetch API</code>）异步请求后端 RESTful JSON 接口并动态挂载 DOM。</li>
+<li><strong>JSON、JSONP 与 JMESPath 抽取</strong>：牢记 JSON 标准与 Python 字典的四大差异（双引号、<code>true/false</code>、<code>null</code>、无尾逗号），保存中文 JSON 时必加 <code>ensure_ascii=False</code>；遇到 <code>callback({...});</code> 格式的 JSONP 响应先剥离最外层括号再反序列化；面对深层嵌套 JSON，使用 <code>jmespath</code> 的投影（<code>[*]</code>）、过滤（<code>[?...]</code>）与多字段重塑语法可避免繁琐的 <code>KeyError</code> 异常处理。</li>
+<li><strong>DevTools 逆向定位与分页规律</strong>：利用 <code>Network -&gt; Fetch/XHR</code> 过滤器和 <code>Ctrl+Shift+F</code> 全局响应关键字反查可快速揪出隐藏 API；区分页码分页、<code>Offset/Limit</code> 偏移量分页（<span class="arithmatex">\(\text{offset} = (p - 1) \times L\)</span>）与瀑布流 <code>Cursor/MaxID</code> 游标链式分页；熟练构造 10 位秒级 <code>int(time.time())</code> 与 13 位毫秒级 <code>int(time.time() * 1000)</code> 时间戳，补齐 <code>X-Requested-With: XMLHttpRequest</code> 请求头，并忽略浏览器独有的 <code>OPTIONS</code> 跨域预检请求。</li>
+<li><strong>三大现代数据流协议</strong>：针对 GraphQL（<code>POST /graphql</code>）直接复用 <code>query</code> 字符串并循环修改 <code>variables</code> 字典；针对 WebSocket（<code>101 Switching Protocols</code>，<code>wss://</code>）使用 <code>websockets</code> 建立全双工长连接收发数据帧；针对大模型常见的 SSE（<code>text/event-stream</code>）使用 <code>httpx.stream()</code> 逐行迭代解析 <code>data:</code> 事件块。</li>
+</ul>
+<h3 id="62">6.2 思考与自测练习<a class="headerlink" href="#62" title="Permanent link">&para;</a></h3>
+<details class="question">
+<summary>思考题 1：为什么在采集小红书、微博、抖音等无限下拉瀑布流接口时，不能像传统分页那样用多线程同时并发请求第 1 页到第 100 页？</summary>
+<p>因为这类高并发实时信息流接口普遍采用 <strong>Cursor 游标分页（或 <code>max_id</code> / <code>next_cursor</code> 机制）</strong> 而非固定数学公式的 <code>offset</code> 分页。在游标分页中，请求第 <span class="arithmatex">\(N\)</span> 页所需的 <code>cursor</code> 令牌是由服务器在第 <span class="arithmatex">\(N-1\)</span> 页的 JSON 响应中动态生成并返回的（且往往带有时效性或加密签名）。在拿到第 1 页的响应之前，客户端根本无法预知第 2 页及后续页面的 <code>cursor</code> 值，因此单条瀑布流链路必须按 <code>while has_more:</code> 顺序串行推进（若需提高并发，应在“多个不同搜索关键词或多个不同博主主页”的维度上进行并发，而不是在单个游标链条内部并发）。</p>
+</details>
+<details class="question">
+<summary>思考题 2：在 Chrome DevTools 的 Network 面板中抓包时，发现每次点击搜索按钮都会产生两条请求：第一条是 <code>OPTIONS https://api.site.com/search</code>（状态码 204），第二条是 <code>POST https://api.site.com/search</code>（状态码 200）。在编写 Python 爬虫时，我们需要先用 <code>client.options()</code> 发送一次请求吗？为什么？</summary>
+<p><strong>完全不需要！</strong> 第一条 <code>OPTIONS</code> 请求是浏览器为了执行 <strong>CORS（跨域资源共享）安全策略</strong>而自动发起的“预检请求（Preflight Request）”，用于向服务器确认当前前端网页域名是否有权发起携带自定义头或 <code>application/json</code> 的跨域调用。Python 爬虫作为独立的 HTTP 客户端直接与服务器通信，根本不存在浏览器的“同源策略”限制。因此爬虫只需直接构造第二条 <code>POST</code> 请求（必要时在 <code>headers</code> 中附上 <code>Origin</code> 和 <code>Referer</code>）即可直接拿到数据，省去了一半的网络往返开销。</p>
+</details>
+<details class="question">
+<summary>思考题 3：当使用 <code>json.dumps(data)</code> 将包含中文的 Python 字典写入 <code>.jsonl</code> 文件时，打开文件发现所有的中文都变成了 <code>\u4eba\u5de5\u667a\u80fd</code>，请问是什么原因导致的？应当如何修复？</summary>
+<p>这是因为 <code>json.dumps()</code> 函数的默认参数是 <code>ensure_ascii=True</code>，它会强制把所有非 ASCII 字符（包括中文、日文、Emoji 等）转义为 <code>\uXXXX</code> 形式的 Unicode 编码以确保纯 ASCII 传输兼容性。修复方法非常简单：在调用时显式传入 <strong><code>json.dumps(data, ensure_ascii=False)</code></strong>，同时确保外层 <code>open()</code> 函数指定了 <strong><code>encoding="utf-8"</code></strong>，即可直接输出清晰可读的原生中文字符。</p>
+</details>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../04-static-html-parsing/" class="md-footer__link md-footer__link--prev" aria-label="Previous: 4. 静态网页结构化解析与正则提取">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                4. 静态网页结构化解析与正则提取
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../06-browser-automation-playwright/" class="md-footer__link md-footer__link--next" aria-label="Next: 6. 动态渲染网页与Playwright浏览器自动化">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                6. 动态渲染网页与Playwright浏览器自动化
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2026 AI教材编写组. Licensed under <a href="license/">CC BY-NC-SA 4.0</a> for non-commercial use.
+    </div>
+  
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["content.code.copy", "content.action.edit", "navigation.expand", "navigation.path", "navigation.prune", "navigation.indexes", "navigation.top", "navigation.footer", "toc.follow", "search.suggest", "search.highlight", "search.share"], "search": "../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.c21346df.min.js"></script>
+      
+    
+  </body>
+</html>

@@ -1,0 +1,1202 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="面向高职专科人工智能技术应用专业的交互式智能教材，系统讲授利用网络爬虫采集、解析与存储AI训练数据的原理与工程方法。">
+      
+      
+        <meta name="author" content="AI教材编写组">
+      
+      
+        <link rel="canonical" href="https://minssnail.github.io/crawbug/learning-graph/concept-list/">
+      
+      
+        <link rel="prev" href="../course-description-assessment/">
+      
+      
+        <link rel="next" href="../concept-taxonomy/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.0">
+    
+    
+      
+        <title>Concept Enumeration - 网络爬虫技术</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.57a0d79d.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.fb2fffe2.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../css/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="orange">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#concept-list-for" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="网络爬虫技术" class="md-header__button md-logo" aria-label="网络爬虫技术" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            网络爬虫技术
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Concept Enumeration
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/Minssnail/crawbug" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Minssnail/crawbug
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="网络爬虫技术" class="md-nav__button md-logo" aria-label="网络爬虫技术" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    网络爬虫技术
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/Minssnail/crawbug" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Minssnail/crawbug
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../about/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    About
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../course-description/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Course Description
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../chapters/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Chapters
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Learning Graph
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_5" id="__nav_5_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Learning Graph
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../course-description-assessment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Course Description Assessment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Concept Enumeration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../concept-taxonomy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Concept Taxonomy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quality-metrics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Graph Quality Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../taxonomy-distribution/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Taxonomy Distribution
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../sims/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MicroSims
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../license/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    License
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contact/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contact
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+                
+
+
+
+  
+
+
+  <nav class="md-path" aria-label="Navigation" >
+    <ol class="md-path__list">
+      
+        
+  
+  
+    <li class="md-path__item">
+      <a href="../.." class="md-path__link">
+        
+  <span class="md-ellipsis">
+    Home
+  </span>
+
+      </a>
+    </li>
+  
+
+      
+      
+        
+  
+  
+    
+    
+      <li class="md-path__item">
+        <a href="../" class="md-path__link">
+          
+  <span class="md-ellipsis">
+    Learning Graph
+  </span>
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ol>
+  </nav>
+
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+    <a href="https://github.com/Minssnail/crawbug/blob/main/docs/learning-graph/concept-list.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
+    </a>
+  
+  
+
+
+<h1 id="concept-list-for">Concept List for 网络爬虫技术<a class="headerlink" href="#concept-list-for" title="Permanent link">&para;</a></h1>
+<p>本列表包含《网络爬虫技术》智能教材的 <strong>240</strong> 个核心知识概念，按拓扑教学顺序排列。</p>
+<ol>
+<li>Python编程基础</li>
+<li>计算机网络基础</li>
+<li>Web浏览器基础</li>
+<li>HTML文档结构基础</li>
+<li>数据结构与集合基础</li>
+<li>文件系统与IO基础</li>
+<li>数据合规与伦理意识</li>
+<li>万维网与超文本传输</li>
+<li>网络爬虫定义与核心价值</li>
+<li>通用搜索引擎爬虫</li>
+<li>聚焦主题网络爬虫</li>
+<li>增量式更新爬虫</li>
+<li>深层网页与暗网数据概念</li>
+<li>网络爬虫标准工作流</li>
+<li>URL种子队列与待抓取池</li>
+<li>网页抓取广度优先策略</li>
+<li>网页抓取深度优先策略</li>
+<li>Robots协议与语法规范</li>
+<li>Sitemap网站地图解析</li>
+<li>数据安全法与个人信息保护</li>
+<li>URI与URL语法结构剖析</li>
+<li>URL百分号编码与解码</li>
+<li>DNS域名解析流程</li>
+<li>TCP三次握手与连接建立</li>
+<li>TLS加密握手与HTTPS原理</li>
+<li>HTTP请求与响应模型</li>
+<li>HTTP请求方法GET与POST</li>
+<li>HTTP状态码分类体系</li>
+<li>常见成功与重定向状态码</li>
+<li>客户端与服务端错误状态码</li>
+<li>HTTP请求头Headers结构</li>
+<li>User-Agent客户端标识</li>
+<li>Referer防盗链与来源校验</li>
+<li>Content-Type媒体类型声明</li>
+<li>Accept与内容协商机制</li>
+<li>HTTP响应头与Gzip压缩</li>
+<li>HTTP无状态特性与Cookie原理</li>
+<li>服务端Session会话跟踪</li>
+<li>Token与JWT身份认证机制</li>
+<li>HTTP/1.1持久连接与HTTP/2多路复用</li>
+<li>Chrome开发者工具DevTools基础</li>
+<li>Network面板抓包与HAR导出</li>
+<li>Python虚拟环境与包管理</li>
+<li>urllib.request底层请求模块</li>
+<li>urllib.parse参数构造与转换</li>
+<li>Requests库安装与核心架构</li>
+<li>构造GET请求与Params查询参数</li>
+<li>Response响应对象属性解析</li>
+<li>响应文本编码自动识别与修正</li>
+<li>定制请求头Headers伪装浏览器</li>
+<li>构造POST表单请求data载荷</li>
+<li>构造POST接口JSON请求载荷</li>
+<li>Multipart多部分文件上传请求</li>
+<li>二进制流模式下载图片与音视频</li>
+<li>Requests中Cookie获取与字典注入</li>
+<li>requests.Session跨请求会话保持</li>
+<li>请求重定向跟随与禁止allow_redirects</li>
+<li>连接超时与读取超时Timeout控制</li>
+<li>SSL证书校验与警告屏蔽verify</li>
+<li>HTTP与SOCKS5代理Proxies配置</li>
+<li>Requests异常继承体系与捕获</li>
+<li>Tenacity库与指数退避自动重试</li>
+<li>HTTPX新一代客户端与HTTP/2请求</li>
+<li>cURL命令转Python爬虫代码技巧</li>
+<li>结构化与非结构化网页数据特征</li>
+<li>HTML5语义化标签与列表表格</li>
+<li>DOM文档对象模型树形拓扑</li>
+<li>DOM节点父子兄弟层级关系</li>
+<li>网页字符集UTF-8与GBK乱码治理</li>
+<li>正则表达式语法元字符与量词</li>
+<li>正则表达式字符集与分组捕获</li>
+<li>贪婪匹配与非贪婪匹配模式</li>
+<li>Python内置re模块核心函数</li>
+<li>BeautifulSoup4库与解析器选型</li>
+<li>BS4节点导航与find_all检索</li>
+<li>CSS选择器语法规则全解</li>
+<li>BS4中select方法与CSS组合选择</li>
+<li>DOM节点文本剥离与属性提取</li>
+<li>XPath路径表达式核心语法</li>
+<li>XPath谓语条件过滤与模糊匹配</li>
+<li>XPath轴定位与逻辑运算符</li>
+<li>lxml.etree高效解析HTML与XPath执行</li>
+<li>Parsel库链式混合选择器解析</li>
+<li>Selectolax极速Cython解析引擎</li>
+<li>HTML表格直接转Pandas数据框</li>
+<li>XML文档与RSS订阅源解析</li>
+<li>相对URL转绝对路径urljoin拼接</li>
+<li>四大静态解析方案性能与场景对比</li>
+<li>服务端渲染SSR与客户端渲染CSR架构</li>
+<li>AJAX异步JavaScript与XML通信原理</li>
+<li>XHR对象与Fetch现代异步API对比</li>
+<li>RESTful架构风格与Web接口设计</li>
+<li>JSON数据序列化格式与嵌套结构</li>
+<li>Python内置json模块与字典互转</li>
+<li>JSONPath与JMESPath深层数据抽取</li>
+<li>JSONP跨域回调原理与字符串剥离</li>
+<li>DevTools中XHR过滤器与接口快速定位</li>
+<li>DevTools全局搜索关键字反查API</li>
+<li>URL查询参数页码与Offset分页逆向</li>
+<li>Cursor游标分页与瀑布流MaxID机制</li>
+<li>时间戳参数Time与毫秒级构造</li>
+<li>复杂POST请求Payload载荷逆向复现</li>
+<li>API自定义请求头X-Requested-With分析</li>
+<li>CORS跨域资源共享与Options预检请求</li>
+<li>GraphQL查询语言与单端点接口采集</li>
+<li>WebSocket全双工长连接实时数据抓取</li>
+<li>SSE服务端推送事件流数据采集</li>
+<li>异步API直采与DOM解析工程选型评估</li>
+<li>浏览器渲染引擎Blink关键渲染路径</li>
+<li>JavaScript事件循环与动态DOM挂载</li>
+<li>无头浏览器Headless概念与演进历程</li>
+<li>Selenium与Playwright架构对比</li>
+<li>Playwright安装与浏览器驱动管理</li>
+<li>Browser与Context多上下文隔离</li>
+<li>Page页面生命周期与goto导航控制</li>
+<li>Playwright智能定位器Locator语法</li>
+<li>显式等待与Auto-Waiting自动等待</li>
+<li>页面加载状态与networkidle等待</li>
+<li>模拟鼠标Click与键盘Fill交互</li>
+<li>执行自定义JS脚本page.evaluate</li>
+<li>页面滚动触底与无限懒加载触发</li>
+<li>Iframe内嵌框架定位与上下文切换</li>
+<li>多标签页弹窗与Dialog对话框处理</li>
+<li>storage_state登录态持久化复用</li>
+<li>route路由拦截与屏蔽静态资源</li>
+<li>监听on_response直接截获API响应</li>
+<li>网页全屏截图与PDF渲染导出</li>
+<li>CDP开发者协议底层控制基础</li>
+<li>DrissionPage混合自动化模式</li>
+<li>动态渲染资源控制与浏览器池复用</li>
+<li>网站反爬虫防御纵深体系概览</li>
+<li>User-Agent池与随机轮换策略</li>
+<li>请求头顺序与完整性校验绕过</li>
+<li>IP频率限制Rate-Limiting与429</li>
+<li>代理IP匿名度分级透明与高匿</li>
+<li>数据中心代理住宅代理与隧道代理</li>
+<li>高可用分布式代理IP池架构设计</li>
+<li>动态Cookie生成与多账号Cookie池</li>
+<li>WebDriver特征检测与Stealth隐藏</li>
+<li>Canvas与WebGL硬件指纹识别原理</li>
+<li>TLS握手JA3指纹与curl_cffi伪装</li>
+<li>CSS样式偏移反爬与伪元素还原</li>
+<li>WebFont字体加密与TTFont映射还原</li>
+<li>图形验证码原理与ddddocr识别</li>
+<li>滑块验证码缺口定位与轨迹模拟</li>
+<li>点选验证码与打码平台接口集成</li>
+<li>前端JS代码混淆与AST反混淆基础</li>
+<li>XHR断点调试与调用栈CallStack追踪</li>
+<li>请求签名Sign与MD5/SHA摘要逆向</li>
+<li>HMAC认证码与Base64参数还原</li>
+<li>对称加密AES与非对称RSA参数解密</li>
+<li>Python调用Node执行JS与RPC远程调用</li>
+<li>CPU密集型与网络IO密集型对比</li>
+<li>同步阻塞请求性能瓶颈与吞吐分析</li>
+<li>进程与线程概念及上下文切换开销</li>
+<li>Python全局解释器锁GIL影响剖析</li>
+<li>ThreadPoolExecutor线程池并发采集</li>
+<li>线程安全队列Queue与生产者消费者</li>
+<li>ProcessPoolExecutor多进程并行解析</li>
+<li>协程Coroutine概念与用户态切换</li>
+<li>asyncio事件循环Event-Loop原理</li>
+<li>async与await异步关键字语法规范</li>
+<li>asyncio.gather与Task并发任务编排</li>
+<li>aiohttp异步客户端与Session复用</li>
+<li>httpx.AsyncClient异步连接池调优</li>
+<li>Playwright异步API多页面并发渲染</li>
+<li>Semaphore信号量控制最大并发数</li>
+<li>令牌桶算法与aiolimiter异步限流</li>
+<li>aiofiles异步非阻塞文件写入</li>
+<li>多线程与异步协程爬虫压测对比</li>
+<li>原始网页脏数据与ETL清洗流水线</li>
+<li>HTML残留标签剥离与实体字符还原</li>
+<li>空白字符归一化与全半角转换</li>
+<li>日期时间标准化与数值单位转换</li>
+<li>Pydantic数据模型与字段类型强校验</li>
+<li>内容指纹MD5/SHA256与SimHash去重</li>
+<li>CSV文件读写与UTF-8-SIG防乱码</li>
+<li>JSON与JSON-Lines流式行存储格式</li>
+<li>Parquet列式存储与Pandas批量导出</li>
+<li>SQLite轻量级嵌入式数据库存储</li>
+<li>MySQL表结构设计与utf8mb4字符集</li>
+<li>PyMySQL参数化防注入与批量写入</li>
+<li>唯一索引约束与UPSERT幂等更新</li>
+<li>SQLAlchemy与数据库连接池高并发</li>
+<li>MongoDB文档数据库半结构化存储</li>
+<li>PyMongo集合操作与upsert幂等去重</li>
+<li>Motor与aiomysql异步数据库写入</li>
+<li>Redis内存数据库核心数据结构</li>
+<li>Redis集合Set与布隆过滤器URL去重</li>
+<li>多模态文件哈希命名与对象存储归档</li>
+<li>Scrapy工业级爬虫框架设计哲学</li>
+<li>Scrapy六大组件与数据流转拓扑</li>
+<li>Twisted异步网络引擎底层机制</li>
+<li>Scrapy项目脚手架与目录结构规范</li>
+<li>Spider基类编写与start_requests</li>
+<li>Response选择器提取与yield生成器</li>
+<li>scrapy.Request翻页与meta上下文传参</li>
+<li>Item数据容器与ItemLoader清洗器</li>
+<li>CrawlSpider全站爬虫与LinkExtractor</li>
+<li>Item-Pipeline管道与多级优先级编排</li>
+<li>Pipeline实现JSONL与数据库入库</li>
+<li>Files与ImagesPipeline多媒体下载</li>
+<li>Downloader-Middleware下载器中间件</li>
+<li>自定义中间件随机UA与动态代理注入</li>
+<li>scrapy-playwright集成动态渲染</li>
+<li>settings.py全局并发与延迟调优</li>
+<li>AutoThrottle自动限速与HTTPCache</li>
+<li>JOBDIR断点续爬与日志统计状态</li>
+<li>scrapy-redis分布式共享调度队列</li>
+<li>Scrapyd服务部署与集群可视化管理</li>
+<li>AI与大模型训练数据生命周期全貌</li>
+<li>LLM预训练语料Corpus质量标准</li>
+<li>网页正文抽取Readability与Trafilatura</li>
+<li>网页噪音剔除与样板文本过滤</li>
+<li>HTML转Markdown结构化保留代码表格</li>
+<li>Jina-Reader与Firecrawl网页提取</li>
+<li>Crawl4AI大模型友好型异步爬虫</li>
+<li>基于LLM与Function-Calling零样本解析</li>
+<li>DOM树精简Pruning降低Token消耗</li>
+<li>LLM自动生成选择器与自愈修复爬虫</li>
+<li>AI视觉Agent结合截图识别复杂交互</li>
+<li>指令微调SFT数据集Alpaca/ShareGPT格式</li>
+<li>垂直社区问答采集构建领域SFT语料</li>
+<li>RAG检索增强生成与知识库实时更新</li>
+<li>文档语义分块Chunking与元数据保留</li>
+<li>Embedding向量化与向量数据库写入</li>
+<li>多模态图文对采集与CLIP对齐过滤</li>
+<li>语料隐私脱敏PII擦除与MinHash去重</li>
+<li>企业级采集需求调研与目标站点勘察</li>
+<li>爬虫工程模块化结构与配置解耦</li>
+<li>Docker容器化封装爬虫与浏览器环境</li>
+<li>APScheduler与Airflow定时增量调度</li>
+<li>Loguru结构化日志与异常堆栈追踪</li>
+<li>核心指标监控与飞书钉钉Webhook告警</li>
+<li>页面结构漂移检测与自动化健康巡检</li>
+<li>数据集质量评估报告与信噪比审计</li>
+<li>实训一：新闻资讯与舆情混合采集系统</li>
+<li>实训二：电商动态渲染多模态商品采集</li>
+<li>实训三：Scrapy-Redis分布式社区爬虫</li>
+<li>综合实训：垂直领域大模型RAG数据工程</li>
+</ol>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../course-description-assessment/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Course Description Assessment">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Course Description Assessment
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../concept-taxonomy/" class="md-footer__link md-footer__link--next" aria-label="Next: Concept Taxonomy">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                Concept Taxonomy
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2026 AI教材编写组. Licensed under <a href="license/">CC BY-NC-SA 4.0</a> for non-commercial use.
+    </div>
+  
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["content.code.copy", "content.action.edit", "navigation.expand", "navigation.path", "navigation.prune", "navigation.indexes", "navigation.top", "navigation.footer", "toc.follow", "search.suggest", "search.highlight", "search.share"], "search": "../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.c21346df.min.js"></script>
+      
+    
+  </body>
+</html>

@@ -1,0 +1,2662 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="系统讲解Python虚拟环境管理、urllib底层模块、Requests与HTTPX核心API、Headers伪装、Session会话维持、流式下载、代理配置与Tenacity指数退避重试。">
+      
+      
+        <meta name="author" content="AI教材编写组">
+      
+      
+        <link rel="canonical" href="https://minssnail.github.io/crawbug/chapters/03-python-http-requests/">
+      
+      
+        <link rel="prev" href="../02-web-and-http-fundamentals/">
+      
+      
+        <link rel="next" href="../04-static-html-parsing/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.0">
+    
+    
+      
+        <title>Python网络请求核心编程 - 网络爬虫技术</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.57a0d79d.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.fb2fffe2.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../css/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="orange">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#python" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="网络爬虫技术" class="md-header__button md-logo" aria-label="网络爬虫技术" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            网络爬虫技术
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Python网络请求核心编程
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/Minssnail/crawbug" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Minssnail/crawbug
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="网络爬虫技术" class="md-nav__button md-logo" aria-label="网络爬虫技术" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    网络爬虫技术
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/Minssnail/crawbug" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Minssnail/crawbug
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../about/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    About
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../course-description/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Course Description
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Chapters
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_4" id="__nav_4_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Chapters
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../01-intro-and-ethics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1. 网络爬虫导论与数据合规基石
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../02-web-and-http-fundamentals/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    2. Web前端基石与HTTP通信原理
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    3. Python网络请求核心编程
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    3. Python网络请求核心编程
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#concepts-covered" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Concepts Covered
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-urllib" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. 工程环境隔离与标准库 urllib 底层探秘
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. 工程环境隔离与标准库 urllib 底层探秘">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-python" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 Python虚拟环境与包管理
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-urllibrequest-urllibparse" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 urllib.request 与 urllib.parse 标准库底层机制
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-requests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Requests 核心编程：请求构造、响应解析与乱码治理
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Requests 核心编程：请求构造、响应解析与乱码治理">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-requests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 Requests库安装与核心架构
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-getheadersresponse" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 构造GET请求、定制Headers与解析Response对象
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3 响应文本编码自动识别与修正
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#24-post-data-vs-json-vs-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.4 POST 载荷提交（data vs json vs files）与流式多媒体下载
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2.4 POST 载荷提交（data vs json vs files）与流式多媒体下载">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#diagram-python-http-request-parameter-and-payload-builder" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagram: Python HTTP Request Parameter and Payload Builder
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. 会话保持、超时、代理与高鲁棒性重试工程
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. 会话保持、超时、代理与高鲁棒性重试工程">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-cookie-requestssession" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 Cookie操作与 requests.Session 跨请求会话保持
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-timeout-ssl" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 重定向控制、双重超时（Timeout）与 SSL 证书校验
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-httpsocks5proxies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 HTTP与SOCKS5代理Proxies配置
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#34-requests-tenacity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.4 Requests异常体系与 Tenacity 指数退避自动重试
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3.4 Requests异常体系与 Tenacity 指数退避自动重试">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#diagram-session-connection-pool-and-exponential-backoff-simulator" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagram: Session Connection Pool and Exponential Backoff Simulator
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-httpx" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. 新一代客户端 HTTPX 与抓包一键转代码技巧
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. 新一代客户端 HTTPX 与抓包一键转代码技巧">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-httpxhttp2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 HTTPX新一代客户端与HTTP/2请求
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-curlpython" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 cURL命令转Python爬虫代码技巧
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. 本章小结与思考练习
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. 本章小结与思考练习">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 核心要点回顾
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 思考与自测练习
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-static-html-parsing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    4. 静态网页结构化解析与正则提取
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../05-ajax-and-api-scraping/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    5. 异步加载与Web接口逆向采集
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../06-browser-automation-playwright/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    6. 动态渲染网页与Playwright浏览器自动化
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../07-anti-scraping-and-countermeasures/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    7. 反爬虫机制原理与工程对抗策略
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../08-concurrent-and-async-scraping/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    8. 高性能并发与异步协程爬虫编程
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../09-data-cleaning-and-storage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    9. 数据清洗流水线与多源持久化存储
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../10-scrapy-industrial-framework/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    10. Scrapy工业级异步爬虫框架实战
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../11-ai-powered-scraping-and-datasets/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    11. 面向大模型与RAG的AI智能爬虫
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../12-engineering-deployment-and-capstone/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    12. 爬虫工程化运维部署与综合实训项目
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../learning-graph/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Learning Graph
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../sims/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MicroSims
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../license/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    License
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contact/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contact
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#concepts-covered" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Concepts Covered
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-urllib" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. 工程环境隔离与标准库 urllib 底层探秘
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. 工程环境隔离与标准库 urllib 底层探秘">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-python" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 Python虚拟环境与包管理
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-urllibrequest-urllibparse" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 urllib.request 与 urllib.parse 标准库底层机制
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-requests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Requests 核心编程：请求构造、响应解析与乱码治理
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Requests 核心编程：请求构造、响应解析与乱码治理">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-requests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 Requests库安装与核心架构
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-getheadersresponse" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 构造GET请求、定制Headers与解析Response对象
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3 响应文本编码自动识别与修正
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#24-post-data-vs-json-vs-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.4 POST 载荷提交（data vs json vs files）与流式多媒体下载
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2.4 POST 载荷提交（data vs json vs files）与流式多媒体下载">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#diagram-python-http-request-parameter-and-payload-builder" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagram: Python HTTP Request Parameter and Payload Builder
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. 会话保持、超时、代理与高鲁棒性重试工程
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. 会话保持、超时、代理与高鲁棒性重试工程">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-cookie-requestssession" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 Cookie操作与 requests.Session 跨请求会话保持
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-timeout-ssl" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 重定向控制、双重超时（Timeout）与 SSL 证书校验
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-httpsocks5proxies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 HTTP与SOCKS5代理Proxies配置
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#34-requests-tenacity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.4 Requests异常体系与 Tenacity 指数退避自动重试
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3.4 Requests异常体系与 Tenacity 指数退避自动重试">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#diagram-session-connection-pool-and-exponential-backoff-simulator" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagram: Session Connection Pool and Exponential Backoff Simulator
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-httpx" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. 新一代客户端 HTTPX 与抓包一键转代码技巧
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. 新一代客户端 HTTPX 与抓包一键转代码技巧">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-httpxhttp2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 HTTPX新一代客户端与HTTP/2请求
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-curlpython" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 cURL命令转Python爬虫代码技巧
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. 本章小结与思考练习
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. 本章小结与思考练习">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 核心要点回顾
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 思考与自测练习
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+                
+
+
+
+  
+
+
+  <nav class="md-path" aria-label="Navigation" >
+    <ol class="md-path__list">
+      
+        
+  
+  
+    <li class="md-path__item">
+      <a href="../.." class="md-path__link">
+        
+  <span class="md-ellipsis">
+    Home
+  </span>
+
+      </a>
+    </li>
+  
+
+      
+      
+        
+  
+  
+    
+    
+      <li class="md-path__item">
+        <a href="../" class="md-path__link">
+          
+  <span class="md-ellipsis">
+    Chapters
+  </span>
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ol>
+  </nav>
+
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+    <a href="https://github.com/Minssnail/crawbug/blob/main/docs/chapters/03-python-http-requests/index.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
+    </a>
+  
+  
+
+
+<h1 id="python">Python网络请求核心编程<a class="headerlink" href="#python" title="Permanent link">&para;</a></h1>
+<h2 id="summary">Summary<a class="headerlink" href="#summary" title="Permanent link">&para;</a></h2>
+<p>掌握了 HTTP 协议原理后，本章进入 Python 网络请求代码实战。内容从底层 <code>urllib</code> 过渡到工业界主流的 <code>requests</code> 与支持 HTTP/2 的新一代客户端 <code>httpx</code>，全面覆盖 GET/POST 请求构造、查询参数编排、Headers 浏览器伪装、二进制流式多媒体下载、<code>Session</code> 跨请求会话维持、超时控制、SSL 证书校验、HTTP/SOCKS5 代理接入以及基于 <code>tenacity</code> 的指数退避自动重试。学完本章后，学生能够编写出高鲁棒性的网络请求客户端代码。</p>
+<h2 id="concepts-covered">Concepts Covered<a class="headerlink" href="#concepts-covered" title="Permanent link">&para;</a></h2>
+<p>This chapter covers the following 22 concepts from the learning graph:</p>
+<table>
+<thead>
+<tr>
+<th>Concept</th>
+<th>Concept Impact Score</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Python虚拟环境与包管理</td>
+<td>1563</td>
+</tr>
+<tr>
+<td>urllib.request底层请求模块</td>
+<td>897</td>
+</tr>
+<tr>
+<td>urllib.parse参数构造与转换</td>
+<td>362</td>
+</tr>
+<tr>
+<td>Requests库安装与核心架构</td>
+<td>534</td>
+</tr>
+<tr>
+<td>构造GET请求与Params查询参数</td>
+<td>348</td>
+</tr>
+<tr>
+<td>Response响应对象属性解析</td>
+<td>155</td>
+</tr>
+<tr>
+<td>响应文本编码自动识别与修正</td>
+<td>77</td>
+</tr>
+<tr>
+<td>定制请求头Headers伪装浏览器</td>
+<td>186</td>
+</tr>
+<tr>
+<td>构造POST表单请求data载荷</td>
+<td>30</td>
+</tr>
+<tr>
+<td>构造POST接口JSON请求载荷</td>
+<td>28</td>
+</tr>
+<tr>
+<td>Multipart多部分文件上传请求</td>
+<td>1</td>
+</tr>
+<tr>
+<td>二进制流模式下载图片与音视频</td>
+<td>14</td>
+</tr>
+<tr>
+<td>Requests中Cookie获取与字典注入</td>
+<td>57</td>
+</tr>
+<tr>
+<td>requests.Session跨请求会话保持</td>
+<td>56</td>
+</tr>
+<tr>
+<td>请求重定向跟随与禁止allow_redirects</td>
+<td>1</td>
+</tr>
+<tr>
+<td>连接超时与读取超时Timeout控制</td>
+<td>76</td>
+</tr>
+<tr>
+<td>SSL证书校验与警告屏蔽verify</td>
+<td>1</td>
+</tr>
+<tr>
+<td>HTTP与SOCKS5代理Proxies配置</td>
+<td>7</td>
+</tr>
+<tr>
+<td>Requests异常继承体系与捕获</td>
+<td>13</td>
+</tr>
+<tr>
+<td>Tenacity库与指数退避自动重试</td>
+<td>5</td>
+</tr>
+<tr>
+<td>HTTPX新一代客户端与HTTP/2请求</td>
+<td>5</td>
+</tr>
+<tr>
+<td>cURL命令转Python爬虫代码技巧</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+<h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">&para;</a></h2>
+<p>This chapter builds on concepts from:</p>
+<ul>
+<li><a href="../01-intro-and-ethics/">Chapter 1: 网络爬虫导论与数据合规基石</a></li>
+<li><a href="../02-web-and-http-fundamentals/">Chapter 2: Web前端基石与HTTP通信原理</a></li>
+</ul>
+<hr />
+<h2 id="1-urllib">1. 工程环境隔离与标准库 <code>urllib</code> 底层探秘<a class="headerlink" href="#1-urllib" title="Permanent link">&para;</a></h2>
+<p>在第 2 章中，我们彻底拆解了 HTTP 请求与响应报文的底层协议规范。从本章开始，我们将正式把这些协议规范转化为高质量的 Python 工程代码。在动手安装任何第三方爬虫库之前，专业工程师的第一步永远是做好项目环境隔离，并理解 Python 标准库是如何封装底层 Socket 通信的。</p>
+<h3 id="11-python">1.1 Python虚拟环境与包管理<a class="headerlink" href="#11-python" title="Permanent link">&para;</a></h3>
+<p>在人工智能与数据采集工程中，不同项目往往依赖不同版本的第三方库（例如老项目依赖 <code>urllib3&lt;2.0</code>，而新项目依赖支持 HTTP/2 的 <code>httpx</code> 与 <code>playwright</code>）。如果把所有包都一股脑安装在操作系统的全局 Python 环境中，极易引发依赖版本冲突（Dependency Hell）。因此，掌握 <strong>Python虚拟环境与包管理（Virtual Environments &amp; Package Management）</strong> 是编写工业级爬虫的第一道工程规范。</p>
+<p>每一个独立的爬虫项目都应当在项目根目录下创建专属的虚拟环境（<code>.venv</code>），并通过 <code>requirements.txt</code> 或现代极速包管理器 <code>uv</code>（基于 Rust 编写，速度比传统 <code>pip</code> 快 10~100 倍）锁定依赖版本：</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># 方案一：使用 Python 内置 venv 模块 + 国内镜像源加速安装</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>python<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>.venv
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="c1"># Windows PowerShell 激活虚拟环境（Linux/macOS 使用 source .venv/bin/activate）</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>.<span class="se">\.</span>venv<span class="se">\S</span>cripts<span class="se">\A</span>ctivate.ps1
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>pip<span class="w"> </span>install<span class="w"> </span>-i<span class="w"> </span>https://pypi.tuna.tsinghua.edu.cn/simple<span class="w"> </span>requests<span class="o">[</span>socks<span class="o">]</span><span class="w"> </span>httpx<span class="o">[</span>http2<span class="o">]</span><span class="w"> </span>tenacity<span class="w"> </span>chardet
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="c1"># 方案二（推荐）：使用现代极速包管理器 uv 初始化并管理依赖</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>uv<span class="w"> </span>venv
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>uv<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>requests<span class="o">[</span>socks<span class="o">]</span><span class="w"> </span>httpx<span class="o">[</span>http2<span class="o">]</span><span class="w"> </span>tenacity<span class="w"> </span>chardet
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>uv<span class="w"> </span>pip<span class="w"> </span>freeze<span class="w"> </span>&gt;<span class="w"> </span>requirements.txt
+</span></code></pre></div>
+<h3 id="12-urllibrequest-urllibparse">1.2 <code>urllib.request</code> 与 <code>urllib.parse</code> 标准库底层机制<a class="headerlink" href="#12-urllibrequest-urllibparse" title="Permanent link">&para;</a></h3>
+<p>在安装第三方库之前，Python 标准库已经内置了完整的 HTTP 客户端包 <code>urllib</code>。虽然在实际项目开发中我们更多使用语法更优雅的 <code>requests</code> 或 <code>httpx</code>，但理解 <strong><code>urllib.request</code>底层请求模块</strong> 与 <strong><code>urllib.parse</code>参数构造与转换</strong> 具有不可替代的价值：一方面，它是零外部依赖环境下（如受限服务器或内置脚本）的兜底利器；另一方面，<code>requests</code> 底层依赖的 <code>urllib3</code> 正是建立在相同的请求抽象之上。</p>
+<p><code>urllib</code> 包将网络请求拆分为四个核心子模块：</p>
+<ol>
+<li><strong><code>urllib.request</code></strong>：负责打开和读取 URL。注意，如果你直接调用 <code>urllib.request.urlopen("https://...")</code>，它默认发送的 <code>User-Agent</code> 是 <code>Python-urllib/3.12</code>，几乎会被所有网站立刻拦截！要定制请求头或请求方法，必须先实例化一个 <strong><code>urllib.request.Request(url, data=..., headers=..., method=...)</code></strong> 对象，再将其传给 <code>urlopen()</code>。</li>
+<li><strong><code>urllib.parse</code></strong>：负责 URL 的拆解（<code>urlsplit</code>）、相对路径拼接（<code>urljoin</code>，将在第 4 章详解）、查询字典转字符串（<code>urlencode</code>）以及中文百分号编码（<code>quote</code>/<code>unquote</code>）。<strong>特别注意</strong>：在 <code>urllib.request.Request</code> 中提交 <code>POST</code> 请求体时，<code>data</code> 参数<strong>只接受 <code>bytes</code> 字节流</strong>，必须先用 <code>urlencode(dict).encode("utf-8")</code> 或 <code>json.dumps(dict).encode("utf-8")</code> 转换为字节！</li>
+<li><strong><code>urllib.error</code></strong>：定义了 <code>URLError</code>（网络不可达、DNS 失败）及其子类 <code>HTTPError</code>（服务器返回 <code>403</code>、<code>404</code>、<code>500</code> 等非 2xx 状态码时直接抛出异常）。</li>
+<li><strong><code>urllib.robotparser</code></strong>：我们在第 1 章已经实战过的 <code>robots.txt</code> 合规解析器。</li>
+</ol>
+<p>下面的代码示例展示了如何使用纯标准库 <code>urllib.request</code> 与 <code>urllib.parse</code> 构造一个带自定义浏览器 <code>User-Agent</code>、超时控制与异常捕获的完整请求流程：</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">urllib.error</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTPError</span><span class="p">,</span> <span class="n">URLError</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">urllib.parse</span><span class="w"> </span><span class="kn">import</span> <span class="n">urlencode</span><span class="p">,</span> <span class="n">urljoin</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="kn">from</span><span class="w"> </span><span class="nn">urllib.request</span><span class="w"> </span><span class="kn">import</span> <span class="n">Request</span><span class="p">,</span> <span class="n">urlopen</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="k">def</span><span class="w"> </span><span class="nf">fetch_with_urllib</span><span class="p">(</span><span class="n">base_url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">endpoint</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">    </span><span class="sd">"""使用标准库 urllib 构造带查询参数与自定义 Headers 的 GET 请求"""</span>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>    <span class="c1"># 1. 使用 urljoin 拼接路径，并用 urlencode 将字典转为百分号编码查询串</span>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>    <span class="n">full_path</span> <span class="o">=</span> <span class="n">urljoin</span><span class="p">(</span><span class="n">base_url</span><span class="p">,</span> <span class="n">endpoint</span><span class="p">)</span>
+</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>    <span class="n">query_string</span> <span class="o">=</span> <span class="n">urlencode</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span>
+</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>    <span class="n">target_url</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">full_path</span><span class="si">}</span><span class="s2">?</span><span class="si">{</span><span class="n">query_string</span><span class="si">}</span><span class="s2">"</span>
+</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>
+</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>    <span class="c1"># 2. 必须实例化 Request 对象才能注入自定义 Headers 伪装浏览器</span>
+</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>    <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span>
+</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>        <span class="s2">"User-Agent"</span><span class="p">:</span> <span class="p">(</span>
+</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>            <span class="s2">"Mozilla/5.0 (Windows NT 10.0; Win64; x64) "</span>
+</span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>            <span class="s2">"AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36"</span>
+</span><span id="__span-1-19"><a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>        <span class="p">),</span>
+</span><span id="__span-1-20"><a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a>        <span class="s2">"Accept"</span><span class="p">:</span> <span class="s2">"application/json"</span><span class="p">,</span>
+</span><span id="__span-1-21"><a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a>    <span class="p">}</span>
+</span><span id="__span-1-22"><a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a>    <span class="n">req</span> <span class="o">=</span> <span class="n">Request</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="n">target_url</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">"GET"</span><span class="p">)</span>
+</span><span id="__span-1-23"><a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a>
+</span><span id="__span-1-24"><a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a>    <span class="k">try</span><span class="p">:</span>
+</span><span id="__span-1-25"><a id="__codelineno-1-25" name="__codelineno-1-25" href="#__codelineno-1-25"></a>        <span class="c1"># 3. 使用 with 上下文自动关闭底层 Socket 连接，显式设置 timeout=10 秒</span>
+</span><span id="__span-1-26"><a id="__codelineno-1-26" name="__codelineno-1-26" href="#__codelineno-1-26"></a>        <span class="k">with</span> <span class="n">urlopen</span><span class="p">(</span><span class="n">req</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span> <span class="k">as</span> <span class="n">response</span><span class="p">:</span>
+</span><span id="__span-1-27"><a id="__codelineno-1-27" name="__codelineno-1-27" href="#__codelineno-1-27"></a>            <span class="n">status_code</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">getcode</span><span class="p">()</span>
+</span><span id="__span-1-28"><a id="__codelineno-1-28" name="__codelineno-1-28" href="#__codelineno-1-28"></a>            <span class="n">raw_bytes</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+</span><span id="__span-1-29"><a id="__codelineno-1-29" name="__codelineno-1-29" href="#__codelineno-1-29"></a>            <span class="k">return</span> <span class="p">{</span>
+</span><span id="__span-1-30"><a id="__codelineno-1-30" name="__codelineno-1-30" href="#__codelineno-1-30"></a>                <span class="s2">"status"</span><span class="p">:</span> <span class="n">status_code</span><span class="p">,</span>
+</span><span id="__span-1-31"><a id="__codelineno-1-31" name="__codelineno-1-31" href="#__codelineno-1-31"></a>                <span class="s2">"url"</span><span class="p">:</span> <span class="n">response</span><span class="o">.</span><span class="n">geturl</span><span class="p">(),</span>
+</span><span id="__span-1-32"><a id="__codelineno-1-32" name="__codelineno-1-32" href="#__codelineno-1-32"></a>                <span class="s2">"body_preview"</span><span class="p">:</span> <span class="n">raw_bytes</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">"utf-8"</span><span class="p">)[:</span><span class="mi">200</span><span class="p">],</span>
+</span><span id="__span-1-33"><a id="__codelineno-1-33" name="__codelineno-1-33" href="#__codelineno-1-33"></a>            <span class="p">}</span>
+</span><span id="__span-1-34"><a id="__codelineno-1-34" name="__codelineno-1-34" href="#__codelineno-1-34"></a>    <span class="k">except</span> <span class="n">HTTPError</span> <span class="k">as</span> <span class="n">http_err</span><span class="p">:</span>
+</span><span id="__span-1-35"><a id="__codelineno-1-35" name="__codelineno-1-35" href="#__codelineno-1-35"></a>        <span class="c1"># 捕获 4xx / 5xx HTTP 状态码错误</span>
+</span><span id="__span-1-36"><a id="__codelineno-1-36" name="__codelineno-1-36" href="#__codelineno-1-36"></a>        <span class="k">return</span> <span class="p">{</span><span class="s2">"status"</span><span class="p">:</span> <span class="n">http_err</span><span class="o">.</span><span class="n">code</span><span class="p">,</span> <span class="s2">"error"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"HTTP错误: </span><span class="si">{</span><span class="n">http_err</span><span class="o">.</span><span class="n">reason</span><span class="si">}</span><span class="s2">"</span><span class="p">}</span>
+</span><span id="__span-1-37"><a id="__codelineno-1-37" name="__codelineno-1-37" href="#__codelineno-1-37"></a>    <span class="k">except</span> <span class="n">URLError</span> <span class="k">as</span> <span class="n">url_err</span><span class="p">:</span>
+</span><span id="__span-1-38"><a id="__codelineno-1-38" name="__codelineno-1-38" href="#__codelineno-1-38"></a>        <span class="c1"># 捕获 DNS 解析失败、连接拒绝或超时错误</span>
+</span><span id="__span-1-39"><a id="__codelineno-1-39" name="__codelineno-1-39" href="#__codelineno-1-39"></a>        <span class="k">return</span> <span class="p">{</span><span class="s2">"status"</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="s2">"error"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"网络层错误: </span><span class="si">{</span><span class="n">url_err</span><span class="o">.</span><span class="n">reason</span><span class="si">}</span><span class="s2">"</span><span class="p">}</span>
+</span><span id="__span-1-40"><a id="__codelineno-1-40" name="__codelineno-1-40" href="#__codelineno-1-40"></a>
+</span><span id="__span-1-41"><a id="__codelineno-1-41" name="__codelineno-1-41" href="#__codelineno-1-41"></a>
+</span><span id="__span-1-42"><a id="__codelineno-1-42" name="__codelineno-1-42" href="#__codelineno-1-42"></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
+</span><span id="__span-1-43"><a id="__codelineno-1-43" name="__codelineno-1-43" href="#__codelineno-1-43"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"标准库 urllib 请求函数已就绪，目标查询串示例:"</span><span class="p">)</span>
+</span><span id="__span-1-44"><a id="__codelineno-1-44" name="__codelineno-1-44" href="#__codelineno-1-44"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">urlencode</span><span class="p">({</span><span class="s2">"course"</span><span class="p">:</span> <span class="s2">"网络爬虫技术"</span><span class="p">,</span> <span class="s2">"level"</span><span class="p">:</span> <span class="s2">"专科"</span><span class="p">},</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">))</span>
+</span></code></pre></div>
+<hr />
+<h2 id="2-requests">2. Requests 核心编程：请求构造、响应解析与乱码治理<a class="headerlink" href="#2-requests" title="Permanent link">&para;</a></h2>
+<h3 id="21-requests">2.1 Requests库安装与核心架构<a class="headerlink" href="#21-requests" title="Permanent link">&para;</a></h3>
+<p>虽然标准库 <code>urllib</code> 功能完备，但每次请求都要手动编码 <code>urlencode</code>、手动 <code>.encode("utf-8")</code> 转字节流、手动 <code>.read().decode()</code> 解码，代码显得繁琐冗长。为此，Kenneth Reitz 开发了著名的第三方库 <strong><code>requests</code></strong>（口号为 <em>"HTTP for Humans"</em>），它至今仍是全球下载量最高、最受 Python 爬虫工程师青睐的同步 HTTP 客户端。</p>
+<p>理解 <strong>Requests库安装与核心架构</strong> 的关键在于看清它的分层封装关系：</p>
+<ul>
+<li><strong>底层引擎（<code>urllib3</code>）</strong>：<code>requests</code> 并不是直接在操作系统 <code>socket</code> 上从零写的，它的底层核心依赖是 <code>urllib3</code> 库。<code>urllib3</code> 负责管理真正核心的 <strong>TCP 连接池（Connection Pooling）</strong>、线程安全、TLS/SSL 证书校验以及底层重试。</li>
+<li><strong>高层人性化接口（<code>requests</code> API）</strong>：在 <code>urllib3</code> 之上，<code>requests</code> 封装了 <code>PreparedRequest</code>（预处理请求对象）、<code>Response</code>（响应对象）与 <code>Session</code>（跨请求会话与连接池容器）。当你调用 <code>requests.get(url)</code> 时，它内部其实自动创建了一个临时的 <code>Session()</code> 对象，发送完请求后立即销毁。</li>
+</ul>
+<h3 id="22-getheadersresponse">2.2 构造GET请求、定制Headers与解析Response对象<a class="headerlink" href="#22-getheadersresponse" title="Permanent link">&para;</a></h3>
+<p>在日常静态网页与公开接口采集中，最频繁的操作就是组合使用 <strong>构造GET请求与Params查询参数</strong>、<strong>定制请求头Headers伪装浏览器</strong> 以及 <strong>Response响应对象属性解析</strong>。</p>
+<ol>
+<li><strong>使用 <code>params</code> 字典优雅传递查询参数</strong><br />
+   在 <code>requests.get(url, params=dict, headers=dict, timeout=tuple)</code> 中，我们不再需要手动拼接 <code>?key1=val1&amp;key2=val2</code>，只需将一个普通的 Python 字典传给 <code>params</code> 参数。<code>requests</code> 会在底层自动完成 UTF-8 百分号编码；如果字典中某个键对应的值是列表（如 <code>{"tag": ["AI", "LLM"]}</code>），它还会自动编码为多值参数 <code>?tag=AI&amp;tag=LLM</code>；如果某个键的值为 <code>None</code>，该键会被自动忽略不发送。</li>
+<li><strong>定制 <code>headers</code> 字典伪装真实浏览器</strong><br />
+   将包含 <code>User-Agent</code>、<code>Referer</code>、<code>Accept-Language</code> 的 Python 字典传给 <code>headers</code> 参数，即可覆盖默认的 <code>python-requests/x.x.x</code> 标识。</li>
+<li><strong>深入理解 <code>Response</code> 对象的四大核心属性</strong><br />
+   当 <code>resp = requests.get(...)</code> 返回后，切忌只知道调 <code>resp.text</code>，必须分清以下属性的使用场景：</li>
+<li><strong><code>resp.status_code</code></strong>：返回整数形式的 HTTP 状态码（如 <code>200</code>、<code>403</code>、<code>404</code>）。配套的快捷方法 <strong><code>resp.raise_for_status()</code></strong> 非常实用——如果状态码是 <code>2xx</code> 则什么都不做；如果是 <code>4xx</code> 或 <code>5xx</code>，则立即抛出 <code>requests.HTTPError</code> 异常，方便交由异常处理或重试装饰器接管。</li>
+<li><strong><code>resp.content</code>（原始二进制字节流 <code>bytes</code>）</strong>：服务器返回的原始未解码字节序列（已自动完成 <code>gzip</code>/<code>deflate</code> 解压）。<strong>在下载图片、音频、视频、PDF，或者使用 <code>lxml.etree.HTML(resp.content)</code> 解析网页时，强烈建议直接读取 <code>resp.content</code>！</strong></li>
+<li><strong><code>resp.text</code>（解码后的字符串 <code>str</code>）</strong>：<code>requests</code> 根据 <code>resp.encoding</code> 属性自动将 <code>resp.content</code> 解码后的 Unicode 字符串。</li>
+<li><strong><code>resp.json()</code>（直接解析 JSON 字典/列表）</strong>：当响应体是 JSON 格式时，直接调用 <code>resp.json()</code> 方法即可将其反序列化为 Python 的 <code>dict</code> 或 <code>list</code>（若响应体不是合法 JSON，会抛出 <code>requests.exceptions.JSONDecodeError</code>）。</li>
+</ol>
+<h3 id="23">2.3 响应文本编码自动识别与修正<a class="headerlink" href="#23" title="Permanent link">&para;</a></h3>
+<p>很多初学者在抓取国内高校官网、政府公报网或老牌行业资讯站时，明明请求返回 <code>200 OK</code>，但一打印 <code>resp.text</code> 就出现类似 <code>ËÑË÷ÒýÇæ</code> 或 <code>˹</code> 的乱码。这就是爬虫开发经典的 <strong>响应文本编码自动识别与修正</strong> 问题。</p>
+<p>为什么 <code>resp.text</code> 会猜错编码？原因在于 RFC 2616 HTTP/1.1 历史规范中的一条古老规定：<strong>如果服务器的响应头为 <code>Content-Type: text/html</code> 但忘记显式写明 <code>; charset=utf-8</code>（或者写成了 <code>; charset=gb2312</code>），<code>requests</code> 会严格遵循古老规范，将 <code>resp.encoding</code> 默认回退设为西欧字符集 <code>ISO-8859-1</code>（即 <code>latin-1</code>）！</strong> 用单字节的西欧字符集去解码三字节的 UTF-8 中文或双字节的 GBK 中文，自然 100% 变成乱码。</p>
+<p>在工程实践中，彻底根治中文网页乱码有三种标准方案（按推荐优先级排序）：</p>
+<ol>
+<li><strong>方案一（最稳健、性能最高）</strong>：如果从网页源码 <code>&lt;meta charset="utf-8"&gt;</code> 中已经明确知道目标网站的编码（国内网站 99% 不是 <code>utf-8</code> 就是 <code>gb18030</code>——注意：<strong><code>gb18030</code> 完全向下兼容 <code>gbk</code> 和 <code>gb2312</code> 且字库最全</strong>），直接在读取 <code>resp.text</code> 之前手动指定 <code>resp.encoding = "utf-8"</code> 或 <code>resp.encoding = "gb18030"</code>；或者直接使用 <strong><code>resp.content.decode("utf-8", errors="replace")</code></strong>。</li>
+<li><strong>方案二（自动探测备用）</strong>：读取 <strong><code>resp.apparent_encoding</code></strong> 属性（底层调用 <code>charset_normalizer</code> 或 <code>chardet</code> 扫描响应体字节特征来统计推断真实编码），赋值给 <code>resp.encoding = resp.apparent_encoding</code>。但需要注意，<code>apparent_encoding</code> 需要遍历分析整个字节流，在大网页上会带来显著的 CPU 开销，且在文本极短时偶有误判。</li>
+<li><strong>方案三（HTML Meta 标签嗅探）</strong>：先用正则从 <code>resp.content[:1024]</code> 前 1KB 字节中匹配 <code>&lt;meta.*?charset=["\']?([a-zA-Z0-9\-]+)</code>，若未找到再回退到 <code>utf-8</code>。</li>
+</ol>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="k">def</span><span class="w"> </span><span class="nf">decode_html_safely</span><span class="p">(</span><span class="n">raw_bytes</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">content_type_header</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">    </span><span class="sd">"""工业级网页字节流智能解码器：优先响应头 -&gt; 其次HTML &lt;meta&gt;标签 -&gt; 最后UTF-8/GB18030兜底"""</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>    <span class="c1"># 1. 检查 HTTP 响应头 Content-Type 是否显式声明了 charset</span>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>    <span class="n">header_match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s2">"charset=([\w\-]+)"</span><span class="p">,</span> <span class="n">content_type_header</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">I</span><span class="p">)</span>
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>    <span class="k">if</span> <span class="n">header_match</span><span class="p">:</span>
+</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>        <span class="n">enc</span> <span class="o">=</span> <span class="n">header_match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>        <span class="c1"># 将 gb2312 / gbk 统一升级为超集 gb18030，防止生僻字解码报错</span>
+</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>        <span class="k">if</span> <span class="n">enc</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"gb2312"</span><span class="p">,</span> <span class="s2">"gbk"</span><span class="p">):</span>
+</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>            <span class="n">enc</span> <span class="o">=</span> <span class="s2">"gb18030"</span>
+</span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>        <span class="k">return</span> <span class="n">raw_bytes</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">enc</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s2">"replace"</span><span class="p">),</span> <span class="n">enc</span>
+</span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a>
+</span><span id="__span-2-16"><a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a>    <span class="c1"># 2. 扫描 HTML 前 2048 字节中的 &lt;meta charset="..."&gt; 声明</span>
+</span><span id="__span-2-17"><a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a>    <span class="n">head_bytes</span> <span class="o">=</span> <span class="n">raw_bytes</span><span class="p">[:</span><span class="mi">2048</span><span class="p">]</span>
+</span><span id="__span-2-18"><a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a>    <span class="n">meta_match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">br</span><span class="s1">'charset=["</span><span class="se">\'</span><span class="s1">]?([a-zA-Z0-9\-]+)'</span><span class="p">,</span> <span class="n">head_bytes</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">I</span><span class="p">)</span>
+</span><span id="__span-2-19"><a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a>    <span class="k">if</span> <span class="n">meta_match</span><span class="p">:</span>
+</span><span id="__span-2-20"><a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a>        <span class="n">enc</span> <span class="o">=</span> <span class="n">meta_match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">"ascii"</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s2">"ignore"</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+</span><span id="__span-2-21"><a id="__codelineno-2-21" name="__codelineno-2-21" href="#__codelineno-2-21"></a>        <span class="k">if</span> <span class="n">enc</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"gb2312"</span><span class="p">,</span> <span class="s2">"gbk"</span><span class="p">):</span>
+</span><span id="__span-2-22"><a id="__codelineno-2-22" name="__codelineno-2-22" href="#__codelineno-2-22"></a>            <span class="n">enc</span> <span class="o">=</span> <span class="s2">"gb18030"</span>
+</span><span id="__span-2-23"><a id="__codelineno-2-23" name="__codelineno-2-23" href="#__codelineno-2-23"></a>        <span class="k">return</span> <span class="n">raw_bytes</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">enc</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s2">"replace"</span><span class="p">),</span> <span class="n">enc</span>
+</span><span id="__span-2-24"><a id="__codelineno-2-24" name="__codelineno-2-24" href="#__codelineno-2-24"></a>
+</span><span id="__span-2-25"><a id="__codelineno-2-25" name="__codelineno-2-25" href="#__codelineno-2-25"></a>    <span class="c1"># 3. 尝试标准 UTF-8 解码，若抛出 UnicodeDecodeError 则自动切换为 GB18030</span>
+</span><span id="__span-2-26"><a id="__codelineno-2-26" name="__codelineno-2-26" href="#__codelineno-2-26"></a>    <span class="k">try</span><span class="p">:</span>
+</span><span id="__span-2-27"><a id="__codelineno-2-27" name="__codelineno-2-27" href="#__codelineno-2-27"></a>        <span class="k">return</span> <span class="n">raw_bytes</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">"utf-8"</span><span class="p">),</span> <span class="s2">"utf-8"</span>
+</span><span id="__span-2-28"><a id="__codelineno-2-28" name="__codelineno-2-28" href="#__codelineno-2-28"></a>    <span class="k">except</span> <span class="ne">UnicodeDecodeError</span><span class="p">:</span>
+</span><span id="__span-2-29"><a id="__codelineno-2-29" name="__codelineno-2-29" href="#__codelineno-2-29"></a>        <span class="k">return</span> <span class="n">raw_bytes</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">"gb18030"</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s2">"replace"</span><span class="p">),</span> <span class="s2">"gb18030"</span>
+</span><span id="__span-2-30"><a id="__codelineno-2-30" name="__codelineno-2-30" href="#__codelineno-2-30"></a>
+</span><span id="__span-2-31"><a id="__codelineno-2-31" name="__codelineno-2-31" href="#__codelineno-2-31"></a>
+</span><span id="__span-2-32"><a id="__codelineno-2-32" name="__codelineno-2-32" href="#__codelineno-2-32"></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
+</span><span id="__span-2-33"><a id="__codelineno-2-33" name="__codelineno-2-33" href="#__codelineno-2-33"></a>    <span class="c1"># 模拟一个未在响应头声明 charset、且采用 GBK 编码的老旧政务网页字节流</span>
+</span><span id="__span-2-34"><a id="__codelineno-2-34" name="__codelineno-2-34" href="#__codelineno-2-34"></a>    <span class="n">gbk_html_bytes</span> <span class="o">=</span> <span class="s1">'&lt;html&gt;&lt;head&gt;&lt;meta charset="gb2312"&gt;&lt;/head&gt;&lt;body&gt;&lt;h1&gt;人工智能产业扶持政策&lt;/h1&gt;&lt;/body&gt;&lt;/html&gt;'</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span>
+</span><span id="__span-2-35"><a id="__codelineno-2-35" name="__codelineno-2-35" href="#__codelineno-2-35"></a>        <span class="s2">"gbk"</span>
+</span><span id="__span-2-36"><a id="__codelineno-2-36" name="__codelineno-2-36" href="#__codelineno-2-36"></a>    <span class="p">)</span>
+</span><span id="__span-2-37"><a id="__codelineno-2-37" name="__codelineno-2-37" href="#__codelineno-2-37"></a>    <span class="n">text</span><span class="p">,</span> <span class="n">detected_enc</span> <span class="o">=</span> <span class="n">decode_html_safely</span><span class="p">(</span><span class="n">gbk_html_bytes</span><span class="p">,</span> <span class="s2">"text/html"</span><span class="p">)</span>
+</span><span id="__span-2-38"><a id="__codelineno-2-38" name="__codelineno-2-38" href="#__codelineno-2-38"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"探测到的真实编码: </span><span class="si">{</span><span class="n">detected_enc</span><span class="si">}</span><span class="s2"> | 解码正文: </span><span class="si">{</span><span class="n">text</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</span></code></pre></div>
+<h3 id="24-post-data-vs-json-vs-files">2.4 POST 载荷提交（<code>data</code> vs <code>json</code> vs <code>files</code>）与流式多媒体下载<a class="headerlink" href="#24-post-data-vs-json-vs-files" title="Permanent link">&para;</a></h3>
+<p>当爬虫需要模拟表单登录、调用分页搜索接口、上传图片进行 OCR 识别，或者下载几十兆的 PDF 论文与数据集压缩包时，必须精准掌握以下四项核心技术：</p>
+<ol>
+<li><strong>构造POST表单请求 <code>data</code> 载荷（<code>application/x-www-form-urlencoded</code>）</strong><br />
+   当你在 <code>requests.post(url, data=payload_dict)</code> 中把一个 Python <strong>字典</strong>传给 <strong><code>data=</code></strong> 参数时，<code>requests</code> 会自动将其编码为 <code>key1=val1&amp;key2=val2</code> 的表单键值对字符串，并自动在请求头中加上 <code>Content-Type: application/x-www-form-urlencoded</code>。</li>
+<li><strong>构造POST接口JSON请求载荷（<code>application/json</code>）</strong><br />
+   当目标接口是一个现代前后端分离的 AJAX 接口（DevTools 中显示 <code>Request Payload</code> 为 <code>{...}</code> 且 <code>Content-Type: application/json</code>）时，<strong>千万不要把字典传给 <code>data=</code></strong>！正确的做法是直接将 Python 字典传给 <strong><code>json=payload_dict</code></strong> 参数。<code>requests</code> 会在底层自动调用 <code>json.dumps()</code> 序列化字典，并自动设置请求头 <code>Content-Type: application/json</code>。</li>
+<li><strong>Multipart多部分文件上传请求（<code>multipart/form-data</code>）</strong><br />
+   当爬虫需要向目标接口上传文件（例如向在线工具接口提交音频或图像文件）时，使用 <strong><code>files={"file_field": ("sample.png", open("sample.png", "rb"), "image/png")}</code></strong> 参数。此时 <code>requests</code> 会自动生成随机分隔符 <code>boundary</code> 并构造标准的 <code>multipart/form-data</code> 请求体（注意：使用 <code>files=</code> 时，<strong>绝对不要手动在 <code>headers</code> 里写死 <code>Content-Type: multipart/form-data</code></strong>，因为手动写死会丢失 <code>boundary=...</code> 参数导致服务器解析失败！）。</li>
+<li><strong>二进制流模式下载图片与音视频（Streaming Download）</strong><br />
+   在采集多模态图文数据集、音频语料或大型 PDF 报告时，如果直接执行 <code>resp = requests.get(large_video_url)</code>，默认情况下 <code>requests</code> 会试图把整个 500MB 的视频文件一次性全部读入内存（RAM）中，在高并发下瞬间就会撑爆内存导致程序崩溃（OOM）！<br />
+   正确的工业级做法是开启 <strong>流式下载模式（<code>stream=True</code>）</strong>：设置 <code>stream=True</code> 后，<code>requests</code> 仅下载响应头而保持底层连接挂起，随后我们通过 <strong><code>resp.iter_content(chunk_size=65536)</code></strong> 每次只从网络缓冲区读取 64KB 的小数据块并立即写入磁盘，无论下载 10MB 还是 10GB 的文件，内存占用始终保持在几十 KB！</li>
+</ol>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="k">def</span><span class="w"> </span><span class="nf">download_media_stream</span><span class="p">(</span>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>    <span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">save_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">,</span> <span class="n">referer</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span><span class="p">,</span> <span class="n">chunk_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">65536</span>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="w">    </span><span class="sd">"""使用 stream=True 与 iter_content 分块流式下载大型多媒体文件，防止内存溢出"""</span>
+</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>    <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span>
+</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>        <span class="s2">"User-Agent"</span><span class="p">:</span> <span class="s2">"Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/130.0.0.0"</span><span class="p">,</span>
+</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>    <span class="p">}</span>
+</span><span id="__span-3-12"><a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a>    <span class="k">if</span> <span class="n">referer</span><span class="p">:</span>
+</span><span id="__span-3-13"><a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a>        <span class="n">headers</span><span class="p">[</span><span class="s2">"Referer"</span><span class="p">]</span> <span class="o">=</span> <span class="n">referer</span>  <span class="c1"># 突破图片/音视频防盗链</span>
+</span><span id="__span-3-14"><a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a>
+</span><span id="__span-3-15"><a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a>    <span class="n">target_file</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">save_path</span><span class="p">)</span>
+</span><span id="__span-3-16"><a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a>    <span class="n">target_file</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="__span-3-17"><a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a>    <span class="n">downloaded_bytes</span> <span class="o">=</span> <span class="mi">0</span>
+</span><span id="__span-3-18"><a id="__codelineno-3-18" name="__codelineno-3-18" href="#__codelineno-3-18"></a>
+</span><span id="__span-3-19"><a id="__codelineno-3-19" name="__codelineno-3-19" href="#__codelineno-3-19"></a>    <span class="c1"># 开启 stream=True，配合 with 上下文确保连接在下载完毕或异常中断时必定关闭</span>
+</span><span id="__span-3-20"><a id="__codelineno-3-20" name="__codelineno-3-20" href="#__codelineno-3-20"></a>    <span class="k">with</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span> <span class="n">stream</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">30</span><span class="p">))</span> <span class="k">as</span> <span class="n">resp</span><span class="p">:</span>
+</span><span id="__span-3-21"><a id="__codelineno-3-21" name="__codelineno-3-21" href="#__codelineno-3-21"></a>        <span class="n">resp</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>
+</span><span id="__span-3-22"><a id="__codelineno-3-22" name="__codelineno-3-22" href="#__codelineno-3-22"></a>        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">target_file</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">"wb"</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+</span><span id="__span-3-23"><a id="__codelineno-3-23" name="__codelineno-3-23" href="#__codelineno-3-23"></a>            <span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="n">resp</span><span class="o">.</span><span class="n">iter_content</span><span class="p">(</span><span class="n">chunk_size</span><span class="o">=</span><span class="n">chunk_size</span><span class="p">):</span>
+</span><span id="__span-3-24"><a id="__codelineno-3-24" name="__codelineno-3-24" href="#__codelineno-3-24"></a>                <span class="k">if</span> <span class="n">chunk</span><span class="p">:</span>  <span class="c1"># 过滤 keep-alive 空心跳包</span>
+</span><span id="__span-3-25"><a id="__codelineno-3-25" name="__codelineno-3-25" href="#__codelineno-3-25"></a>                    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>
+</span><span id="__span-3-26"><a id="__codelineno-3-26" name="__codelineno-3-26" href="#__codelineno-3-26"></a>                    <span class="n">downloaded_bytes</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>
+</span><span id="__span-3-27"><a id="__codelineno-3-27" name="__codelineno-3-27" href="#__codelineno-3-27"></a>
+</span><span id="__span-3-28"><a id="__codelineno-3-28" name="__codelineno-3-28" href="#__codelineno-3-28"></a>    <span class="k">return</span> <span class="n">downloaded_bytes</span>
+</span></code></pre></div>
+<p>下表对比了 <code>requests</code> 中不同参数在底层生成的 HTTP 报文差异，这是初学者最容易混淆的高频考点：</p>
+<table>
+<thead>
+<tr>
+<th>调用方式与参数</th>
+<th>传入的 Python 类型</th>
+<th>底层自动设置的 <code>Content-Type</code> 请求头</th>
+<th>最终发送的 HTTP 报文位置与格式</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>requests.get(url, params=d)</code></td>
+<td><code>dict</code> 或 <code>list[tuple]</code></td>
+<td>无（GET 无请求体）</td>
+<td>拼接到 <strong>URL <code>?</code> 之后</strong>：<code>?k1=v1&amp;k2=v2</code></td>
+</tr>
+<tr>
+<td><code>requests.post(url, data=d)</code></td>
+<td><code>dict</code> 或 <code>list[tuple]</code></td>
+<td><code>application/x-www-form-urlencoded</code></td>
+<td>写入 <strong>Request Body</strong>：<code>k1=v1&amp;k2=v2</code></td>
+</tr>
+<tr>
+<td><code>requests.post(url, data=s)</code></td>
+<td>已序列化的 <code>str</code> 或 <code>bytes</code></td>
+<td><strong>不会自动设置</strong>（需手动在 <code>headers</code> 声明）</td>
+<td>原样写入 <strong>Request Body</strong></td>
+</tr>
+<tr>
+<td><code>requests.post(url, json=d)</code></td>
+<td><code>dict</code> 或 <code>list</code></td>
+<td><code>application/json</code></td>
+<td>序列化为 JSON 字符串写入 <strong>Request Body</strong>：<code>{"k1": "v1"}</code></td>
+</tr>
+<tr>
+<td><code>requests.post(url, files=f)</code></td>
+<td><code>dict</code>（含文件句柄元组）</td>
+<td><code>multipart/form-data; boundary=...</code></td>
+<td>按 <code>--boundary</code> 分隔多段二进制流写入 <strong>Request Body</strong></td>
+</tr>
+</tbody>
+</table>
+<p>在掌握了 <code>params</code>、<code>data</code>、<code>json</code>、<code>files</code> 与 <code>headers</code> 的映射规则后，请通过下方的交互式微仿真，检验你能否根据不同的目标接口需求，精准组装出正确的 Python 请求代码并预测其生成的底层 HTTP 报文。</p>
+<h4 id="diagram-python-http-request-parameter-and-payload-builder">Diagram: Python HTTP Request Parameter and Payload Builder<a class="headerlink" href="#diagram-python-http-request-parameter-and-payload-builder" title="Permanent link">&para;</a></h4>
+<pre class="mermaid"><code>flowchart LR
+    subgraph Input["Python 请求参数字典"]
+        P["params = {'page': 1}"]
+        D["data = {'user': 'admin'}"]
+        J["json = {'query': 'LLM'}"]
+        H["headers = {'User-Agent': 'Mozilla/5.0'}"]
+    end
+    P --&gt;|"URL 查询字符串编码"| Out1["GET /search?page=1"]
+    D --&gt;|"表单编码 x-www-form-urlencoded"| Out2["Request Body: user=admin"]
+    J --&gt;|"JSON 序列化 application/json"| Out3["Request Body: {'query': 'LLM'}"]
+    H --&gt;|"覆盖默认请求头"| Out4["HTTP Request Headers"]</code></pre>
+<details>
+<summary>Python HTTP Request Parameter and Payload Builder</summary>
+<p>Type: microsim
+<strong>sim-id:</strong> python-http-request-builder<br/>
+<strong>Library:</strong> p5.js<br/>
+<strong>Status:</strong> Specified<br/>
+<strong>Bloom Level:</strong> Apply<br/>
+<strong>Bloom Verb:</strong> construct<br/>
+<strong>Learning Objective:</strong> The learner will construct valid Python <code>requests</code> calls for 6 distinct web scraping scenarios by selecting the correct HTTP method, payload parameter (<code>params</code>, <code>data</code>, <code>json</code>, <code>files</code>), and <code>stream</code>/<code>headers</code> options, and verifying the resulting raw HTTP wire message.</p>
+<p><strong>Prerequisites:</strong> <code>requests.get</code> and <code>requests.post</code>, <code>params</code> vs <code>data</code> vs <code>json</code> vs <code>files</code> arguments, <code>Content-Type</code> header generation, <code>Referer</code> anti-hotlinking, and <code>stream=True</code> chunked downloading (all defined in Sections 2.1–2.4 above).</p>
+<p><strong>Evidence of Mastery:</strong> Across 6 scraping task challenges, the learner selects the Method (<code>GET</code>/<code>POST</code>), Parameter Key (<code>params</code>/<code>data</code>/<code>json</code>/<code>files</code>), and Special Option (<code>None</code>/<code>Referer Header</code>/<code>stream=True</code>) to assemble the Python code and generate the raw HTTP packet. Mastery is constructing at least 5 of the 6 requests correctly on the first attempt.</p>
+<p><strong>Misconceptions:</strong> (1) Passing a Python dict to <code>data=</code> sends a JSON body (<code>application/json</code>). (2) Manual <code>Content-Type: multipart/form-data</code> header should be hardcoded when using <code>files=</code>. (3) Downloading a 500MB dataset archive with plain <code>requests.get(url).content</code> is safe and memory-efficient.</p>
+<p><strong>Instructional Rationale:</strong> Apply-level construction bridges the gap between Python syntax and wire-level HTTP messages by showing learners the exact raw HTTP Request Line, <code>Content-Type</code> header, and Body produced by each parameter choice before they lock in their answer.</p>
+<p><strong>Content:</strong></p>
+<p>The 6 scraping task challenges (in fixed order):</p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Scraping Scenario Description</th>
+<th>Correct Configuration (<code>Method</code> + <code>Arg</code> + <code>Option</code>)</th>
+<th>Generated Raw HTTP Wire Preview</th>
+<th>Why (Feedback Explanation)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>向开源社区搜索接口 <code>/api/models</code> 发送 GET 查询，筛选条件为 <code>tag="视觉大模型"</code>、第 <code>2</code> 页</td>
+<td><code>Method: GET</code> + <code>Arg: params={"tag": "视觉大模型", "page": 2}</code> + <code>Option: Standard UA Header</code></td>
+<td><code>GET /api/models?tag=%E8%A7%86%E8%A7%89%E5%A4%A7%E6%A8%A1%E5%9E%8B&amp;page=2 HTTP/1.1</code> (Body 为空)</td>
+<td><code>GET</code> 请求的查询条件应传给 <code>params=</code>，由 <code>requests</code> 自动完成 UTF-8 百分号编码并拼接到 URL 问号后。</td>
+</tr>
+<tr>
+<td>2</td>
+<td>向传统教务系统登录表单 <code>/auth/login.do</code> 提交表单键值对 <code>username="stu01"</code> 与 <code>password="123456"</code></td>
+<td><code>Method: POST</code> + <code>Arg: data={"username": "stu01", "password": "123456"}</code> + <code>Option: Standard UA Header</code></td>
+<td><code>POST /auth/login.do HTTP/1.1</code> / <code>Content-Type: application/x-www-form-urlencoded</code> / Body: <code>username=stu01&amp;password=123456</code></td>
+<td>传统 HTML 表单提交需要将字典传给 <code>data=</code>，底层自动编码为 <code>&amp;</code> 连接的键值对并声明 <code>x-www-form-urlencoded</code>。</td>
+</tr>
+<tr>
+<td>3</td>
+<td>向现代前后端分离的异步接口 <code>/v2/rag/search</code> 提交 JSON 格式检索载荷 <code>{"query": "Scrapy管道", "top_k": 5}</code></td>
+<td><code>Method: POST</code> + <code>Arg: json={"query": "Scrapy管道", "top_k": 5}</code> + <code>Option: Standard UA Header</code></td>
+<td><code>POST /v2/rag/search HTTP/1.1</code> / <code>Content-Type: application/json</code> / Body: <code>{"query": "Scrapy管道", "top_k": 5}</code></td>
+<td>将字典传给 <code>json=</code> 参数会自动调用 <code>json.dumps</code> 序列化并自动设置 <code>Content-Type: application/json</code>。</td>
+</tr>
+<tr>
+<td>4</td>
+<td>从开启了防盗链保护的图片 CDN <code>https://img.example.com/101.png</code> 抓取高清架构图，主站域名为 <code>https://www.example.com/</code></td>
+<td><code>Method: GET</code> + <code>Arg: None (URL Direct)</code> + <code>Option: Add Referer: https://www.example.com/</code></td>
+<td><code>GET /101.png HTTP/1.1</code> / <code>Host: img.example.com</code> / <code>Referer: https://www.example.com/</code></td>
+<td>针对图片 CDN 的防盗链校验，必须在 <code>headers</code> 中补齐主站来源地址 <code>Referer</code> 才能避免 <code>403 Forbidden</code>。</td>
+</tr>
+<tr>
+<td>5</td>
+<td>从开源语料站下载体积达 <code>1.2 GB</code> 的微调数据集压缩包 <code>corpus_v1.tar.gz</code>，要求内存占用不超过 1MB</td>
+<td><code>Method: GET</code> + <code>Arg: None (URL Direct)</code> + <code>Option: Enable stream=True + iter_content(65536)</code></td>
+<td><code>GET /corpus_v1.tar.gz HTTP/1.1</code> -&gt; 响应流式挂起，按 64KB 分块写入磁盘文件</td>
+<td>针对大体积文件必须开启 <code>stream=True</code> 并配合 <code>iter_content</code> 分块流式落盘，避免一次性读入内存导致 OOM 崩溃。</td>
+</tr>
+<tr>
+<td>6</td>
+<td>向在线验证码 OCR 识别接口 <code>/api/ocr/predict</code> 上传本地图片文件 <code>captcha.png</code></td>
+<td><code>Method: POST</code> + <code>Arg: files={"image": ("captcha.png", fp, "image/png")}</code> + <code>Option: Auto Multipart Boundary (No manual Content-Type)</code></td>
+<td><code>POST /api/ocr/predict HTTP/1.1</code> / <code>Content-Type: multipart/form-data; boundary=c8f9...</code> / Body: <code>--c8f9...</code></td>
+<td>上传文件使用 <code>files=</code> 参数，且由 <code>requests</code> 自动生成包含 <code>boundary</code> 的 <code>Content-Type</code> 头，切勿手动硬编码覆盖。</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Provenance:</strong> Directly implements the parameter rules and table in Chapter 3 Sections 2.2 and 2.4.</p>
+<p><strong>Rules:</strong> Each challenge lets the learner pick from 2 Methods (<code>GET</code>, <code>POST</code>), 5 Parameter modes (<code>None</code>, <code>params=dict</code>, <code>data=dict</code>, <code>json=dict</code>, <code>files=dict</code>), and 4 Options (<code>Standard UA Header</code>, <code>Add Referer Header</code>, <code>Enable stream=True + iter_content</code>, <code>Hardcode Content-Type: multipart/form-data</code>). Selecting any combination immediately updates the live "Generated Raw HTTP Packet Preview" so the learner can inspect what would be sent over the wire before clicking "Commit Request".</p>
+<p><strong>Learner Activity:</strong></p>
+<ol>
+<li>The learner reads the active scraping scenario (<code>Challenge 1</code> through <code>6</code>).</li>
+<li>The learner toggles the Method, Parameter mode, and Option controls, watching the Python code snippet and the Raw HTTP Wire Preview update in real time.</li>
+<li>The learner clicks "Commit Request" to submit the constructed request.</li>
+<li>The simulator validates the request against the target server expectation and displays the feedback explanation.</li>
+</ol>
+<p><strong>Feedback:</strong> 6 challenges in fixed order, 2 attempts per challenge. Correct: "请求构造完美！服务器返回 200 OK：" + <code>Why</code> explanation. Incorrect: "服务器拒绝请求（400/403/OOM）：请查看右侧生成的原始 HTTP 报文——" + explains why the chosen parameter/header failed. Score display: <code>已成功构造请求：n / 6</code>.</p>
+<p><strong>Starting State:</strong> Challenge 1 is active with default selection <code>Method: GET</code>, <code>Arg: None</code>, <code>Option: Standard UA Header</code>, showing the live Python code preview and raw HTTP packet panel.</p>
+<p><strong>Chapter Anchors:</strong> Matches the exact 5-row parameter comparison table and <code>download_media_stream</code> function in Section 2.4.</p>
+</details>
+<hr />
+<h2 id="3">3. 会话保持、超时、代理与高鲁棒性重试工程<a class="headerlink" href="#3" title="Permanent link">&para;</a></h2>
+<p>如果说把单次 <code>requests.get()</code> 跑通只能算“玩具级脚本”，那么能否正确管理跨请求会话池、设置双重超时防卡死、接入代理 IP 以及实现网络抖动自动恢复，则决定了你的爬虫能否在生产环境中连续稳定运行 7×24 小时。</p>
+<h3 id="31-cookie-requestssession">3.1 Cookie操作与 <code>requests.Session</code> 跨请求会话保持<a class="headerlink" href="#31-cookie-requestssession" title="Permanent link">&para;</a></h3>
+<p>在采集需要登录或带有反爬状态校验的网站时，我们经常需要处理 <strong>Requests中Cookie获取与字典注入</strong> 以及 <strong><code>requests.Session</code>跨请求会话保持</strong>：</p>
+<ol>
+<li><strong>单次请求的 Cookie 获取与注入</strong>  </li>
+<li><strong>读取响应 Cookie</strong>：服务器通过 <code>Set-Cookie</code> 返回的凭证存储在 <code>resp.cookies</code>（一个 <code>RequestsCookieJar</code> 对象）中，调用 <code>requests.utils.dict_from_cookiejar(resp.cookies)</code> 即可将其转换为普通 Python 字典。</li>
+<li><strong>注入请求 Cookie</strong>：如果在 Chrome DevTools 中已经复制了登录后的 Cookie，既可以直接将其作为字符串放进 <code>headers={"Cookie": "sid=123; uid=456"}</code>，也可以作为字典传给专门的 <code>cookies={"sid": "123", "uid": "456"}</code> 参数。</li>
+<li><strong>为什么生产环境必须使用 <code>requests.Session()</code>？</strong><br />
+   如前所述，如果你在循环中连续调用 100 次 <code>requests.get(url)</code>，每次调用都是完全独立的：不仅第一次请求拿到的 <code>Set-Cookie</code> 在第二次请求时会丢失，而且每次调用都会销毁连接池、重新进行 TCP 三次握手与 TLS 加密握手！<br />
+   而使用 <strong><code>with requests.Session() as session:</code></strong> 创建会话对象后，它具备两大核心工程威力：</li>
+<li><strong>自动跨请求保持 Cookie</strong>：第一次调 <code>session.post(login_url)</code> 登录成功后，服务器下发的 <code>Set-Cookie</code> 会自动保存在 <code>session.cookies</code> 中；后续调用 <code>session.get(profile_url)</code> 时，会自动携带该 Cookie，无需手动传递！</li>
+<li><strong>底层 TCP+TLS 连接池复用（Keep-Alive）</strong>：<code>Session</code> 内部持有一个 <code>urllib3.PoolManager</code> 连接池，对同一域名连续抓取 1,000 页时，全程复用同一条已经握手完毕的 TCP+TLS 通道，<strong>抓取速度比裸调 <code>requests.get()</code> 提升 3~5 倍以上，同时大幅降低目标服务器的握手负载！</strong></li>
+</ol>
+<h3 id="32-timeout-ssl">3.2 重定向控制、双重超时（Timeout）与 SSL 证书校验<a class="headerlink" href="#32-timeout-ssl" title="Permanent link">&para;</a></h3>
+<p>在真实网络环境中，如果不给爬虫请求加上严格的边界约束，爬虫极易陷入“假死挂起”或“掉入重定向陷阱”。</p>
+<ol>
+<li><strong>请求重定向跟随与禁止（<code>allow_redirects</code>）</strong><br />
+<code>requests</code> 在执行 <code>GET</code>/<code>POST</code> 时，默认参数为 <strong><code>allow_redirects=True</code></strong>——即遇到 <code>301</code>/<code>302</code> 状态码时会自动顺着响应头的 <code>Location</code> 跳转到新网址（最多跳转 30 次），并在 <strong><code>resp.history</code></strong> 列表中记录中间经历的所有跳转响应对象。<br />
+<strong>实战技巧</strong>：当我们需要检测当前登录 Cookie 是否失效（很多网站 Cookie 失效后会返回 <code>302</code> 跳转到 <code>/login</code>）时，应当显式设置 <strong><code>allow_redirects=False</code></strong>，这样一旦发现 <code>resp.status_code in (301, 302)</code>，就能立即判定登录态已过期并触发重新登录，而不必白白下载一次登录页。</li>
+<li><strong>连接超时与读取超时 <code>Timeout</code> 控制（生死红线！）</strong><br />
+<strong>在编写 Python 爬虫时，有一条绝对禁止违反的铁律：任何 <code>requests</code> 请求都必须显式传入 <code>timeout</code> 参数！</strong><br />
+   因为 <code>requests</code> 的默认 <code>timeout=None</code>——这意味着如果目标服务器建立连接后既不返回数据也不主动断开连接，你的爬虫主线程就会<strong>永远卡死在那一行代码上，直到天荒地老</strong>！<br />
+   在生产工程中，最规范的做法是传入一个二元组 <strong><code>timeout=(connect_timeout, read_timeout)</code></strong>，例如 <strong><code>timeout=(5.0, 15.0)</code></strong>：</li>
+<li>第一个数字 <code>5.0</code> 是 <strong>连接超时（Connect Timeout）</strong>：指客户端与目标服务器完成 TCP 握手建立连接的最大等待秒数（通常设为 <code>3.0</code>~<code>5.0</code> 秒）；</li>
+<li>第二个数字 <code>15.0</code> 是 <strong>读取超时（Read Timeout）</strong>：指连接建立后，等待服务器发回第一个响应字节的最大间隔秒数（通常设为 <code>10.0</code>~<code>30.0</code> 秒）。</li>
+<li><strong>SSL证书校验与警告屏蔽（<code>verify</code>）</strong><br />
+<code>requests</code> 默认开启 <code>verify=True</code>，使用内置的 <code>certifi</code> 根证书库严格校验目标 HTTPS 网站的 SSL 数字证书。但在采集部分高校内网、政务老旧站点（证书过期或使用自签名证书），或者开启了 Charles/Mitmproxy 抓包代理时，会抛出 <code>requests.exceptions.SSLError: [SSL: CERTIFICATE_VERIFY_FAILED]</code>。此时可在测试或受控内网环境中设置 <strong><code>verify=False</code></strong> 跳过证书校验，并配合 <code>urllib3.disable_warnings()</code> 屏蔽控制台刷屏的 <code>InsecureRequestWarning</code> 警告。</li>
+</ol>
+<h3 id="33-httpsocks5proxies">3.3 HTTP与SOCKS5代理Proxies配置<a class="headerlink" href="#33-httpsocks5proxies" title="Permanent link">&para;</a></h3>
+<p>当目标网站开启了基于 IP 的频率限制（<code>429</code> 或 <code>403</code>）时，我们需要通过代理服务器（Proxy Server）中转请求，隐藏爬虫本机的真实公网 IP。掌握 <strong>HTTP与SOCKS5代理Proxies配置</strong> 非常简单：只需构造一个映射 <code>http</code> 和 <code>https</code> 协议的 <code>proxies</code> 字典传给请求方法或挂载到 <code>session.proxies</code> 上。</p>
+<ul>
+<li><strong>带账密认证的 HTTP/HTTPS 代理格式</strong>：<code>http://username:password@proxy_ip:port</code></li>
+<li><strong>SOCKS5 代理格式</strong>（需提前安装 <code>pip install "requests[socks]"</code>，即安装底层 <code>PySocks</code> 库）：<code>socks5h://username:password@proxy_ip:port</code>（注意：<strong>强烈建议使用 <code>socks5h://</code> 而不是 <code>socks5://</code></strong>，末尾的字母 <code>h</code> 表示将 DNS 域名解析也交由远端代理服务器执行，避免本地 DNS 污染或泄漏！）。</li>
+</ul>
+<h3 id="34-requests-tenacity">3.4 Requests异常体系与 <code>Tenacity</code> 指数退避自动重试<a class="headerlink" href="#34-requests-tenacity" title="Permanent link">&para;</a></h3>
+<p>网络通信天生是不可靠的：代理 IP 随时可能掉线、目标服务器可能偶发 <code>502 Bad Gateway</code>、跨国光缆可能瞬间抖动丢包。要写出工业级高鲁棒性爬虫，必须透彻理解 <strong>Requests异常继承体系与捕获</strong>，并结合 <strong><code>Tenacity</code>库与指数退避自动重试</strong>。</p>
+<p>在 <code>requests.exceptions</code> 模块中，所有异常都继承自顶层基类 <strong><code>RequestException</code></strong>：</p>
+<ul>
+<li><code>RequestException</code></li>
+<li><strong><code>HTTPError</code></strong>：调用 <code>resp.raise_for_status()</code> 时针对 <code>4xx</code>/<code>5xx</code> 状态码抛出的异常；</li>
+<li><strong><code>ConnectionError</code></strong>：网络层连接失败（包含 <code>ProxyError</code> 代理连接失败、<code>SSLError</code> 证书错误、DNS 解析失败）；</li>
+<li><strong><code>Timeout</code></strong>：超时异常基类，细分为 <strong><code>ConnectTimeout</code></strong>（连接阶段超时）与 <strong><code>ReadTimeout</code></strong>（等待响应阶段超时）；</li>
+<li><strong><code>TooManyRedirects</code></strong>：重定向次数超过上限（默认 30 次，通常意味着陷入了循环重定向陷阱）。</li>
+</ul>
+<p>当遇到 <code>Timeout</code>、<code>ConnectionError</code> 或 <code>502/503/504/429</code> 状态码时，如果立刻（间隔 0 秒）发起重试，不仅大概率继续失败，还会加剧目标服务器负担。工业界标准的恢复算法是 <strong>带随机抖动的指数退避（Exponential Backoff with Jitter）</strong>：第 <span class="arithmatex">\(k\)</span> 次失败后的等待时间按指数增长（例如 <span class="arithmatex">\(2^1=2\text{s}, 2^2=4\text{s}, 2^3=8\text{s}\)</span>），并叠加一个微小随机偏移量防止多个并发爬虫在同一毫秒集体发起重试冲击服务器。</p>
+<p>在 Python 中，我们无需手写繁琐的 <code>while</code> 循环和 <code>time.sleep</code>，第三方库 <strong><code>tenacity</code></strong> 提供了声明式的 <code>@retry</code> 装饰器。下面这段代码展示了一个可直接复用于任何企业级爬虫项目的“高鲁棒性 Session 客户端封装”，集成了连接池复用、双重超时、自定义异常重试判定（仅对网络异常和 <code>429/5xx</code> 重试，遇到 <code>404</code> 绝不傻等重试！）以及指数退避日志记录：</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">requests.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="ne">ConnectionError</span><span class="p">,</span> <span class="n">HTTPError</span><span class="p">,</span> <span class="n">RequestException</span><span class="p">,</span> <span class="n">Timeout</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="kn">from</span><span class="w"> </span><span class="nn">tenacity</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>    <span class="n">before_sleep_log</span><span class="p">,</span>
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>    <span class="n">retry</span><span class="p">,</span>
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>    <span class="n">retry_if_exception</span><span class="p">,</span>
+</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>    <span class="n">stop_after_attempt</span><span class="p">,</span>
+</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>    <span class="n">wait_exponential_jitter</span><span class="p">,</span>
+</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="p">)</span>
+</span><span id="__span-4-11"><a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a>
+</span><span id="__span-4-12"><a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a><span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">"</span><span class="si">%(asctime)s</span><span class="s2"> [</span><span class="si">%(levelname)s</span><span class="s2">] </span><span class="si">%(message)s</span><span class="s2">"</span><span class="p">)</span>
+</span><span id="__span-4-13"><a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a><span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">"RobustCrawler"</span><span class="p">)</span>
+</span><span id="__span-4-14"><a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a>
+</span><span id="__span-4-15"><a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a>
+</span><span id="__span-4-16"><a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a><span class="k">def</span><span class="w"> </span><span class="nf">is_retryable_exception</span><span class="p">(</span><span class="n">exc</span><span class="p">:</span> <span class="ne">BaseException</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+</span><span id="__span-4-17"><a id="__codelineno-4-17" name="__codelineno-4-17" href="#__codelineno-4-17"></a><span class="w">    </span><span class="sd">"""精准判定哪些异常值得重试：网络超时/连接错误可重试；HTTP 状态码仅重试 429 和 5xx"""</span>
+</span><span id="__span-4-18"><a id="__codelineno-4-18" name="__codelineno-4-18" href="#__codelineno-4-18"></a>    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">exc</span><span class="p">,</span> <span class="p">(</span><span class="n">Timeout</span><span class="p">,</span> <span class="ne">ConnectionError</span><span class="p">)):</span>
+</span><span id="__span-4-19"><a id="__codelineno-4-19" name="__codelineno-4-19" href="#__codelineno-4-19"></a>        <span class="k">return</span> <span class="kc">True</span>
+</span><span id="__span-4-20"><a id="__codelineno-4-20" name="__codelineno-4-20" href="#__codelineno-4-20"></a>    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">exc</span><span class="p">,</span> <span class="n">HTTPError</span><span class="p">)</span> <span class="ow">and</span> <span class="n">exc</span><span class="o">.</span><span class="n">response</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-4-21"><a id="__codelineno-4-21" name="__codelineno-4-21" href="#__codelineno-4-21"></a>        <span class="n">status</span> <span class="o">=</span> <span class="n">exc</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span>
+</span><span id="__span-4-22"><a id="__codelineno-4-22" name="__codelineno-4-22" href="#__codelineno-4-22"></a>        <span class="c1"># 404 Not Found 或 400 Bad Request 属于确定性错误，绝不浪费时间重试！</span>
+</span><span id="__span-4-23"><a id="__codelineno-4-23" name="__codelineno-4-23" href="#__codelineno-4-23"></a>        <span class="k">return</span> <span class="n">status</span> <span class="o">==</span> <span class="mi">429</span> <span class="ow">or</span> <span class="p">(</span><span class="mi">500</span> <span class="o">&lt;=</span> <span class="n">status</span> <span class="o">&lt;</span> <span class="mi">600</span><span class="p">)</span>
+</span><span id="__span-4-24"><a id="__codelineno-4-24" name="__codelineno-4-24" href="#__codelineno-4-24"></a>    <span class="k">return</span> <span class="kc">False</span>
+</span><span id="__span-4-25"><a id="__codelineno-4-25" name="__codelineno-4-25" href="#__codelineno-4-25"></a>
+</span><span id="__span-4-26"><a id="__codelineno-4-26" name="__codelineno-4-26" href="#__codelineno-4-26"></a>
+</span><span id="__span-4-27"><a id="__codelineno-4-27" name="__codelineno-4-27" href="#__codelineno-4-27"></a><span class="k">class</span><span class="w"> </span><span class="nc">RobustHttpClient</span><span class="p">:</span>
+</span><span id="__span-4-28"><a id="__codelineno-4-28" name="__codelineno-4-28" href="#__codelineno-4-28"></a><span class="w">    </span><span class="sd">"""集成 Session 连接池、双重超时与 Tenacity 指数退避重试的工业级请求客户端"""</span>
+</span><span id="__span-4-29"><a id="__codelineno-4-29" name="__codelineno-4-29" href="#__codelineno-4-29"></a>
+</span><span id="__span-4-30"><a id="__codelineno-4-30" name="__codelineno-4-30" href="#__codelineno-4-30"></a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">proxy_url</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-4-31"><a id="__codelineno-4-31" name="__codelineno-4-31" href="#__codelineno-4-31"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">session</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">Session</span><span class="p">()</span>
+</span><span id="__span-4-32"><a id="__codelineno-4-32" name="__codelineno-4-32" href="#__codelineno-4-32"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+</span><span id="__span-4-33"><a id="__codelineno-4-33" name="__codelineno-4-33" href="#__codelineno-4-33"></a>            <span class="s2">"User-Agent"</span><span class="p">:</span> <span class="p">(</span>
+</span><span id="__span-4-34"><a id="__codelineno-4-34" name="__codelineno-4-34" href="#__codelineno-4-34"></a>                <span class="s2">"Mozilla/5.0 (Windows NT 10.0; Win64; x64) "</span>
+</span><span id="__span-4-35"><a id="__codelineno-4-35" name="__codelineno-4-35" href="#__codelineno-4-35"></a>                <span class="s2">"AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36"</span>
+</span><span id="__span-4-36"><a id="__codelineno-4-36" name="__codelineno-4-36" href="#__codelineno-4-36"></a>            <span class="p">),</span>
+</span><span id="__span-4-37"><a id="__codelineno-4-37" name="__codelineno-4-37" href="#__codelineno-4-37"></a>            <span class="s2">"Accept"</span><span class="p">:</span> <span class="s2">"text/html,application/xhtml+xml,application/json;q=0.9,*/*;q=0.8"</span><span class="p">,</span>
+</span><span id="__span-4-38"><a id="__codelineno-4-38" name="__codelineno-4-38" href="#__codelineno-4-38"></a>            <span class="s2">"Accept-Language"</span><span class="p">:</span> <span class="s2">"zh-CN,zh;q=0.9,en;q=0.8"</span><span class="p">,</span>
+</span><span id="__span-4-39"><a id="__codelineno-4-39" name="__codelineno-4-39" href="#__codelineno-4-39"></a>        <span class="p">})</span>
+</span><span id="__span-4-40"><a id="__codelineno-4-40" name="__codelineno-4-40" href="#__codelineno-4-40"></a>        <span class="k">if</span> <span class="n">proxy_url</span><span class="p">:</span>
+</span><span id="__span-4-41"><a id="__codelineno-4-41" name="__codelineno-4-41" href="#__codelineno-4-41"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">proxies</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">"http"</span><span class="p">:</span> <span class="n">proxy_url</span><span class="p">,</span> <span class="s2">"https"</span><span class="p">:</span> <span class="n">proxy_url</span><span class="p">})</span>
+</span><span id="__span-4-42"><a id="__codelineno-4-42" name="__codelineno-4-42" href="#__codelineno-4-42"></a>
+</span><span id="__span-4-43"><a id="__codelineno-4-43" name="__codelineno-4-43" href="#__codelineno-4-43"></a>    <span class="nd">@retry</span><span class="p">(</span>
+</span><span id="__span-4-44"><a id="__codelineno-4-44" name="__codelineno-4-44" href="#__codelineno-4-44"></a>        <span class="n">retry</span><span class="o">=</span><span class="n">retry_if_exception</span><span class="p">(</span><span class="n">is_retryable_exception</span><span class="p">),</span>
+</span><span id="__span-4-45"><a id="__codelineno-4-45" name="__codelineno-4-45" href="#__codelineno-4-45"></a>        <span class="c1"># 最多尝试 4 次；等待时间按 2^n 秒指数退避（初始2s，最大15s）并叠加随机抖动</span>
+</span><span id="__span-4-46"><a id="__codelineno-4-46" name="__codelineno-4-46" href="#__codelineno-4-46"></a>        <span class="n">stop</span><span class="o">=</span><span class="n">stop_after_attempt</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span>
+</span><span id="__span-4-47"><a id="__codelineno-4-47" name="__codelineno-4-47" href="#__codelineno-4-47"></a>        <span class="n">wait</span><span class="o">=</span><span class="n">wait_exponential_jitter</span><span class="p">(</span><span class="n">initial</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">jitter</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+</span><span id="__span-4-48"><a id="__codelineno-4-48" name="__codelineno-4-48" href="#__codelineno-4-48"></a>        <span class="n">before_sleep</span><span class="o">=</span><span class="n">before_sleep_log</span><span class="p">(</span><span class="n">logger</span><span class="p">,</span> <span class="n">logging</span><span class="o">.</span><span class="n">WARNING</span><span class="p">),</span>
+</span><span id="__span-4-49"><a id="__codelineno-4-49" name="__codelineno-4-49" href="#__codelineno-4-49"></a>        <span class="n">reraise</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+</span><span id="__span-4-50"><a id="__codelineno-4-50" name="__codelineno-4-50" href="#__codelineno-4-50"></a>    <span class="p">)</span>
+</span><span id="__span-4-51"><a id="__codelineno-4-51" name="__codelineno-4-51" href="#__codelineno-4-51"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">fetch</span><span class="p">(</span>
+</span><span id="__span-4-52"><a id="__codelineno-4-52" name="__codelineno-4-52" href="#__codelineno-4-52"></a>        <span class="bp">self</span><span class="p">,</span>
+</span><span id="__span-4-53"><a id="__codelineno-4-53" name="__codelineno-4-53" href="#__codelineno-4-53"></a>        <span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+</span><span id="__span-4-54"><a id="__codelineno-4-54" name="__codelineno-4-54" href="#__codelineno-4-54"></a>        <span class="n">method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"GET"</span><span class="p">,</span>
+</span><span id="__span-4-55"><a id="__codelineno-4-55" name="__codelineno-4-55" href="#__codelineno-4-55"></a>        <span class="n">params</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="__span-4-56"><a id="__codelineno-4-56" name="__codelineno-4-56" href="#__codelineno-4-56"></a>        <span class="n">json_data</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="__span-4-57"><a id="__codelineno-4-57" name="__codelineno-4-57" href="#__codelineno-4-57"></a>        <span class="n">timeout</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mf">5.0</span><span class="p">,</span> <span class="mf">15.0</span><span class="p">),</span>
+</span><span id="__span-4-58"><a id="__codelineno-4-58" name="__codelineno-4-58" href="#__codelineno-4-58"></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">requests</span><span class="o">.</span><span class="n">Response</span><span class="p">:</span>
+</span><span id="__span-4-59"><a id="__codelineno-4-59" name="__codelineno-4-59" href="#__codelineno-4-59"></a>        <span class="n">resp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">request</span><span class="p">(</span>
+</span><span id="__span-4-60"><a id="__codelineno-4-60" name="__codelineno-4-60" href="#__codelineno-4-60"></a>            <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span>
+</span><span id="__span-4-61"><a id="__codelineno-4-61" name="__codelineno-4-61" href="#__codelineno-4-61"></a>            <span class="n">url</span><span class="o">=</span><span class="n">url</span><span class="p">,</span>
+</span><span id="__span-4-62"><a id="__codelineno-4-62" name="__codelineno-4-62" href="#__codelineno-4-62"></a>            <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">,</span>
+</span><span id="__span-4-63"><a id="__codelineno-4-63" name="__codelineno-4-63" href="#__codelineno-4-63"></a>            <span class="n">json</span><span class="o">=</span><span class="n">json_data</span><span class="p">,</span>
+</span><span id="__span-4-64"><a id="__codelineno-4-64" name="__codelineno-4-64" href="#__codelineno-4-64"></a>            <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>  <span class="c1"># 强制双重超时：(连接超时5s, 读取超时15s)</span>
+</span><span id="__span-4-65"><a id="__codelineno-4-65" name="__codelineno-4-65" href="#__codelineno-4-65"></a>        <span class="p">)</span>
+</span><span id="__span-4-66"><a id="__codelineno-4-66" name="__codelineno-4-66" href="#__codelineno-4-66"></a>        <span class="n">resp</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>  <span class="c1"># 若返回 4xx / 5xx 则抛出 HTTPError 交由 tenacity 判定</span>
+</span><span id="__span-4-67"><a id="__codelineno-4-67" name="__codelineno-4-67" href="#__codelineno-4-67"></a>        <span class="k">return</span> <span class="n">resp</span>
+</span><span id="__span-4-68"><a id="__codelineno-4-68" name="__codelineno-4-68" href="#__codelineno-4-68"></a>
+</span><span id="__span-4-69"><a id="__codelineno-4-69" name="__codelineno-4-69" href="#__codelineno-4-69"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-4-70"><a id="__codelineno-4-70" name="__codelineno-4-70" href="#__codelineno-4-70"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</span><span id="__span-4-71"><a id="__codelineno-4-71" name="__codelineno-4-71" href="#__codelineno-4-71"></a>
+</span><span id="__span-4-72"><a id="__codelineno-4-72" name="__codelineno-4-72" href="#__codelineno-4-72"></a>
+</span><span id="__span-4-73"><a id="__codelineno-4-73" name="__codelineno-4-73" href="#__codelineno-4-73"></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
+</span><span id="__span-4-74"><a id="__codelineno-4-74" name="__codelineno-4-74" href="#__codelineno-4-74"></a>    <span class="n">client</span> <span class="o">=</span> <span class="n">RobustHttpClient</span><span class="p">()</span>
+</span><span id="__span-4-75"><a id="__codelineno-4-75" name="__codelineno-4-75" href="#__codelineno-4-75"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"✅ RobustHttpClient 初始化完成，默认 Headers 已挂载至 Session 连接池。"</span><span class="p">)</span>
+</span><span id="__span-4-76"><a id="__codelineno-4-76" name="__codelineno-4-76" href="#__codelineno-4-76"></a>    <span class="n">client</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</span></code></pre></div>
+<p>为了直观理解为什么 <code>Session</code> 连接池复用与指数退避（Exponential Backoff）能显著提升采集效率并避免触发防火墙永久封禁，请操作下方的交互式微仿真进行对比实验。</p>
+<h4 id="diagram-session-connection-pool-and-exponential-backoff-simulator">Diagram: Session Connection Pool and Exponential Backoff Simulator<a class="headerlink" href="#diagram-session-connection-pool-and-exponential-backoff-simulator" title="Permanent link">&para;</a></h4>
+<pre class="mermaid"><code>flowchart TD
+    Start["发起网络请求 (复用 Session TCP 连接池)"] --&gt; Resp{"是否捕获网络超时或 5xx/429?"}
+    Resp --&gt;|"否: 200 OK 正常响应"| Success["成功返回 Response 并复用底层 Keep-Alive 连接"]
+    Resp --&gt;|"是: 第 n 次请求失败"| CheckMax{"重试次数 n 是否未超上限?"}
+    CheckMax --&gt;|"未超上限: 继续重试"| Wait["指数退避等待: sleep(2^n + jitter) 秒"]
+    Wait --&gt; Start
+    CheckMax --&gt;|"已耗尽最大重试次数"| DeadLetter["记录结构化错误日志并推入死信队列 DLQ"]</code></pre>
+<details>
+<summary>Session Connection Pool and Exponential Backoff Simulator</summary>
+<p>Type: microsim
+<strong>sim-id:</strong> session-backoff-simulator<br/>
+<strong>Library:</strong> p5.js<br/>
+<strong>Status:</strong> Specified<br/>
+<strong>Bloom Level:</strong> Evaluate<br/>
+<strong>Bloom Verb:</strong> assess<br/>
+<strong>Learning Objective:</strong> The learner will assess the total latency and success rate of scraping a 20-page endpoint under transient server overload by comparing naive <code>requests.get</code> (no session, immediate retry) against <code>requests.Session</code> with exponential backoff.</p>
+<p><strong>Prerequisites:</strong> TCP+TLS handshake RTT overhead, <code>requests.Session</code> Keep-Alive connection reuse, HTTP <code>429</code>/<code>503</code> transient errors vs <code>404</code> permanent errors, and exponential backoff formula <span class="arithmatex">\(t_k = \min(t_{\max}, t_0 \cdot 2^{k-1})\)</span> (all defined in Sections 3.1–3.4 above).</p>
+<p><strong>Evidence of Mastery:</strong> The learner configures the client parameters to complete a 20-request batch against a rate-limited server (which enforces a 2.0 s cooldown window when overloaded) with a 100% success rate on valid pages and total elapsed time under 25.0 s, and correctly answers two assessment questions comparing connection overhead and retry behavior on <code>404</code> vs <code>503</code>.</p>
+<p><strong>Misconceptions:</strong> (1) Calling <code>requests.get()</code> in a loop reuses the TCP/TLS connection automatically. (2) Retrying immediately (<code>0 s</code> wait) after a <code>429</code> or <code>503</code> recovers faster than waiting <code>2 s -&gt; 4 s -&gt; 8 s</code>. (3) A <code>404 Not Found</code> response should be retried 4 times just like a <code>503 Service Unavailable</code>.</p>
+<p><strong>Instructional Rationale:</strong> Parameter exploration paired with a concrete latency/ban model lets learners quantify the exact RTT savings of <code>Session</code> connection pooling and observe why immediate retries burn through all attempts inside a server's cooldown window while exponential backoff succeeds.</p>
+<p><strong>Content:</strong></p>
+<p>Adjustable quantities and modes:</p>
+<table>
+<thead>
+<tr>
+<th>Quantity / Control</th>
+<th>Min</th>
+<th>Max</th>
+<th>Step</th>
+<th>Default</th>
+<th>Unit</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Connection Mode</td>
+<td>0 (<code>Naive requests.get</code>)</td>
+<td>1 (<code>requests.Session Keep-Alive</code>)</td>
+<td>1</td>
+<td>0</td>
+<td>mode</td>
+</tr>
+<tr>
+<td>Base Retry Wait <span class="arithmatex">\(t_0\)</span></td>
+<td>0.0</td>
+<td>4.0</td>
+<td>1.0</td>
+<td>0.0</td>
+<td>seconds</td>
+</tr>
+<tr>
+<td>Max Attempts</td>
+<td>1</td>
+<td>4</td>
+<td>1</td>
+<td>3</td>
+<td>attempts</td>
+</tr>
+<tr>
+<td>Network RTT</td>
+<td>0.10</td>
+<td>0.50</td>
+<td>0.10</td>
+<td>0.20</td>
+<td>seconds</td>
+</tr>
+</tbody>
+</table>
+<p>Benchmark batch of 20 requests to <code>https://api.example.edu/items?page=1..20</code>:
+- Server Cooldown Window on overload (<code>Request #7</code> and <code>Request #14</code> trigger transient <code>503</code> overload): the server rejects any retry arriving within <code>&lt; 2.5 s</code> of the initial <code>503</code> failure.
+- <code>Request #19</code> is a deleted article returning <code>404 Not Found</code>.</p>
+<p>Comparison table of model outcomes at default <code>RTT = 0.20 s</code> (1 TCP RTT + 1 TLS RTT = <code>0.40 s</code> handshake overhead per new connection, plus <code>0.20 s</code> HTTP request/response transfer):</p>
+<table>
+<thead>
+<tr>
+<th>Strategy Preset</th>
+<th>Handshake Time (20 reqs)</th>
+<th>Transfer Time</th>
+<th>Overload Recovery (#7 &amp; #14)</th>
+<th>404 Handling (#19)</th>
+<th>Total Time &amp; Valid Pages Fetched</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Preset A: <code>Naive requests.get</code> + Immediate Retry (<span class="arithmatex">\(t_0 = 0\text{s}\)</span>, retry all errors)</td>
+<td><code>20 × 0.40s = 8.00s</code> (+ extra handshakes on retries)</td>
+<td><code>4.00s</code></td>
+<td>Fails all 3 attempts at <code>0.0s</code> wait (inside <code>2.5s</code> server cooldown) -&gt; <code>17 / 19</code> valid pages</td>
+<td>Wastes 3 retries on <code>404</code></td>
+<td><code>15.60 s</code> (Failed: 2 pages lost to <code>503</code>)</td>
+</tr>
+<tr>
+<td>Preset B: <code>requests.Session</code> + Immediate Retry (<span class="arithmatex">\(t_0 = 0\text{s}\)</span>)</td>
+<td><code>1 × 0.40s = 0.40s</code> (19 connections reused!)</td>
+<td><code>4.00s</code></td>
+<td>Fails all 3 attempts at <code>0.0s</code> wait (inside <code>2.5s</code> server cooldown) -&gt; <code>17 / 19</code> valid pages</td>
+<td>Skips retry on <code>404</code></td>
+<td><code>4.80 s</code> (Failed: 2 pages lost to <code>503</code>)</td>
+</tr>
+<tr>
+<td>Preset C: <code>requests.Session</code> + Exponential Backoff (<span class="arithmatex">\(t_0 = 2.0\text{s}\)</span>, <code>Max Attempts = 3</code>, skip <code>404</code>)</td>
+<td><code>1 × 0.40s = 0.40s</code></td>
+<td><code>4.00s</code></td>
+<td>Attempt 1 fails (<code>503</code>), waits <code>2.0s</code> (Attempt 2 still <code>&lt; 2.5s</code>), waits <code>4.0s</code> (Attempt 3 at <code>6.0s &gt;= 2.5s</code> succeeds!) -&gt; <code>19 / 19</code> valid pages</td>
+<td>Fails fast on <code>404</code> (0 retries)</td>
+<td><code>17.20 s</code> (Success: <code>19 / 19</code> valid pages fetched!)</td>
+</tr>
+</tbody>
+</table>
+<p>Assessment Questions:
+1. "在 RTT = 0.20 秒（单次 TCP+TLS 握手耗时 0.40 秒）的网络环境下，对同一域名连续发起 20 次请求，使用 <code>requests.Session()</code> 相比裸调 <code>requests.get()</code> 仅在握手阶段就能节省多少秒？" -&gt; Correct Answer: <code>7.60 秒</code> (<code>20 × 0.40 - 0.40 = 7.60 s</code>).
+2. "当第 19 页返回 <code>404 Not Found</code>、第 7 页返回 <code>503 Service Unavailable</code> 时，<code>is_retryable_exception</code> 函数的正确处理策略是什么？" -&gt; Correct Answer: <code>对 404 立即放弃不重试，仅对 503（及 429/网络超时）执行指数退避重试</code>.</p>
+<p><strong>Provenance:</strong> Derived from the TCP/TLS RTT model in Chapter 2 Section 1.3 and the <code>RobustHttpClient</code> tenacity configuration in Chapter 3 Section 3.4.</p>
+<p><strong>Rules:</strong> Each new connection costs <code>2 * RTT</code> seconds for TCP+TLS handshakes plus <code>1 * RTT</code> for HTTP transfer. With <code>requests.Session</code> (<code>Connection Mode = 1</code>), Request #1 pays <code>2 * RTT</code> handshake + <code>1 * RTT</code> transfer, and Requests #2–#20 pay <code>0 s</code> handshake + <code>1 * RTT</code> transfer. When <code>Base Retry Wait</code> <span class="arithmatex">\(t_0 &gt; 0\)</span>, retry attempt <span class="arithmatex">\(k\)</span> (<span class="arithmatex">\(k \ge 1\)</span>) waits <span class="arithmatex">\(t_0 \cdot 2^{k-1}\)</span> seconds; a transient <code>503</code> on Request #7 or #14 succeeds when cumulative wait time since the initial <code>503</code> is <code>&gt;= 2.5 s</code>.</p>
+<p><strong>Learner Activity:</strong></p>
+<ol>
+<li>The learner runs Preset A (<code>Naive requests.get</code>, <span class="arithmatex">\(t_0 = 0\text{s}\)</span>) and observes the 20-bar timeline: every bar has a tall handshake segment, and Requests #7 and #14 fail all retries because all attempts fire within the <code>2.5 s</code> server cooldown window.</li>
+<li>The learner switches Connection Mode to <code>requests.Session Keep-Alive</code> and sets <code>Base Retry Wait</code> <span class="arithmatex">\(t_0 = 2.0\text{s}\)</span> and <code>Max Attempts = 3</code>, then re-runs the batch.</li>
+<li>The learner observes that Requests #2–#20 eliminate the handshake segment (<code>7.60 s</code> saved) and that Requests #7 and #14 recover on the second backoff interval (<code>2.0s + 4.0s = 6.0s &gt;= 2.5s</code>).</li>
+<li>The learner answers the two assessment questions to demonstrate mastery.</li>
+</ol>
+<p><strong>Feedback:</strong> Two assessment questions plus the configuration target (<code>19 / 19</code> valid pages fetched in <code>&lt; 25.0 s</code>), two attempts per question. Correct: "回答正确！" + worked calculation. Incorrect: shows the exact formula (<code>19 Reused Connections × 2 × RTT = 7.60 s</code>) and explains why <code>404</code> is a permanent client error whereas <code>503</code> is a transient server overload.</p>
+<p><strong>Starting State:</strong> Connection Mode is set to <code>0 (Naive requests.get)</code>, <span class="arithmatex">\(t_0 = 0.0\text{s}\)</span>, <code>Max Attempts = 3</code>, <code>RTT = 0.20 s</code>, showing the Preset A timeline where Requests #7 and #14 fail in red, with the prompt: "观察裸调 requests.get 与 0 秒重试的失败结果，请调整参数实现 19 个有效页面 100% 采集成功且总耗时低于 25 秒。"</p>
+<p><strong>Chapter Anchors:</strong> Matches the <code>RobustHttpClient</code> class and <code>is_retryable_exception</code> logic in Section 3.4.</p>
+</details>
+<hr />
+<h2 id="4-httpx">4. 新一代客户端 <code>HTTPX</code> 与抓包一键转代码技巧<a class="headerlink" href="#4-httpx" title="Permanent link">&para;</a></h2>
+<h3 id="41-httpxhttp2">4.1 HTTPX新一代客户端与HTTP/2请求<a class="headerlink" href="#41-httpxhttp2" title="Permanent link">&para;</a></h3>
+<p>虽然 <code>requests</code> 极其经典，但它诞生于 2011 年，架构上存在两个无法回避的时代局限：一是<strong>不支持 <code>async/await</code> 原生异步协程</strong>，二是<strong>不支持 HTTP/2 协议</strong>。为了在保留 <code>requests</code> 99% 相同 API 习惯的同时全面拥抱现代 Web 标准，Encode 团队（FastAPI 底层 Starlette 的同一开源团队）打造了 <strong>HTTPX新一代客户端与HTTP/2请求（<code>httpx</code>）</strong>。</p>
+<p><code>httpx</code> 被称为“下一代 <code>requests</code>”，其三大核心优势使其成为现代 AI 爬虫工程师的标配武器：</p>
+<ol>
+<li><strong>API 与 <code>requests</code> 几乎 100% 兼容</strong>：同样拥有 <code>httpx.get()</code>、<code>httpx.post()</code>、<code>params=</code>、<code>json=</code>、<code>headers=</code>、<code>resp.status_code</code>、<code>resp.text</code>、<code>resp.json()</code>；其中等价于 <code>requests.Session()</code> 的上下文容器叫做 <strong><code>httpx.Client()</code></strong>。</li>
+<li><strong>原生支持 HTTP/2 多路复用</strong>：只需安装 <code>pip install "httpx[http2]"</code> 并在初始化客户端时传入 <strong><code>http2=True</code></strong>（即 <code>with httpx.Client(http2=True) as client:</code>），即可直接与目标服务器建立二进制分帧的 HTTP/2 连接，不仅大幅提升同域名并发抓取效率，还能直接绕过部分检测 HTTP/1.1 协议降级的反爬虫防火墙！</li>
+<li><strong>同步与异步双模统一</strong>：既可以用 <code>httpx.Client()</code> 写同步爬虫，也可以用 <code>httpx.AsyncClient()</code> 写单机千级并发的异步协程爬虫（将在第 8 章深入实战），而且默认强制开启 <code>timeout=5.0</code> 秒安全超时保護，彻底告别忘记写 <code>timeout</code> 导致程序永久卡死的隐患。</li>
+</ol>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">httpx</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="k">def</span><span class="w"> </span><span class="nf">fetch_with_httpx_http2</span><span class="p">(</span><span class="n">urls</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="w">    </span><span class="sd">"""使用新一代客户端 HTTPX 开启 HTTP/2 多路复用连接池批量抓取"""</span>
+</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>    <span class="n">results</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>    <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span>
+</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>        <span class="s2">"User-Agent"</span><span class="p">:</span> <span class="s2">"Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/130.0.0.0"</span><span class="p">,</span>
+</span><span id="__span-5-9"><a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>        <span class="s2">"Accept"</span><span class="p">:</span> <span class="s2">"application/json, text/html"</span><span class="p">,</span>
+</span><span id="__span-5-10"><a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>    <span class="p">}</span>
+</span><span id="__span-5-11"><a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a>
+</span><span id="__span-5-12"><a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a>    <span class="c1"># httpx.Client 等价于 requests.Session，开启 http2=True 激活 HTTP/2 协议</span>
+</span><span id="__span-5-13"><a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a>    <span class="k">with</span> <span class="n">httpx</span><span class="o">.</span><span class="n">Client</span><span class="p">(</span><span class="n">http2</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">follow_redirects</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+</span><span id="__span-5-14"><a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a>        <span class="k">for</span> <span class="n">url</span> <span class="ow">in</span> <span class="n">urls</span><span class="p">:</span>
+</span><span id="__span-5-15"><a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a>            <span class="n">resp</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+</span><span id="__span-5-16"><a id="__codelineno-5-16" name="__codelineno-5-16" href="#__codelineno-5-16"></a>            <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+</span><span id="__span-5-17"><a id="__codelineno-5-17" name="__codelineno-5-17" href="#__codelineno-5-17"></a>                <span class="s2">"url"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">resp</span><span class="o">.</span><span class="n">url</span><span class="p">),</span>
+</span><span id="__span-5-18"><a id="__codelineno-5-18" name="__codelineno-5-18" href="#__codelineno-5-18"></a>                <span class="s2">"status"</span><span class="p">:</span> <span class="n">resp</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span>
+</span><span id="__span-5-19"><a id="__codelineno-5-19" name="__codelineno-5-19" href="#__codelineno-5-19"></a>                <span class="c1"># resp.http_version 会返回 "HTTP/2" 或 "HTTP/1.1"</span>
+</span><span id="__span-5-20"><a id="__codelineno-5-20" name="__codelineno-5-20" href="#__codelineno-5-20"></a>                <span class="s2">"http_version"</span><span class="p">:</span> <span class="n">resp</span><span class="o">.</span><span class="n">http_version</span><span class="p">,</span>
+</span><span id="__span-5-21"><a id="__codelineno-5-21" name="__codelineno-5-21" href="#__codelineno-5-21"></a>                <span class="s2">"length"</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">resp</span><span class="o">.</span><span class="n">content</span><span class="p">),</span>
+</span><span id="__span-5-22"><a id="__codelineno-5-22" name="__codelineno-5-22" href="#__codelineno-5-22"></a>            <span class="p">})</span>
+</span><span id="__span-5-23"><a id="__codelineno-5-23" name="__codelineno-5-23" href="#__codelineno-5-23"></a>    <span class="k">return</span> <span class="n">results</span>
+</span><span id="__span-5-24"><a id="__codelineno-5-24" name="__codelineno-5-24" href="#__codelineno-5-24"></a>
+</span><span id="__span-5-25"><a id="__codelineno-5-25" name="__codelineno-5-25" href="#__codelineno-5-25"></a>
+</span><span id="__span-5-26"><a id="__codelineno-5-26" name="__codelineno-5-26" href="#__codelineno-5-26"></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
+</span><span id="__span-5-27"><a id="__codelineno-5-27" name="__codelineno-5-27" href="#__codelineno-5-27"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"HTTPX 客户端版本: </span><span class="si">{</span><span class="n">httpx</span><span class="o">.</span><span class="n">__version__</span><span class="si">}</span><span class="s2"> (已默认启用 5.0s 安全超时保护)"</span><span class="p">)</span>
+</span></code></pre></div>
+<h3 id="42-curlpython">4.2 cURL命令转Python爬虫代码技巧<a class="headerlink" href="#42-curlpython" title="Permanent link">&para;</a></h3>
+<p>在日常逆向分析一个复杂的网站接口时，一条请求往往包含十几个自定义 Request Headers、二十多个 Cookie 键值对以及复杂的 JSON 载荷。如果靠人工一行行把它们从 Chrome DevTools 复制粘贴成 Python 字典，不仅耗时费力，而且极易漏掉引号或拼错键名。掌握 <strong>cURL命令转Python爬虫代码技巧</strong> 可以让你在 <strong>5 秒钟内</strong> 完成从浏览器抓包到可运行 Python 脚本的转换！</p>
+<p>完整操作流如下：</p>
+<ol>
+<li>在 Chrome DevTools 的 <code>Network</code> 面板中右键点击目标请求 <span class="arithmatex">\(\rightarrow\)</span> <code>Copy</code> <span class="arithmatex">\(\rightarrow\)</span> 选择 <strong><code>Copy as cURL (bash)</code></strong>（注意：在 Windows 下也请优先选择 <code>Copy as cURL (bash)</code> 而不是 <code>(cmd)</code>，因为 <code>bash</code> 格式采用标准的单引号转义，通用性最强）。你会得到如下一段命令行文本：
+   <div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>curl<span class="w"> </span><span class="s1">'https://api.example.edu/v1/search?page=1'</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="w">  </span>-H<span class="w"> </span><span class="s1">'User-Agent: Mozilla/5.0'</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="w">  </span>-H<span class="w"> </span><span class="s1">'Authorization: Bearer token_123'</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="w">  </span>-H<span class="w"> </span><span class="s1">'Cookie: sid=abc; theme=dark'</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="w">  </span>--data-raw<span class="w"> </span><span class="s1">'{"keyword":"AI爬虫"}'</span>
+</span></code></pre></div></li>
+<li><strong>转换方式一（在线/离线可视化工具）</strong>：使用开源工具网站 <code>curlconverter.com</code>（支持在本地通过 <code>npx curlconverter</code> 离线运行）或 Postman/Apifox 的导入功能，粘贴 cURL 命令即可一键生成标准 <code>requests</code> 或 <code>httpx</code> 代码，并且会自动把 <code>-H 'Cookie: ...'</code> 拆解为独立的 <code>cookies</code> 字典，把 <code>?page=1</code> 拆解为 <code>params</code> 字典！</li>
+<li><strong>转换方式二（自编写轻量级 Python 解析器）</strong>：为了在无外网环境下也能随时转换，我们可以利用 Python 内置的 <code>shlex</code>（Shell 词法分割器）和 <code>argparse</code> 编写一个不到 40 行的本地转换器函数，直接将剪贴板里的 <code>curl</code> 命令解析并输出为规范的 <code>requests</code> 字典结构：</li>
+</ol>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="kn">import</span><span class="w"> </span><span class="nn">shlex</span>
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">urllib.parse</span><span class="w"> </span><span class="kn">import</span> <span class="n">parse_qsl</span><span class="p">,</span> <span class="n">urlsplit</span><span class="p">,</span> <span class="n">urlunsplit</span>
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>
+</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>
+</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="k">def</span><span class="w"> </span><span class="nf">parse_curl_to_requests_spec</span><span class="p">(</span><span class="n">curl_command</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="w">    </span><span class="sd">"""将 Chrome DevTools 复制的 Copy as cURL (bash) 命令自动解析为 requests 参数字典"""</span>
+</span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>    <span class="c1"># 处理多行反斜杠续行符，并用 shlex 按 POSIX shell 规则安全分词</span>
+</span><span id="__span-7-9"><a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a>    <span class="n">normalized</span> <span class="o">=</span> <span class="n">curl_command</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"</span><span class="se">\\\n</span><span class="s2">"</span><span class="p">,</span> <span class="s2">" "</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"</span><span class="se">\\\r\n</span><span class="s2">"</span><span class="p">,</span> <span class="s2">" "</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+</span><span id="__span-7-10"><a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a>    <span class="n">tokens</span> <span class="o">=</span> <span class="n">shlex</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">normalized</span><span class="p">)</span>
+</span><span id="__span-7-11"><a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a>
+</span><span id="__span-7-12"><a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a>    <span class="n">url</span> <span class="o">=</span> <span class="s2">""</span>
+</span><span id="__span-7-13"><a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a>    <span class="n">method</span> <span class="o">=</span> <span class="s2">"GET"</span>
+</span><span id="__span-7-14"><a id="__codelineno-7-14" name="__codelineno-7-14" href="#__codelineno-7-14"></a>    <span class="n">headers</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+</span><span id="__span-7-15"><a id="__codelineno-7-15" name="__codelineno-7-15" href="#__codelineno-7-15"></a>    <span class="n">cookies</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+</span><span id="__span-7-16"><a id="__codelineno-7-16" name="__codelineno-7-16" href="#__codelineno-7-16"></a>    <span class="n">body_raw</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span id="__span-7-17"><a id="__codelineno-7-17" name="__codelineno-7-17" href="#__codelineno-7-17"></a>
+</span><span id="__span-7-18"><a id="__codelineno-7-18" name="__codelineno-7-18" href="#__codelineno-7-18"></a>    <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># 跳过开头的 'curl'</span>
+</span><span id="__span-7-19"><a id="__codelineno-7-19" name="__codelineno-7-19" href="#__codelineno-7-19"></a>    <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">tokens</span><span class="p">):</span>
+</span><span id="__span-7-20"><a id="__codelineno-7-20" name="__codelineno-7-20" href="#__codelineno-7-20"></a>        <span class="n">tok</span> <span class="o">=</span> <span class="n">tokens</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+</span><span id="__span-7-21"><a id="__codelineno-7-21" name="__codelineno-7-21" href="#__codelineno-7-21"></a>        <span class="k">if</span> <span class="n">tok</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"-X"</span><span class="p">,</span> <span class="s2">"--request"</span><span class="p">)</span> <span class="ow">and</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">tokens</span><span class="p">):</span>
+</span><span id="__span-7-22"><a id="__codelineno-7-22" name="__codelineno-7-22" href="#__codelineno-7-22"></a>            <span class="n">method</span> <span class="o">=</span> <span class="n">tokens</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+</span><span id="__span-7-23"><a id="__codelineno-7-23" name="__codelineno-7-23" href="#__codelineno-7-23"></a>            <span class="n">i</span> <span class="o">+=</span> <span class="mi">2</span>
+</span><span id="__span-7-24"><a id="__codelineno-7-24" name="__codelineno-7-24" href="#__codelineno-7-24"></a>        <span class="k">elif</span> <span class="n">tok</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"-H"</span><span class="p">,</span> <span class="s2">"--header"</span><span class="p">)</span> <span class="ow">and</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">tokens</span><span class="p">):</span>
+</span><span id="__span-7-25"><a id="__codelineno-7-25" name="__codelineno-7-25" href="#__codelineno-7-25"></a>            <span class="n">header_line</span> <span class="o">=</span> <span class="n">tokens</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+</span><span id="__span-7-26"><a id="__codelineno-7-26" name="__codelineno-7-26" href="#__codelineno-7-26"></a>            <span class="k">if</span> <span class="s2">":"</span> <span class="ow">in</span> <span class="n">header_line</span><span class="p">:</span>
+</span><span id="__span-7-27"><a id="__codelineno-7-27" name="__codelineno-7-27" href="#__codelineno-7-27"></a>                <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">header_line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">":"</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+</span><span id="__span-7-28"><a id="__codelineno-7-28" name="__codelineno-7-28" href="#__codelineno-7-28"></a>                <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">k</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span> <span class="n">v</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+</span><span id="__span-7-29"><a id="__codelineno-7-29" name="__codelineno-7-29" href="#__codelineno-7-29"></a>                <span class="k">if</span> <span class="n">k</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">"cookie"</span><span class="p">:</span>
+</span><span id="__span-7-30"><a id="__codelineno-7-30" name="__codelineno-7-30" href="#__codelineno-7-30"></a>                    <span class="k">for</span> <span class="n">pair</span> <span class="ow">in</span> <span class="n">v</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">";"</span><span class="p">):</span>
+</span><span id="__span-7-31"><a id="__codelineno-7-31" name="__codelineno-7-31" href="#__codelineno-7-31"></a>                        <span class="k">if</span> <span class="s2">"="</span> <span class="ow">in</span> <span class="n">pair</span><span class="p">:</span>
+</span><span id="__span-7-32"><a id="__codelineno-7-32" name="__codelineno-7-32" href="#__codelineno-7-32"></a>                            <span class="n">ck</span><span class="p">,</span> <span class="n">cv</span> <span class="o">=</span> <span class="n">pair</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"="</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+</span><span id="__span-7-33"><a id="__codelineno-7-33" name="__codelineno-7-33" href="#__codelineno-7-33"></a>                            <span class="n">cookies</span><span class="p">[</span><span class="n">ck</span><span class="p">]</span> <span class="o">=</span> <span class="n">cv</span>
+</span><span id="__span-7-34"><a id="__codelineno-7-34" name="__codelineno-7-34" href="#__codelineno-7-34"></a>                <span class="k">else</span><span class="p">:</span>
+</span><span id="__span-7-35"><a id="__codelineno-7-35" name="__codelineno-7-35" href="#__codelineno-7-35"></a>                    <span class="n">headers</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+</span><span id="__span-7-36"><a id="__codelineno-7-36" name="__codelineno-7-36" href="#__codelineno-7-36"></a>            <span class="n">i</span> <span class="o">+=</span> <span class="mi">2</span>
+</span><span id="__span-7-37"><a id="__codelineno-7-37" name="__codelineno-7-37" href="#__codelineno-7-37"></a>        <span class="k">elif</span> <span class="n">tok</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"-b"</span><span class="p">,</span> <span class="s2">"--cookie"</span><span class="p">)</span> <span class="ow">and</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">tokens</span><span class="p">):</span>
+</span><span id="__span-7-38"><a id="__codelineno-7-38" name="__codelineno-7-38" href="#__codelineno-7-38"></a>            <span class="k">for</span> <span class="n">pair</span> <span class="ow">in</span> <span class="n">tokens</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">";"</span><span class="p">):</span>
+</span><span id="__span-7-39"><a id="__codelineno-7-39" name="__codelineno-7-39" href="#__codelineno-7-39"></a>                <span class="k">if</span> <span class="s2">"="</span> <span class="ow">in</span> <span class="n">pair</span><span class="p">:</span>
+</span><span id="__span-7-40"><a id="__codelineno-7-40" name="__codelineno-7-40" href="#__codelineno-7-40"></a>                    <span class="n">ck</span><span class="p">,</span> <span class="n">cv</span> <span class="o">=</span> <span class="n">pair</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"="</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+</span><span id="__span-7-41"><a id="__codelineno-7-41" name="__codelineno-7-41" href="#__codelineno-7-41"></a>                    <span class="n">cookies</span><span class="p">[</span><span class="n">ck</span><span class="p">]</span> <span class="o">=</span> <span class="n">cv</span>
+</span><span id="__span-7-42"><a id="__codelineno-7-42" name="__codelineno-7-42" href="#__codelineno-7-42"></a>            <span class="n">i</span> <span class="o">+=</span> <span class="mi">2</span>
+</span><span id="__span-7-43"><a id="__codelineno-7-43" name="__codelineno-7-43" href="#__codelineno-7-43"></a>        <span class="k">elif</span> <span class="n">tok</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"-d"</span><span class="p">,</span> <span class="s2">"--data"</span><span class="p">,</span> <span class="s2">"--data-raw"</span><span class="p">,</span> <span class="s2">"--data-binary"</span><span class="p">)</span> <span class="ow">and</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">tokens</span><span class="p">):</span>
+</span><span id="__span-7-44"><a id="__codelineno-7-44" name="__codelineno-7-44" href="#__codelineno-7-44"></a>            <span class="n">body_raw</span> <span class="o">=</span> <span class="n">tokens</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+</span><span id="__span-7-45"><a id="__codelineno-7-45" name="__codelineno-7-45" href="#__codelineno-7-45"></a>            <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">"GET"</span><span class="p">:</span>
+</span><span id="__span-7-46"><a id="__codelineno-7-46" name="__codelineno-7-46" href="#__codelineno-7-46"></a>                <span class="n">method</span> <span class="o">=</span> <span class="s2">"POST"</span>
+</span><span id="__span-7-47"><a id="__codelineno-7-47" name="__codelineno-7-47" href="#__codelineno-7-47"></a>            <span class="n">i</span> <span class="o">+=</span> <span class="mi">2</span>
+</span><span id="__span-7-48"><a id="__codelineno-7-48" name="__codelineno-7-48" href="#__codelineno-7-48"></a>        <span class="k">elif</span> <span class="ow">not</span> <span class="n">tok</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"-"</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">url</span><span class="p">:</span>
+</span><span id="__span-7-49"><a id="__codelineno-7-49" name="__codelineno-7-49" href="#__codelineno-7-49"></a>            <span class="n">url</span> <span class="o">=</span> <span class="n">tok</span>
+</span><span id="__span-7-50"><a id="__codelineno-7-50" name="__codelineno-7-50" href="#__codelineno-7-50"></a>            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+</span><span id="__span-7-51"><a id="__codelineno-7-51" name="__codelineno-7-51" href="#__codelineno-7-51"></a>        <span class="k">else</span><span class="p">:</span>
+</span><span id="__span-7-52"><a id="__codelineno-7-52" name="__codelineno-7-52" href="#__codelineno-7-52"></a>            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+</span><span id="__span-7-53"><a id="__codelineno-7-53" name="__codelineno-7-53" href="#__codelineno-7-53"></a>
+</span><span id="__span-7-54"><a id="__codelineno-7-54" name="__codelineno-7-54" href="#__codelineno-7-54"></a>    <span class="c1"># 拆解 URL 中的查询参数</span>
+</span><span id="__span-7-55"><a id="__codelineno-7-55" name="__codelineno-7-55" href="#__codelineno-7-55"></a>    <span class="n">sp</span> <span class="o">=</span> <span class="n">urlsplit</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+</span><span id="__span-7-56"><a id="__codelineno-7-56" name="__codelineno-7-56" href="#__codelineno-7-56"></a>    <span class="n">clean_url</span> <span class="o">=</span> <span class="n">urlunsplit</span><span class="p">((</span><span class="n">sp</span><span class="o">.</span><span class="n">scheme</span><span class="p">,</span> <span class="n">sp</span><span class="o">.</span><span class="n">netloc</span><span class="p">,</span> <span class="n">sp</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="s2">""</span><span class="p">,</span> <span class="s2">""</span><span class="p">))</span>
+</span><span id="__span-7-57"><a id="__codelineno-7-57" name="__codelineno-7-57" href="#__codelineno-7-57"></a>    <span class="n">params</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">parse_qsl</span><span class="p">(</span><span class="n">sp</span><span class="o">.</span><span class="n">query</span><span class="p">))</span>
+</span><span id="__span-7-58"><a id="__codelineno-7-58" name="__codelineno-7-58" href="#__codelineno-7-58"></a>
+</span><span id="__span-7-59"><a id="__codelineno-7-59" name="__codelineno-7-59" href="#__codelineno-7-59"></a>    <span class="k">return</span> <span class="p">{</span>
+</span><span id="__span-7-60"><a id="__codelineno-7-60" name="__codelineno-7-60" href="#__codelineno-7-60"></a>        <span class="s2">"method"</span><span class="p">:</span> <span class="n">method</span><span class="p">,</span>
+</span><span id="__span-7-61"><a id="__codelineno-7-61" name="__codelineno-7-61" href="#__codelineno-7-61"></a>        <span class="s2">"url"</span><span class="p">:</span> <span class="n">clean_url</span><span class="p">,</span>
+</span><span id="__span-7-62"><a id="__codelineno-7-62" name="__codelineno-7-62" href="#__codelineno-7-62"></a>        <span class="s2">"params"</span><span class="p">:</span> <span class="n">params</span><span class="p">,</span>
+</span><span id="__span-7-63"><a id="__codelineno-7-63" name="__codelineno-7-63" href="#__codelineno-7-63"></a>        <span class="s2">"headers"</span><span class="p">:</span> <span class="n">headers</span><span class="p">,</span>
+</span><span id="__span-7-64"><a id="__codelineno-7-64" name="__codelineno-7-64" href="#__codelineno-7-64"></a>        <span class="s2">"cookies"</span><span class="p">:</span> <span class="n">cookies</span><span class="p">,</span>
+</span><span id="__span-7-65"><a id="__codelineno-7-65" name="__codelineno-7-65" href="#__codelineno-7-65"></a>        <span class="s2">"data_or_json"</span><span class="p">:</span> <span class="n">body_raw</span><span class="p">,</span>
+</span><span id="__span-7-66"><a id="__codelineno-7-66" name="__codelineno-7-66" href="#__codelineno-7-66"></a>    <span class="p">}</span>
+</span><span id="__span-7-67"><a id="__codelineno-7-67" name="__codelineno-7-67" href="#__codelineno-7-67"></a>
+</span><span id="__span-7-68"><a id="__codelineno-7-68" name="__codelineno-7-68" href="#__codelineno-7-68"></a>
+</span><span id="__span-7-69"><a id="__codelineno-7-69" name="__codelineno-7-69" href="#__codelineno-7-69"></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
+</span><span id="__span-7-70"><a id="__codelineno-7-70" name="__codelineno-7-70" href="#__codelineno-7-70"></a>    <span class="n">sample_curl</span> <span class="o">=</span> <span class="s2">"""</span>
+</span><span id="__span-7-71"><a id="__codelineno-7-71" name="__codelineno-7-71" href="#__codelineno-7-71"></a><span class="s2">    curl 'https://api.example.edu/v1/search?page=1&amp;lang=zh' </span><span class="se">\\</span>
+</span><span id="__span-7-72"><a id="__codelineno-7-72" name="__codelineno-7-72" href="#__codelineno-7-72"></a><span class="s2">      -H 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64)' </span><span class="se">\\</span>
+</span><span id="__span-7-73"><a id="__codelineno-7-73" name="__codelineno-7-73" href="#__codelineno-7-73"></a><span class="s2">      -H 'Content-Type: application/json' </span><span class="se">\\</span>
+</span><span id="__span-7-74"><a id="__codelineno-7-74" name="__codelineno-7-74" href="#__codelineno-7-74"></a><span class="s2">      -H 'Cookie: session_id=xyz999; role=student' </span><span class="se">\\</span>
+</span><span id="__span-7-75"><a id="__codelineno-7-75" name="__codelineno-7-75" href="#__codelineno-7-75"></a><span class="s2">      --data-raw '{"keyword": "人工智能教材"}'</span>
+</span><span id="__span-7-76"><a id="__codelineno-7-76" name="__codelineno-7-76" href="#__codelineno-7-76"></a><span class="s2">    """</span>
+</span><span id="__span-7-77"><a id="__codelineno-7-77" name="__codelineno-7-77" href="#__codelineno-7-77"></a>    <span class="n">spec</span> <span class="o">=</span> <span class="n">parse_curl_to_requests_spec</span><span class="p">(</span><span class="n">sample_curl</span><span class="p">)</span>
+</span><span id="__span-7-78"><a id="__codelineno-7-78" name="__codelineno-7-78" href="#__codelineno-7-78"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="n">ensure_ascii</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+</span></code></pre></div>
+<div class="admonition tip">
+<p class="admonition-title">cURL 转代码后的『精简瘦身』原则</p>
+<p>从 Chrome 复制出来的 cURL 往往包含 <code>sec-ch-ua</code>、<code>sec-fetch-dest</code>、<code>accept-encoding</code>、<code>priority</code> 等十几个冗余请求头。转为 Python 代码后，建议执行<strong>“二分精简法”</strong>：只保留 <code>User-Agent</code>、<code>Referer</code>、<code>Cookie</code>/<code>Authorization</code> 和 <code>Content-Type</code> 四个核心头，删掉其余次要头（特别是删掉 <code>Accept-Encoding</code> 以防 <code>br</code> 压缩乱码），让爬虫代码既清爽又不易因死板固定了某个浏览器小版本头而被关联识别。</p>
+</div>
+<hr />
+<h2 id="5">5. 本章小结与思考练习<a class="headerlink" href="#5" title="Permanent link">&para;</a></h2>
+<h3 id="51">5.1 核心要点回顾<a class="headerlink" href="#51" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>环境隔离与三大客户端演进</strong>：每个爬虫项目均应使用 <code>venv</code> 或 <code>uv</code> 创建独立虚拟环境；Python 标准库 <code>urllib</code> 是零依赖底层基石，<code>requests</code> 是基于 <code>urllib3</code> 连接池的同步工业标准，而 <code>httpx</code> 则进一步支持了 <strong>HTTP/2 多路复用</strong> 与原生异步协程。</li>
+<li><strong>参数位置与乱码根治</strong>：<code>params=</code> 自动编码 URL 查询串，<code>data=dict</code> 发送传统表单，<code>json=dict</code> 发送 JSON 载荷，大文件下载必须开启 <code>stream=True</code> 分块流式写入；遇到中文乱码优先检查响应头未声明 <code>charset</code> 导致的 <code>ISO-8859-1</code> 回退，使用 <code>gb18030</code> 或 <code>utf-8</code> 显式解码。</li>
+<li><strong>高鲁棒性请求四要素</strong>：</li>
+<li>使用 <strong><code>requests.Session()</code></strong>（或 <code>httpx.Client()</code>）自动维护跨请求 Cookie 并复用底层 TCP+TLS 连接；</li>
+<li>永远显式设置 <strong><code>timeout=(5.0, 15.0)</code></strong> 双重超时，杜绝线程永久挂死；</li>
+<li>针对反爬限流配置高匿 HTTP 或 <strong><code>socks5h://</code></strong> 远程 DNS 解析代理；</li>
+<li>使用 <strong><code>tenacity</code></strong> 装饰器针对网络超时、<code>429</code> 和 <code>5xx</code> 状态码执行<strong>带随机抖动的指数退避自动重试</strong>（跳过 <code>404</code> 等确定性客户端错误）。</li>
+</ul>
+<h3 id="52">5.2 思考与自测练习<a class="headerlink" href="#52" title="Permanent link">&para;</a></h3>
+<details class="question">
+<summary>思考题 1：在编写一个循环抓取同一网站 5,000 篇文章的脚本时，同学 A 在循环体内每次直接调用 <code>requests.get(url)</code>，同学 B 在循环体外创建一个 <code>with requests.Session() as s:</code> 并在循环体内调用 <code>s.get(url)</code>。请问两者的运行速度为什么会相差数倍？</summary>
+<p>因为 <code>requests.get(url)</code> 每次调用都会新建并销毁一个临时的 <code>Session</code>，导致每抓一篇文章都要重新经历一次 <strong>TCP 三次握手 + TLS 加密握手</strong>（每次耗时约 1~2 个 RTT，即 100~300 毫秒），5,000 次请求光在握手等待上就要白白浪费十几个小时！而同学 B 在循环外创建 <code>requests.Session()</code>，底层 <code>urllib3</code> 连接池会利用 HTTP/1.1 的 <strong><code>Connection: keep-alive</code> 持久连接</strong> 机制，只在第 1 次请求时进行 TCP+TLS 握手，后续 4,999 次请求全部复用同一条已建立的加密通道，从而实现数倍的速度飞跃。</p>
+</details>
+<details class="question">
+<summary>思考题 2：为什么在使用 <code>tenacity</code> 编写爬虫自动重试逻辑时，我们只对 <code>Timeout</code>、<code>ConnectionError</code> 以及状态码 <code>429</code>、<code>502/503/504</code> 进行重试，而明确排除状态码 <code>404 Not Found</code> 和 <code>400 Bad Request</code>？</summary>
+<p>因为自动重试的目的是克服<strong>瞬时性、偶发性故障（Transient Failures）</strong>，例如网络瞬时丢包、代理节点抖动、目标服务器瞬时并发过高（<code>503</code>）或触发了短时频率窗口限制（<code>429</code>），等待几秒后重发往往就能成功。而 <strong><code>404 Not Found</code></strong>（目标页面已被删除或 ID 不存在）和 <strong><code>400 Bad Request</code></strong>（我们拼接的参数语法有误）属于<strong>确定性客户端错误（Permanent Client Errors）</strong>——只要不修改代码参数，哪怕重试 1 万次结果依然是 <code>404</code> 或 <code>400</code>，对它们重试只会白白浪费爬虫时间和代理流量。</p>
+</details>
+<details class="question">
+<summary>思考题 3：在配置 SOCKS5 代理时，<code>proxies = {'https': 'socks5://127.0.0.1:1080'}</code> 与 <code>proxies = {'https': 'socks5h://127.0.0.1:1080'}</code> 只差了一个字母 <code>h</code>，它们在底层通信上有什么重要区别？</summary>
+<p>字母 <code>h</code> 代表 <strong>Host resolution on proxy（在代理端解析主机域名）</strong>：
+- 使用 <code>socks5://</code> 时，你的爬虫会在<strong>本地计算机</strong>向本地默认 DNS 服务器发起域名解析请求，拿到 IP 后再通过代理连接；如果目标域名在本地网络无法解析或存在 DNS 污染，请求就会直接失败。
+- 使用 <strong><code>socks5h://</code></strong> 时，爬虫会把目标网站的<strong>原始域名字符串</strong>直接发给远端 SOCKS5 代理服务器，由代理服务器在远端完成 DNS 解析并建立连接，既避免了本地 DNS 解析失败，又防止了本地 DNS 查询泄漏爬虫意图。</p>
+</details>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../02-web-and-http-fundamentals/" class="md-footer__link md-footer__link--prev" aria-label="Previous: 2. Web前端基石与HTTP通信原理">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                2. Web前端基石与HTTP通信原理
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../04-static-html-parsing/" class="md-footer__link md-footer__link--next" aria-label="Next: 4. 静态网页结构化解析与正则提取">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                4. 静态网页结构化解析与正则提取
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2026 AI教材编写组. Licensed under <a href="license/">CC BY-NC-SA 4.0</a> for non-commercial use.
+    </div>
+  
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["content.code.copy", "content.action.edit", "navigation.expand", "navigation.path", "navigation.prune", "navigation.indexes", "navigation.top", "navigation.footer", "toc.follow", "search.suggest", "search.highlight", "search.share"], "search": "../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.c21346df.min.js"></script>
+      
+    
+  </body>
+</html>

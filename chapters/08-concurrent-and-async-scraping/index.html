@@ -1,0 +1,2940 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="本章深入剖析I/O密集型任务瓶颈、操作系统进程与线程、Python GIL锁机制，并系统实战ThreadPoolExecutor线程池、asyncio事件循环、aiohttp/httpx异步高并发采集、Playwright并发渲染及Semaphore/令牌桶平滑限流技术。">
+      
+      
+        <meta name="author" content="AI教材编写组">
+      
+      
+        <link rel="canonical" href="https://minssnail.github.io/crawbug/chapters/08-concurrent-and-async-scraping/">
+      
+      
+        <link rel="prev" href="../07-anti-scraping-and-countermeasures/">
+      
+      
+        <link rel="next" href="../09-data-cleaning-and-storage/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.0">
+    
+    
+      
+        <title>高性能并发与异步协程爬虫编程 - 网络爬虫技术</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.57a0d79d.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.fb2fffe2.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../css/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="orange">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#_1" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="网络爬虫技术" class="md-header__button md-logo" aria-label="网络爬虫技术" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            网络爬虫技术
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              高性能并发与异步协程爬虫编程
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/Minssnail/crawbug" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Minssnail/crawbug
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="网络爬虫技术" class="md-nav__button md-logo" aria-label="网络爬虫技术" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    网络爬虫技术
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/Minssnail/crawbug" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Minssnail/crawbug
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../about/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    About
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../course-description/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Course Description
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Chapters
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_4" id="__nav_4_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Chapters
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../01-intro-and-ethics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1. 网络爬虫导论与数据合规基石
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../02-web-and-http-fundamentals/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    2. Web前端基石与HTTP通信原理
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../03-python-http-requests/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    3. Python网络请求核心编程
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-static-html-parsing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    4. 静态网页结构化解析与正则提取
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../05-ajax-and-api-scraping/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    5. 异步加载与Web接口逆向采集
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../06-browser-automation-playwright/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    6. 动态渲染网页与Playwright浏览器自动化
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../07-anti-scraping-and-countermeasures/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    7. 反爬虫机制原理与工程对抗策略
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    8. 高性能并发与异步协程爬虫编程
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    8. 高性能并发与异步协程爬虫编程
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#concepts-covered" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Concepts Covered
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-io-gil" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. 性能瓶颈本质：I/O 密集型任务、进程线程与 GIL 锁
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. 性能瓶颈本质：I/O 密集型任务、进程线程与 GIL 锁">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-cpuio" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 CPU密集型与网络IO密集型对比及同步阻塞瓶颈分析
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 进程与线程概念及上下文切换开销
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#13-pythongil" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.3 Python全局解释器锁GIL影响剖析
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. 多线程与多进程并发采集实战
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. 多线程与多进程并发采集实战">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-threadpoolexecutor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 ThreadPoolExecutor线程池并发采集
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-queue" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 线程安全队列Queue与生产者消费者模型
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-processpoolexecutor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3 ProcessPoolExecutor多进程并行解析
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-asyncio-asyncawait" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. 异步协程革命：asyncio 事件循环与 async/await 编程
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. 异步协程革命：asyncio 事件循环与 async/await 编程">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-coroutine" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 协程Coroutine概念与用户态切换
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-asyncioevent-loop" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 asyncio事件循环Event-Loop原理
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-asyncawait" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 async与await异步关键字语法规范
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#34-asynciogathertask" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.4 asyncio.gather与Task并发任务编排
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3.4 asyncio.gather与Task并发任务编排">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#diagram-synchronous-vs-threaded-vs-asyncio-event-loop-concurrency-simulator" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagram: Synchronous vs Threaded vs Asyncio Event Loop Concurrency Simulator
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-aiohttphttpx-playwright" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. 异步网络请求生态：aiohttp、httpx 与异步 Playwright
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. 异步网络请求生态：aiohttp、httpx 与异步 Playwright">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-aiohttpsession" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 aiohttp异步客户端与Session复用
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-httpxasyncclient" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 httpx.AsyncClient异步连接池调优
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#43-playwrightapi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3 Playwright异步API多页面并发渲染
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. 受控并发、平滑限流与异步全链路压测
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. 受控并发、平滑限流与异步全链路压测">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-semaphore" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 Semaphore信号量控制最大并发数
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-aiolimiter" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 令牌桶算法与aiolimiter异步限流
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5.2 令牌桶算法与aiolimiter异步限流">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#diagram-asyncio-semaphore-and-token-bucket-rate-limiter-simulator" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagram: Asyncio Semaphore and Token Bucket Rate Limiter Simulator
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#53-aiofiles" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.3 aiofiles异步非阻塞文件写入与完整生产级管道
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#54" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.4 多线程与异步协程爬虫压测对比
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. 本章小结与思考练习
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. 本章小结与思考练习">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#61" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.1 核心要点回顾
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#62" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.2 思考与自测练习
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../09-data-cleaning-and-storage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    9. 数据清洗流水线与多源持久化存储
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../10-scrapy-industrial-framework/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    10. Scrapy工业级异步爬虫框架实战
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../11-ai-powered-scraping-and-datasets/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    11. 面向大模型与RAG的AI智能爬虫
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../12-engineering-deployment-and-capstone/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    12. 爬虫工程化运维部署与综合实训项目
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../learning-graph/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Learning Graph
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../sims/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MicroSims
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../license/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    License
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contact/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contact
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#concepts-covered" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Concepts Covered
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-io-gil" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. 性能瓶颈本质：I/O 密集型任务、进程线程与 GIL 锁
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. 性能瓶颈本质：I/O 密集型任务、进程线程与 GIL 锁">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-cpuio" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 CPU密集型与网络IO密集型对比及同步阻塞瓶颈分析
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 进程与线程概念及上下文切换开销
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#13-pythongil" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.3 Python全局解释器锁GIL影响剖析
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. 多线程与多进程并发采集实战
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. 多线程与多进程并发采集实战">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-threadpoolexecutor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 ThreadPoolExecutor线程池并发采集
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-queue" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 线程安全队列Queue与生产者消费者模型
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-processpoolexecutor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3 ProcessPoolExecutor多进程并行解析
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-asyncio-asyncawait" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. 异步协程革命：asyncio 事件循环与 async/await 编程
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. 异步协程革命：asyncio 事件循环与 async/await 编程">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-coroutine" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 协程Coroutine概念与用户态切换
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-asyncioevent-loop" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 asyncio事件循环Event-Loop原理
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-asyncawait" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 async与await异步关键字语法规范
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#34-asynciogathertask" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.4 asyncio.gather与Task并发任务编排
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3.4 asyncio.gather与Task并发任务编排">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#diagram-synchronous-vs-threaded-vs-asyncio-event-loop-concurrency-simulator" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagram: Synchronous vs Threaded vs Asyncio Event Loop Concurrency Simulator
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-aiohttphttpx-playwright" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. 异步网络请求生态：aiohttp、httpx 与异步 Playwright
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. 异步网络请求生态：aiohttp、httpx 与异步 Playwright">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-aiohttpsession" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 aiohttp异步客户端与Session复用
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-httpxasyncclient" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 httpx.AsyncClient异步连接池调优
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#43-playwrightapi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3 Playwright异步API多页面并发渲染
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. 受控并发、平滑限流与异步全链路压测
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. 受控并发、平滑限流与异步全链路压测">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-semaphore" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 Semaphore信号量控制最大并发数
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-aiolimiter" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 令牌桶算法与aiolimiter异步限流
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5.2 令牌桶算法与aiolimiter异步限流">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#diagram-asyncio-semaphore-and-token-bucket-rate-limiter-simulator" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagram: Asyncio Semaphore and Token Bucket Rate Limiter Simulator
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#53-aiofiles" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.3 aiofiles异步非阻塞文件写入与完整生产级管道
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#54" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.4 多线程与异步协程爬虫压测对比
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. 本章小结与思考练习
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. 本章小结与思考练习">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#61" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.1 核心要点回顾
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#62" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.2 思考与自测练习
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+                
+
+
+
+  
+
+
+  <nav class="md-path" aria-label="Navigation" >
+    <ol class="md-path__list">
+      
+        
+  
+  
+    <li class="md-path__item">
+      <a href="../.." class="md-path__link">
+        
+  <span class="md-ellipsis">
+    Home
+  </span>
+
+      </a>
+    </li>
+  
+
+      
+      
+        
+  
+  
+    
+    
+      <li class="md-path__item">
+        <a href="../" class="md-path__link">
+          
+  <span class="md-ellipsis">
+    Chapters
+  </span>
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ol>
+  </nav>
+
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+    <a href="https://github.com/Minssnail/crawbug/blob/main/docs/chapters/08-concurrent-and-async-scraping/index.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
+    </a>
+  
+  
+
+
+<h1 id="_1">高性能并发与异步协程爬虫编程<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h1>
+<h2 id="summary">Summary<a class="headerlink" href="#summary" title="Permanent link">&para;</a></h2>
+<p>当采集规模从几百页跃升至百万级页面时，单线程同步阻塞爬虫将面临严重的性能瓶颈。本章从操作系统进程、线程与 Python 全局解释器锁（GIL）讲起，首先实战 <code>ThreadPoolExecutor</code> 线程池与 <code>queue.Queue</code> 生产者-消费者并发模型；随后重点攻克 Python <code>asyncio</code> 事件循环（Event Loop）与 <code>async/await</code> 协程编程，结合 <code>aiohttp</code>、<code>httpx.AsyncClient</code>、异步 Playwright 与 <code>aiofiles</code> 构建单机千级并发管道，并利用 <code>Semaphore</code> 信号量与 <code>aiolimiter</code> 令牌桶算法实现既快又稳的受控并发。</p>
+<h2 id="concepts-covered">Concepts Covered<a class="headerlink" href="#concepts-covered" title="Permanent link">&para;</a></h2>
+<p>This chapter covers the following 18 concepts from the learning graph:</p>
+<table>
+<thead>
+<tr>
+<th>Concept</th>
+<th>Concept Impact Score</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CPU密集型与网络IO密集型对比</td>
+<td>267</td>
+</tr>
+<tr>
+<td>同步阻塞请求性能瓶颈与吞吐分析</td>
+<td>11</td>
+</tr>
+<tr>
+<td>进程与线程概念及上下文切换开销</td>
+<td>134</td>
+</tr>
+<tr>
+<td>Python全局解释器锁GIL影响剖析</td>
+<td>133</td>
+</tr>
+<tr>
+<td>ThreadPoolExecutor线程池并发采集</td>
+<td>10</td>
+</tr>
+<tr>
+<td>线程安全队列Queue与生产者消费者</td>
+<td>1</td>
+</tr>
+<tr>
+<td>ProcessPoolExecutor多进程并行解析</td>
+<td>1</td>
+</tr>
+<tr>
+<td>协程Coroutine概念与用户态切换</td>
+<td>121</td>
+</tr>
+<tr>
+<td>asyncio事件循环Event-Loop原理</td>
+<td>120</td>
+</tr>
+<tr>
+<td>async与await异步关键字语法规范</td>
+<td>44</td>
+</tr>
+<tr>
+<td>asyncio.gather与Task并发任务编排</td>
+<td>42</td>
+</tr>
+<tr>
+<td>aiohttp异步客户端与Session复用</td>
+<td>36</td>
+</tr>
+<tr>
+<td>httpx.AsyncClient异步连接池调优</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Playwright异步API多页面并发渲染</td>
+<td>4</td>
+</tr>
+<tr>
+<td>Semaphore信号量控制最大并发数</td>
+<td>26</td>
+</tr>
+<tr>
+<td>令牌桶算法与aiolimiter异步限流</td>
+<td>2</td>
+</tr>
+<tr>
+<td>aiofiles异步非阻塞文件写入</td>
+<td>1</td>
+</tr>
+<tr>
+<td>多线程与异步协程爬虫压测对比</td>
+<td>7</td>
+</tr>
+</tbody>
+</table>
+<h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">&para;</a></h2>
+<p>This chapter builds on concepts from:</p>
+<ul>
+<li><a href="../01-intro-and-ethics/">Chapter 1: 网络爬虫导论与数据合规基石</a></li>
+<li><a href="../02-web-and-http-fundamentals/">Chapter 2: Web前端基石与HTTP通信原理</a></li>
+<li><a href="../03-python-http-requests/">Chapter 3: Python网络请求核心编程</a></li>
+<li><a href="../04-static-html-parsing/">Chapter 4: 静态网页结构化解析与正则提取</a></li>
+<li><a href="../06-browser-automation-playwright/">Chapter 6: 动态渲染网页与Playwright浏览器自动化</a></li>
+<li><a href="../07-anti-scraping-and-countermeasures/">Chapter 7: 反爬虫机制原理与工程对抗策略</a></li>
+</ul>
+<hr />
+<h2 id="1-io-gil">1. 性能瓶颈本质：I/O 密集型任务、进程线程与 GIL 锁<a class="headerlink" href="#1-io-gil" title="Permanent link">&para;</a></h2>
+<p>在前面的章节中，我们已经掌握了使用 <code>requests</code> 发起网络请求、使用 <code>parsel</code> 解析 HTML 以及应对常见反爬策略的完整技能。如果我们的任务只是抓取某高校官网的 50 篇通知公告，用一个简单的 <code>for</code> 循环逐页请求，不到 1 分钟就能顺利跑完。然而，在人工智能大语言模型（LLM）语料库建设或电商全品类价格监测等真实工业场景中，待采集的 URL 数量动辄达到<strong>数十万乃至上千万级</strong>。此时，传统的单线程顺序代码将遭遇毁灭性的性能墙。要打破这堵墙，我们必须深入计算机底层，厘清任务的物理属性与操作系统的并发调度机制。</p>
+<h3 id="11-cpuio">1.1 CPU密集型与网络IO密集型对比及同步阻塞瓶颈分析<a class="headerlink" href="#11-cpuio" title="Permanent link">&para;</a></h3>
+<p>在计算机体系结构中，一切程序任务都可以根据其消耗的核心硬件资源划分为两大类：<strong>CPU密集型与网络IO密集型对比（CPU-Bound vs. Network I/O-Bound Tasks）</strong>。</p>
+<ol>
+<li><strong>CPU 密集型任务（CPU-Bound / Compute-Bound）</strong><br />
+   指程序绝大部分运行时间都在满负荷使用中央处理器（CPU）进行算术与逻辑运算。典型场景包括：大矩阵乘法与深度学习张量训练、高清视频编码转码、复杂图像滤波处理、大规模文本的复杂正则表达式回溯，以及对超大体积 HTML DOM 树（如单页数十兆字节的维基百科词条）进行深度 XPath 解析。在这类任务中，CPU 占用率接近 <span class="arithmatex">\(100\%\)</span>，性能上限取决于 CPU 的核心数量与主频。</li>
+<li><strong>网络 I/O 密集型任务（Network I/O-Bound）</strong><br />
+   指程序绝大部分时间都在等待外部输入/输出（Input/Output）设备完成数据传输，尤其是等待网络网卡收发数据包或磁盘读写完成。<strong>网络爬虫的下载阶段是教科书级别的极端网络 I/O 密集型任务。</strong></li>
+</ol>
+<p>为了直观揭示<strong>同步阻塞请求性能瓶颈与吞吐分析（Synchronous Blocking Bottleneck &amp; Throughput Analysis）</strong>，让我们拆解一次标准 HTTP 请求的耗时构成：</p>
+<ul>
+<li>假设爬虫向远端服务器请求一个网页，<strong>网络往返延迟与服务器处理耗时</strong> <span class="arithmatex">\(T_{\text{io}} = 200\text{ ms} = 0.200\text{ s}\)</span>（包含 DNS 查询、TCP 三次握手、TLS 握手、HTTP 请求报文传输、远端数据库查询及响应报文回传）；</li>
+<li>当响应字节流到达本地内存后，CPU 执行 <code>parsel</code> 选择器提取标题与正文的<strong>本地计算耗时</strong>仅为 <span class="arithmatex">\(T_{\text{cpu}} = 2\text{ ms} = 0.002\text{ s}\)</span>。</li>
+</ul>
+<p>在传统的<strong>同步阻塞（Synchronous Blocking）</strong>模式下（如连续调用 <code>requests.get(url)</code>），当前代码必须死死卡在原地等待那漫长的 <span class="arithmatex">\(200\text{ ms}\)</span> 网络响应返回后，才能执行 <span class="arithmatex">\(2\text{ ms}\)</span> 的解析代码，然后再发起下一个请求。此时 CPU 的真实有效利用率 <span class="arithmatex">\(\eta_{\text{cpu}}\)</span> 为：</p>
+<div class="arithmatex">\[
+\eta_{\text{cpu}} = \frac{T_{\text{cpu}}}{T_{\text{io}} + T_{\text{cpu}}} = \frac{2\text{ ms}}{200\text{ ms} + 2\text{ ms}} \approx 0.99\%
+\]</div>
+<p>这意味着在单线程同步爬虫运行期间，<strong>高达 <span class="arithmatex">\(99.01\%\)</span> 的时间里，昂贵的 CPU 都处于无所事事的空转等待（Idle）状态！</strong> 单线程同步爬虫的理论吞吐量（Throughput，每秒完成请求数 RPS）被死死限制在：</p>
+<div class="arithmatex">\[
+\text{RPS}_{\text{sync}} = \frac{1}{T_{\text{io}} + T_{\text{cpu}}} \approx \frac{1}{0.202\text{ s}} \approx 4.95\text{ 页/秒}
+\]</div>
+<p>按照每秒约 5 页的速度计算，采集 <span class="arithmatex">\(100\text{ 万}\)</span>（<span class="arithmatex">\(10^6\)</span>）个网页需要耗费 <span class="arithmatex">\(200,000\text{ 秒} \approx 55.6\text{ 小时}\)</span>（超过两天两夜）。如果网络延迟波动到 <span class="arithmatex">\(500\text{ ms}\)</span>，耗时更会飙升至近一周。因此，爬虫性能优化的核心命题并非“让 CPU 算得更快”，而是<strong>“如何把等待网络响应的那 <span class="arithmatex">\(99\%\)</span> 空闲时间利用起来，在同一时间窗口内同时发出并等待成百上千个网络请求”</strong>。</p>
+<h3 id="12">1.2 进程与线程概念及上下文切换开销<a class="headerlink" href="#12" title="Permanent link">&para;</a></h3>
+<p>为了实现多任务同时推进，现代操作系统提供了两个核心抽象层级：<strong>进程与线程概念及上下文切换开销（OS Processes vs. Threads &amp; Context Switching Overhead）</strong>。在深入之前，请先区分两个极易混淆的术语：</p>
+<ul>
+<li><strong>并发（Concurrency）</strong>：指在宏观时间段内，多个任务通过<strong>交替轮流占用</strong>计算资源来共同推进（例如单核 CPU 在等待请求 A 返回的空隙去发送请求 B）。</li>
+<li><strong>并行（Parallelism）</strong>：指在同一物理时刻，多个任务在<strong>多个不同的 CPU 物理核心</strong>上真正同时执行运算。</li>
+</ul>
+<p>操作系统管理并发与并行的两级载体分别是进程（Process）与线程（Thread）：</p>
+<ol>
+<li><strong>进程（Process —— 资源分配的最小基本单位）</strong><br />
+   当你运行一次 <code>python spider.py</code> 时，操作系统就会创建一个独立的 Python 进程。每个进程都拥有自己<strong>完全独立的虚拟内存地址空间</strong>（堆、栈、代码段、全局变量互不干扰）和独立的文件描述符表。一个进程崩溃不会直接导致另一个进程崩溃，安全性极高；但代价是进程创建慢、内存占用大（每个 Python 进程基础内存开销通常在 <span class="arithmatex">\(20\text{ MB}\sim 50\text{ MB}\)</span> 以上），且进程间通信（IPC）必须借助管道、队列或共享内存等特殊机制。</li>
+<li><strong>线程（Thread —— CPU 调度执行的最小基本单位）</strong><br />
+   线程存在于进程内部，一个进程可以开启多个线程。同一进程下的所有线程<strong>共享该进程的内存空间与全局变量</strong>，因此线程间交换数据极其方便（如直接读写同一个内存队列）。每个线程仅维护自己独立的调用栈（Stack，通常默认分配 <span class="arithmatex">\(1\text{ MB}\sim 8\text{ MB}\)</span> 栈空间）与 CPU 寄存器状态。</li>
+<li><strong>内核态上下文切换开销（Kernel Context Switching Overhead）</strong><br />
+   无论是进程还是操作系统原生线程（OS Native Thread），其调度权都掌握在<strong>操作系统内核（OS Kernel）</strong>手中。当操作系统决定暂停当前正在等待网络 I/O 的线程 A、转而唤醒就绪的线程 B 时，必须执行一次<strong>用户态（User Space）<span class="arithmatex">\(\leftrightarrow\)</span> 内核态（Kernel Space）的上下文切换</strong>：保存线程 A 的程序计数器与寄存器现场、刷新 CPU 缓存/TLB（进程切换时尤为昂贵）、加载线程 B 的上下文。每次内核级线程切换耗时约 <span class="arithmatex">\(1\sim 5\text{ }\mu\text{s}\)</span>（微秒）。当线程数量控制在几十个以内时，这点开销微不足道；但如果盲目开启 <span class="arithmatex">\(5,000\)</span> 个操作系统线程，不仅单机内存（<span class="arithmatex">\(5000 \times 2\text{ MB} \approx 10\text{ GB}\)</span>）会被瞬间撑爆，CPU 更会将绝大部分算力浪费在频繁的线程切换（Thrashing，颠簸现象）上，导致爬虫整体吞吐量断崖式下跌。</li>
+</ol>
+<h3 id="13-pythongil">1.3 Python全局解释器锁GIL影响剖析<a class="headerlink" href="#13-pythongil" title="Permanent link">&para;</a></h3>
+<p>许多初学者在尝试用 Python 多线程加速代码时，都会听闻一个著名的术语：<strong>Python全局解释器锁GIL影响剖析（Global Interpreter Lock, GIL）</strong>。那么，GIL 究竟是什么？它会不会让多线程爬虫失效？</p>
+<p>在我们日常使用的官方标准 <strong>CPython 解释器</strong>中，内存管理采用了非线程安全的<strong>引用计数（Reference Counting）</strong>机制。为了防止多个线程同时修改同一个 Python 对象的引用计数而导致内存损坏，CPython 设计了一把进程级别的互斥大锁——<strong>全局解释器锁（GIL）</strong>。GIL 的核心规则极其严格：<strong>在同一个 Python 进程内部，任何物理时刻，最多只能有一个线程持有 GIL 并在 CPU 上执行 Python 字节码。</strong> 即使你的服务器拥有 64 核 CPU，同一个 Python 进程里的 10 个线程也无法在 10 个核心上并行跑满计算。</p>
+<div class="admonition tip">
+<p class="admonition-title">核心工程破局点：为什么受 GIL 限制的 Python 多线程依然能大幅加速网络爬虫？</p>
+<p>这是一个在面试与工程实践中极其关键的认知分水岭：</p>
+<ul>
+<li><strong>对于 CPU 密集型任务（如纯数学计算、重度文本解析）</strong>：由于线程一刻不停地在执行字节码，争夺 GIL 锁不仅无法利用多核并行，反而会因为频繁抢锁与切换比单线程还要慢！因此 CPU 密集型任务必须使用<strong>多进程（<code>ProcessPoolExecutor</code>）</strong>——每个子进程拥有自己独立的 Python 解释器与独立的 GIL，从而真正跑满多核 CPU。</li>
+<li><strong>对于网络 I/O 密集型任务（如网络爬虫下载网页）</strong>：CPython 解释器底层有一条黄金规则——<strong>每当一个线程发起阻塞式系统 I/O 调用（如等待网卡 Socket 读取数据、等待磁盘写入、或调用 <code>time.sleep()</code>）之前，该线程会主动释放（Release）手中的 GIL 锁！</strong> 一旦线程 A 释放了 GIL 进入网络等待，线程 B 就能立刻拿到 GIL 并发出第二个 HTTP 请求，随后线程 B 也释放 GIL，线程 C 接着发出第三个请求……当线程 A 的网络数据终于返回时，它再重新申请获取 GIL 执行那短短 <span class="arithmatex">\(2\text{ ms}\)</span> 的解析逻辑。</li>
+</ul>
+</div>
+<p>因此，在网络 I/O 占比高达 <span class="arithmatex">\(99\%\)</span> 的爬虫下载场景中，Python 多线程不仅<strong>完全有效</strong>，而且开启 <span class="arithmatex">\(N\)</span> 个工作线程（在合理范围内，如 <span class="arithmatex">\(N=10\sim 50\)</span>）几乎可以将爬虫吞吐量线性提升接近 <span class="arithmatex">\(N\)</span> 倍！</p>
+<hr />
+<h2 id="2">2. 多线程与多进程并发采集实战<a class="headerlink" href="#2" title="Permanent link">&para;</a></h2>
+<h3 id="21-threadpoolexecutor">2.1 ThreadPoolExecutor线程池并发采集<a class="headerlink" href="#21-threadpoolexecutor" title="Permanent link">&para;</a></h3>
+<p>在早期 Python 代码中，开发者常手动实例化 <code>threading.Thread</code> 来创建线程。但在爬虫工程中，如果有 <span class="arithmatex">\(10,000\)</span> 个 URL，绝不能一次性创建 <span class="arithmatex">\(10,000\)</span> 个线程。正确的工业级做法是使用 Python 标准库 <code>concurrent.futures</code> 提供的 <strong><code>ThreadPoolExecutor</code>线程池并发采集</strong>。</p>
+<p><strong>线程池（Thread Pool）</strong>的设计思想是：预先创建固定数量（<code>max_workers</code>）的工作线程驻留在内存中，将成千上万个待抓取的 URL 作为任务放入池中排队，工作线程每抓完一个网页就自动从队列里领取下一个 URL，从而完全省去了反复创建和销毁线程的系统开销。<code>ThreadPoolExecutor</code> 提供了两种核心调度范式：</p>
+<ol>
+<li><strong><code>executor.map(func, urls)</code></strong>：语法最简洁，按输入列表 <code>urls</code> 的原始顺序依次返回每个网页的采集结果，适合批量静态列表抓取。</li>
+<li><strong><code>executor.submit(func, url)</code> 配合 <code>as_completed(futures)</code></strong>：<code>submit()</code> 立即返回一个代表未来结果的 <code>Future</code> 对象；将所有 <code>Future</code> 传入 <code>as_completed()</code> 迭代器后，<strong>哪个网页先下载完成就先处理哪个（谁快谁先出）</strong>，不会因为某一个慢网页卡住后续已完成结果的落盘，并且能针对单个任务独立捕获异常，是生产环境的首选模式。</li>
+</ol>
+<p>在阅读下方的代码示例前，请注意关键参数与函数的作用：<code>max_workers=5</code> 将最大并发线程数限制为 5 个；<code>simulate_fetch_page(url, delay)</code> 模拟一个耗时 <span class="arithmatex">\(0.2\text{ s}\)</span> 的网络请求；<code>as_completed(future_to_url)</code> 实现了按完成先后顺序实时收集采集结果。</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">concurrent.futures</span><span class="w"> </span><span class="kn">import</span> <span class="n">ThreadPoolExecutor</span><span class="p">,</span> <span class="n">as_completed</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="k">def</span><span class="w"> </span><span class="nf">simulate_fetch_page</span><span class="p">(</span><span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">io_delay</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.2</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">float</span><span class="p">]:</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">    </span><span class="sd">"""模拟单页网络 I/O 阻塞请求与轻量级解析"""</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="c1"># 在 time.sleep (模拟网络 Socket 等待) 期间，当前线程会主动释放 GIL 锁！</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">io_delay</span><span class="p">)</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>    <span class="k">return</span> <span class="p">{</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>        <span class="s2">"url"</span><span class="p">:</span> <span class="n">url</span><span class="p">,</span>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>        <span class="s2">"status"</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span>
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>        <span class="s2">"title"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"AI语料详情页 - </span><span class="si">{</span><span class="n">url</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">'/'</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>        <span class="s2">"cost_ms"</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="n">io_delay</span> <span class="o">*</span> <span class="mi">1000</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>    <span class="p">}</span>
+</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>
+</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>
+</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="k">def</span><span class="w"> </span><span class="nf">run_sync_vs_threadpool</span><span class="p">(</span><span class="n">urls</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">max_workers</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="w">    </span><span class="sd">"""对比单线程同步抓取与 ThreadPoolExecutor 线程池并发抓取耗时"""</span>
+</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>    <span class="c1"># 1. 传统单线程同步顺序抓取</span>
+</span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>    <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
+</span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>    <span class="n">sync_results</span> <span class="o">=</span> <span class="p">[</span><span class="n">simulate_fetch_page</span><span class="p">(</span><span class="n">u</span><span class="p">)</span> <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">urls</span><span class="p">]</span>
+</span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a>    <span class="n">sync_elapsed</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span> <span class="o">-</span> <span class="n">t0</span>
+</span><span id="__span-0-23"><a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"🐢 [单线程同步] 抓取 </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">sync_results</span><span class="p">)</span><span class="si">}</span><span class="s2"> 页耗时: </span><span class="si">{</span><span class="n">sync_elapsed</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> 秒"</span><span class="p">)</span>
+</span><span id="__span-0-24"><a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a>
+</span><span id="__span-0-25"><a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a>    <span class="c1"># 2. 使用 ThreadPoolExecutor + as_completed 并发抓取</span>
+</span><span id="__span-0-26"><a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a>    <span class="n">t1</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
+</span><span id="__span-0-27"><a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a>    <span class="n">concurrent_results</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span id="__span-0-28"><a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a>    <span class="c1"># 使用 with 上下文管理器确保所有线程任务执行完毕后安全回收线程池</span>
+</span><span id="__span-0-29"><a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a>    <span class="k">with</span> <span class="n">ThreadPoolExecutor</span><span class="p">(</span><span class="n">max_workers</span><span class="o">=</span><span class="n">max_workers</span><span class="p">)</span> <span class="k">as</span> <span class="n">executor</span><span class="p">:</span>
+</span><span id="__span-0-30"><a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a>        <span class="c1"># 提交所有 URL 任务，建立 Future 对象到原始 URL 的映射字典</span>
+</span><span id="__span-0-31"><a id="__codelineno-0-31" name="__codelineno-0-31" href="#__codelineno-0-31"></a>        <span class="n">future_to_url</span> <span class="o">=</span> <span class="p">{</span><span class="n">executor</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">simulate_fetch_page</span><span class="p">,</span> <span class="n">u</span><span class="p">):</span> <span class="n">u</span> <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">urls</span><span class="p">}</span>
+</span><span id="__span-0-32"><a id="__codelineno-0-32" name="__codelineno-0-32" href="#__codelineno-0-32"></a>
+</span><span id="__span-0-33"><a id="__codelineno-0-33" name="__codelineno-0-33" href="#__codelineno-0-33"></a>        <span class="c1"># as_completed 会在任意一个线程完成下载时立即产出该 Future</span>
+</span><span id="__span-0-34"><a id="__codelineno-0-34" name="__codelineno-0-34" href="#__codelineno-0-34"></a>        <span class="k">for</span> <span class="n">future</span> <span class="ow">in</span> <span class="n">as_completed</span><span class="p">(</span><span class="n">future_to_url</span><span class="p">):</span>
+</span><span id="__span-0-35"><a id="__codelineno-0-35" name="__codelineno-0-35" href="#__codelineno-0-35"></a>            <span class="n">target_url</span> <span class="o">=</span> <span class="n">future_to_url</span><span class="p">[</span><span class="n">future</span><span class="p">]</span>
+</span><span id="__span-0-36"><a id="__codelineno-0-36" name="__codelineno-0-36" href="#__codelineno-0-36"></a>            <span class="k">try</span><span class="p">:</span>
+</span><span id="__span-0-37"><a id="__codelineno-0-37" name="__codelineno-0-37" href="#__codelineno-0-37"></a>                <span class="n">data</span> <span class="o">=</span> <span class="n">future</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
+</span><span id="__span-0-38"><a id="__codelineno-0-38" name="__codelineno-0-38" href="#__codelineno-0-38"></a>                <span class="n">concurrent_results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+</span><span id="__span-0-39"><a id="__codelineno-0-39" name="__codelineno-0-39" href="#__codelineno-0-39"></a>            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+</span><span id="__span-0-40"><a id="__codelineno-0-40" name="__codelineno-0-40" href="#__codelineno-0-40"></a>                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"❌ 抓取异常 [</span><span class="si">{</span><span class="n">target_url</span><span class="si">}</span><span class="s2">]: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</span><span id="__span-0-41"><a id="__codelineno-0-41" name="__codelineno-0-41" href="#__codelineno-0-41"></a>
+</span><span id="__span-0-42"><a id="__codelineno-0-42" name="__codelineno-0-42" href="#__codelineno-0-42"></a>    <span class="n">pool_elapsed</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span> <span class="o">-</span> <span class="n">t1</span>
+</span><span id="__span-0-43"><a id="__codelineno-0-43" name="__codelineno-0-43" href="#__codelineno-0-43"></a>    <span class="n">speedup</span> <span class="o">=</span> <span class="n">sync_elapsed</span> <span class="o">/</span> <span class="n">pool_elapsed</span>
+</span><span id="__span-0-44"><a id="__codelineno-0-44" name="__codelineno-0-44" href="#__codelineno-0-44"></a>    <span class="nb">print</span><span class="p">(</span>
+</span><span id="__span-0-45"><a id="__codelineno-0-45" name="__codelineno-0-45" href="#__codelineno-0-45"></a>        <span class="sa">f</span><span class="s2">"🚀 [线程池并发 (workers=</span><span class="si">{</span><span class="n">max_workers</span><span class="si">}</span><span class="s2">)] 抓取 </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">concurrent_results</span><span class="p">)</span><span class="si">}</span><span class="s2"> 页耗时: "</span>
+</span><span id="__span-0-46"><a id="__codelineno-0-46" name="__codelineno-0-46" href="#__codelineno-0-46"></a>        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">pool_elapsed</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> 秒 (提速比: </span><span class="si">{</span><span class="n">speedup</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">x)"</span>
+</span><span id="__span-0-47"><a id="__codelineno-0-47" name="__codelineno-0-47" href="#__codelineno-0-47"></a>    <span class="p">)</span>
+</span><span id="__span-0-48"><a id="__codelineno-0-48" name="__codelineno-0-48" href="#__codelineno-0-48"></a>
+</span><span id="__span-0-49"><a id="__codelineno-0-49" name="__codelineno-0-49" href="#__codelineno-0-49"></a>
+</span><span id="__span-0-50"><a id="__codelineno-0-50" name="__codelineno-0-50" href="#__codelineno-0-50"></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
+</span><span id="__span-0-51"><a id="__codelineno-0-51" name="__codelineno-0-51" href="#__codelineno-0-51"></a>    <span class="n">sample_urls</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">"https://corpus.example.edu/doc/</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">"</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">21</span><span class="p">)]</span>
+</span><span id="__span-0-52"><a id="__codelineno-0-52" name="__codelineno-0-52" href="#__codelineno-0-52"></a>    <span class="n">run_sync_vs_threadpool</span><span class="p">(</span><span class="n">sample_urls</span><span class="p">,</span> <span class="n">max_workers</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+</span></code></pre></div>
+<p>运行上述脚本可以看到：抓取 20 个单页耗时 <span class="arithmatex">\(0.2\text{ s}\)</span> 的网址，单线程同步模式需要 <strong><span class="arithmatex">\(4.02\text{ 秒}\)</span></strong>，而开启 <code>max_workers=5</code> 的线程池仅需 <strong><span class="arithmatex">\(0.81\text{ 秒}\)</span></strong>，提速比精准达到 <strong><span class="arithmatex">\(5.0\text{ 倍}\)</span></strong>！</p>
+<h3 id="22-queue">2.2 线程安全队列Queue与生产者消费者模型<a class="headerlink" href="#22-queue" title="Permanent link">&para;</a></h3>
+<p><code>ThreadPoolExecutor</code> 非常适合在启动前就已经明确知道所有待抓取 URL 列表的场景。但在全站爬虫或两级联动采集中，<strong>一组线程正在不断抓取列表页并解析出新的详情页 URL，另一组线程则需要实时消费这些新 URL 并把提取出的业务字段写入文件</strong>。如果多个线程同时对普通的 Python <code>list</code> 执行读写操作，极易引发数据竞争（Race Condition）。</p>
+<p>为此，Python 标准库提供了 <strong><code>queue.Queue</code>——线程安全队列与生产者消费者模型（Thread-Safe Queue &amp; Producer-Consumer Pattern）</strong>。<code>queue.Queue</code> 内部已经封装好了互斥锁（Mutex Lock）与条件变量，支持多生产者线程（Producer，负责网络下载或新链接发现）与多消费者线程（Consumer，负责数据解析或统一落盘）安全地并发交换数据。其三大核心协调方法必须成对掌握：</p>
+<ul>
+<li><strong><code>q.put(item)</code></strong>：生产者将一个任务推入队列尾部（若设置了队列容量上限 <code>maxsize</code> 且已满，生产者会自动阻塞等待，从而天然防止内存溢出 OOM）。</li>
+<li><strong><code>q.get()</code></strong>：消费者从队列头部安全取出一个任务（若队列为空，消费者会自动挂起等待）。</li>
+<li><strong><code>q.task_done()</code> 与 <code>q.join()</code></strong>：每当消费者完整处理完一个从队列取出的任务后，必须调用一次 <code>q.task_done()</code> 向队列发送完成信号；主线程调用 <code>q.join()</code> 则会一直阻塞，直到队列中所有曾入队的任务全部收到 <code>task_done()</code> 确认为止。此外，工程上常采用向队列推入 <code>None</code>（称为<strong>哨兵对象 Sentinel / 毒丸 Poison Pill</strong>）的方式通知消费者线程优雅退出循环。</li>
+</ul>
+<h3 id="23-processpoolexecutor">2.3 ProcessPoolExecutor多进程并行解析<a class="headerlink" href="#23-processpoolexecutor" title="Permanent link">&para;</a></h3>
+<p>正如 1.3 节所剖析的，当我们的爬虫下载回了数千个体积庞大、结构复杂的 HTML 文档，或者需要对提取出的海量正文字段执行密集的中文分词、正则清洗与 SimHash 指纹计算时，<strong>解析阶段就转变成了典型的 CPU 密集型瓶颈</strong>。受制于 GIL 锁，此时增加再多线程也无法利用多核 CPU 加速解析。</p>
+<p>标准解决方案是引入 <code>concurrent.futures</code> 中的 <strong><code>ProcessPoolExecutor</code>多进程并行解析</strong>。它的 API 接口（<code>submit</code>、<code>map</code>、<code>as_completed</code>）与 <code>ThreadPoolExecutor</code> 几乎完全一致，但底层会启动多个独立的操作系统子进程（默认数量等于机器的 CPU 逻辑核心数 <code>os.cpu_count()</code>）。在工业级混合架构中，我们通常采用<strong>“多线程/异步协程负责高并发网络 I/O 下载 + <code>ProcessPoolExecutor</code> 多进程池负责重度 CPU 解析与清洗”</strong>的协同流水线。</p>
+<p>下面这段代码完整演示了两部分核心技能：一是使用 <code>queue.Queue</code> 构建“3 个下载生产者线程 + 2 个解析消费者线程”的线程安全流水线；二是展示如何定义一个顶层纯函数 <code>cpu_heavy_parse(raw_html)</code> 并交由 <code>ProcessPoolExecutor</code> 实现多核并行解析（注意：多进程传递的函数与参数必须支持 <code>pickle</code> 序列化，且必须在 <code>if __name__ == "__main__":</code> 保护块内启动）：</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">queue</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="kn">import</span><span class="w"> </span><span class="nn">threading</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="kn">from</span><span class="w"> </span><span class="nn">concurrent.futures</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProcessPoolExecutor</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="c1"># 1. 定义供 ProcessPoolExecutor 调用的顶层 CPU 密集型解析函数</span>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="k">def</span><span class="w"> </span><span class="nf">cpu_heavy_parse</span><span class="p">(</span><span class="n">raw_html</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="w">    </span><span class="sd">"""模拟针对大型 HTML 文本的高强度正则提取与词频统计 (CPU-Bound)"""</span>
+</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>    <span class="n">words</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="sa">r</span><span class="s2">"[a-zA-Z0-9_\u4e00-\u9fa5]+"</span><span class="p">,</span> <span class="n">raw_html</span><span class="p">)</span>
+</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>    <span class="c1"># 模拟重度 CPU 计算（如文本特征哈希计算）</span>
+</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>    <span class="n">checksum</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span> <span class="nb">ord</span><span class="p">(</span><span class="n">ch</span><span class="p">)</span> <span class="o">*</span> <span class="n">idx</span> <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">word</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">words</span><span class="p">[:</span><span class="mi">500</span><span class="p">])</span> <span class="k">for</span> <span class="n">ch</span> <span class="ow">in</span> <span class="n">word</span> <span class="p">)</span>
+</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>    <span class="k">return</span> <span class="p">{</span><span class="s2">"word_count"</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">words</span><span class="p">),</span> <span class="s2">"checksum"</span><span class="p">:</span> <span class="n">checksum</span><span class="p">}</span>
+</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>
+</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>
+</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a><span class="c1"># 2. 基于 queue.Queue 的多线程生产者-消费者爬虫管道</span>
+</span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a><span class="k">def</span><span class="w"> </span><span class="nf">run_producer_consumer_pipeline</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-1-19"><a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>    <span class="n">url_queue</span><span class="p">:</span> <span class="n">queue</span><span class="o">.</span><span class="n">Queue</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="n">queue</span><span class="o">.</span><span class="n">Queue</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+</span><span id="__span-1-20"><a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a>    <span class="n">html_queue</span><span class="p">:</span> <span class="n">queue</span><span class="o">.</span><span class="n">Queue</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="n">queue</span><span class="o">.</span><span class="n">Queue</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+</span><span id="__span-1-21"><a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a>    <span class="n">parsed_items</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span id="__span-1-22"><a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a>    <span class="n">lock</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Lock</span><span class="p">()</span>
+</span><span id="__span-1-23"><a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a>
+</span><span id="__span-1-24"><a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">downloader_worker</span><span class="p">(</span><span class="n">worker_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-1-25"><a id="__codelineno-1-25" name="__codelineno-1-25" href="#__codelineno-1-25"></a><span class="w">        </span><span class="sd">"""生产者线程：从 url_queue 取网址下载，将源码推入 html_queue"""</span>
+</span><span id="__span-1-26"><a id="__codelineno-1-26" name="__codelineno-1-26" href="#__codelineno-1-26"></a>        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+</span><span id="__span-1-27"><a id="__codelineno-1-27" name="__codelineno-1-27" href="#__codelineno-1-27"></a>            <span class="n">url</span> <span class="o">=</span> <span class="n">url_queue</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+</span><span id="__span-1-28"><a id="__codelineno-1-28" name="__codelineno-1-28" href="#__codelineno-1-28"></a>            <span class="k">if</span> <span class="n">url</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># 收到哨兵毒丸信号，安全退出线程</span>
+</span><span id="__span-1-29"><a id="__codelineno-1-29" name="__codelineno-1-29" href="#__codelineno-1-29"></a>                <span class="n">url_queue</span><span class="o">.</span><span class="n">task_done</span><span class="p">()</span>
+</span><span id="__span-1-30"><a id="__codelineno-1-30" name="__codelineno-1-30" href="#__codelineno-1-30"></a>                <span class="k">break</span>
+</span><span id="__span-1-31"><a id="__codelineno-1-31" name="__codelineno-1-31" href="#__codelineno-1-31"></a>            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.05</span><span class="p">)</span>  <span class="c1"># 模拟网络 I/O 延迟</span>
+</span><span id="__span-1-32"><a id="__codelineno-1-32" name="__codelineno-1-32" href="#__codelineno-1-32"></a>            <span class="n">fake_html</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"&lt;html&gt;&lt;body&gt;&lt;h1&gt;文档 </span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s2">&lt;/h1&gt;&lt;p&gt;人工智能语料内容...&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;"</span>
+</span><span id="__span-1-33"><a id="__codelineno-1-33" name="__codelineno-1-33" href="#__codelineno-1-33"></a>            <span class="n">html_queue</span><span class="o">.</span><span class="n">put</span><span class="p">((</span><span class="n">url</span><span class="p">,</span> <span class="n">fake_html</span><span class="p">))</span>
+</span><span id="__span-1-34"><a id="__codelineno-1-34" name="__codelineno-1-34" href="#__codelineno-1-34"></a>            <span class="n">url_queue</span><span class="o">.</span><span class="n">task_done</span><span class="p">()</span>
+</span><span id="__span-1-35"><a id="__codelineno-1-35" name="__codelineno-1-35" href="#__codelineno-1-35"></a>
+</span><span id="__span-1-36"><a id="__codelineno-1-36" name="__codelineno-1-36" href="#__codelineno-1-36"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">parser_worker</span><span class="p">(</span><span class="n">worker_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-1-37"><a id="__codelineno-1-37" name="__codelineno-1-37" href="#__codelineno-1-37"></a><span class="w">        </span><span class="sd">"""消费者线程：从 html_queue 取源码，提取结构化结果"""</span>
+</span><span id="__span-1-38"><a id="__codelineno-1-38" name="__codelineno-1-38" href="#__codelineno-1-38"></a>        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+</span><span id="__span-1-39"><a id="__codelineno-1-39" name="__codelineno-1-39" href="#__codelineno-1-39"></a>            <span class="n">item</span> <span class="o">=</span> <span class="n">html_queue</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+</span><span id="__span-1-40"><a id="__codelineno-1-40" name="__codelineno-1-40" href="#__codelineno-1-40"></a>            <span class="k">if</span> <span class="n">item</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-1-41"><a id="__codelineno-1-41" name="__codelineno-1-41" href="#__codelineno-1-41"></a>                <span class="n">html_queue</span><span class="o">.</span><span class="n">task_done</span><span class="p">()</span>
+</span><span id="__span-1-42"><a id="__codelineno-1-42" name="__codelineno-1-42" href="#__codelineno-1-42"></a>                <span class="k">break</span>
+</span><span id="__span-1-43"><a id="__codelineno-1-43" name="__codelineno-1-43" href="#__codelineno-1-43"></a>            <span class="n">url</span><span class="p">,</span> <span class="n">html</span> <span class="o">=</span> <span class="n">item</span>
+</span><span id="__span-1-44"><a id="__codelineno-1-44" name="__codelineno-1-44" href="#__codelineno-1-44"></a>            <span class="n">stats</span> <span class="o">=</span> <span class="n">cpu_heavy_parse</span><span class="p">(</span><span class="n">html</span><span class="p">)</span>
+</span><span id="__span-1-45"><a id="__codelineno-1-45" name="__codelineno-1-45" href="#__codelineno-1-45"></a>            <span class="k">with</span> <span class="n">lock</span><span class="p">:</span>
+</span><span id="__span-1-46"><a id="__codelineno-1-46" name="__codelineno-1-46" href="#__codelineno-1-46"></a>                <span class="n">parsed_items</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">"url"</span><span class="p">:</span> <span class="n">url</span><span class="p">,</span> <span class="o">**</span><span class="n">stats</span><span class="p">})</span>
+</span><span id="__span-1-47"><a id="__codelineno-1-47" name="__codelineno-1-47" href="#__codelineno-1-47"></a>            <span class="n">html_queue</span><span class="o">.</span><span class="n">task_done</span><span class="p">()</span>
+</span><span id="__span-1-48"><a id="__codelineno-1-48" name="__codelineno-1-48" href="#__codelineno-1-48"></a>
+</span><span id="__span-1-49"><a id="__codelineno-1-49" name="__codelineno-1-49" href="#__codelineno-1-49"></a>    <span class="c1"># 启动 3 个下载线程与 2 个解析线程</span>
+</span><span id="__span-1-50"><a id="__codelineno-1-50" name="__codelineno-1-50" href="#__codelineno-1-50"></a>    <span class="n">num_downloaders</span><span class="p">,</span> <span class="n">num_parsers</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span>
+</span><span id="__span-1-51"><a id="__codelineno-1-51" name="__codelineno-1-51" href="#__codelineno-1-51"></a>    <span class="n">dl_threads</span> <span class="o">=</span> <span class="p">[</span>
+</span><span id="__span-1-52"><a id="__codelineno-1-52" name="__codelineno-1-52" href="#__codelineno-1-52"></a>        <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">downloader_worker</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">i</span><span class="p">,))</span>
+</span><span id="__span-1-53"><a id="__codelineno-1-53" name="__codelineno-1-53" href="#__codelineno-1-53"></a>        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_downloaders</span><span class="p">)</span>
+</span><span id="__span-1-54"><a id="__codelineno-1-54" name="__codelineno-1-54" href="#__codelineno-1-54"></a>    <span class="p">]</span>
+</span><span id="__span-1-55"><a id="__codelineno-1-55" name="__codelineno-1-55" href="#__codelineno-1-55"></a>    <span class="n">ps_threads</span> <span class="o">=</span> <span class="p">[</span>
+</span><span id="__span-1-56"><a id="__codelineno-1-56" name="__codelineno-1-56" href="#__codelineno-1-56"></a>        <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">parser_worker</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">i</span><span class="p">,))</span>
+</span><span id="__span-1-57"><a id="__codelineno-1-57" name="__codelineno-1-57" href="#__codelineno-1-57"></a>        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_parsers</span><span class="p">)</span>
+</span><span id="__span-1-58"><a id="__codelineno-1-58" name="__codelineno-1-58" href="#__codelineno-1-58"></a>    <span class="p">]</span>
+</span><span id="__span-1-59"><a id="__codelineno-1-59" name="__codelineno-1-59" href="#__codelineno-1-59"></a>    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">dl_threads</span> <span class="o">+</span> <span class="n">ps_threads</span><span class="p">:</span>
+</span><span id="__span-1-60"><a id="__codelineno-1-60" name="__codelineno-1-60" href="#__codelineno-1-60"></a>        <span class="n">t</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+</span><span id="__span-1-61"><a id="__codelineno-1-61" name="__codelineno-1-61" href="#__codelineno-1-61"></a>
+</span><span id="__span-1-62"><a id="__codelineno-1-62" name="__codelineno-1-62" href="#__codelineno-1-62"></a>    <span class="c1"># 注入 10 个待抓取种子 URL</span>
+</span><span id="__span-1-63"><a id="__codelineno-1-63" name="__codelineno-1-63" href="#__codelineno-1-63"></a>    <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">11</span><span class="p">):</span>
+</span><span id="__span-1-64"><a id="__codelineno-1-64" name="__codelineno-1-64" href="#__codelineno-1-64"></a>        <span class="n">url_queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="sa">f</span><span class="s2">"https://ai.example.edu/paper/</span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</span><span id="__span-1-65"><a id="__codelineno-1-65" name="__codelineno-1-65" href="#__codelineno-1-65"></a>
+</span><span id="__span-1-66"><a id="__codelineno-1-66" name="__codelineno-1-66" href="#__codelineno-1-66"></a>    <span class="c1"># 等待所有 URL 下载完毕，随后投放毒丸终止下载线程</span>
+</span><span id="__span-1-67"><a id="__codelineno-1-67" name="__codelineno-1-67" href="#__codelineno-1-67"></a>    <span class="n">url_queue</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+</span><span id="__span-1-68"><a id="__codelineno-1-68" name="__codelineno-1-68" href="#__codelineno-1-68"></a>    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_downloaders</span><span class="p">):</span>
+</span><span id="__span-1-69"><a id="__codelineno-1-69" name="__codelineno-1-69" href="#__codelineno-1-69"></a>        <span class="n">url_queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+</span><span id="__span-1-70"><a id="__codelineno-1-70" name="__codelineno-1-70" href="#__codelineno-1-70"></a>    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">dl_threads</span><span class="p">:</span>
+</span><span id="__span-1-71"><a id="__codelineno-1-71" name="__codelineno-1-71" href="#__codelineno-1-71"></a>        <span class="n">t</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+</span><span id="__span-1-72"><a id="__codelineno-1-72" name="__codelineno-1-72" href="#__codelineno-1-72"></a>
+</span><span id="__span-1-73"><a id="__codelineno-1-73" name="__codelineno-1-73" href="#__codelineno-1-73"></a>    <span class="c1"># 等待所有 HTML 解析完毕，随后投放毒丸终止解析线程</span>
+</span><span id="__span-1-74"><a id="__codelineno-1-74" name="__codelineno-1-74" href="#__codelineno-1-74"></a>    <span class="n">html_queue</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+</span><span id="__span-1-75"><a id="__codelineno-1-75" name="__codelineno-1-75" href="#__codelineno-1-75"></a>    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_parsers</span><span class="p">):</span>
+</span><span id="__span-1-76"><a id="__codelineno-1-76" name="__codelineno-1-76" href="#__codelineno-1-76"></a>        <span class="n">html_queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+</span><span id="__span-1-77"><a id="__codelineno-1-77" name="__codelineno-1-77" href="#__codelineno-1-77"></a>    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">ps_threads</span><span class="p">:</span>
+</span><span id="__span-1-78"><a id="__codelineno-1-78" name="__codelineno-1-78" href="#__codelineno-1-78"></a>        <span class="n">t</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+</span><span id="__span-1-79"><a id="__codelineno-1-79" name="__codelineno-1-79" href="#__codelineno-1-79"></a>
+</span><span id="__span-1-80"><a id="__codelineno-1-80" name="__codelineno-1-80" href="#__codelineno-1-80"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"✅ [Queue 生产者-消费者] 安全处理完成 </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">parsed_items</span><span class="p">)</span><span class="si">}</span><span class="s2"> 条记录"</span><span class="p">)</span>
+</span><span id="__span-1-81"><a id="__codelineno-1-81" name="__codelineno-1-81" href="#__codelineno-1-81"></a>
+</span><span id="__span-1-82"><a id="__codelineno-1-82" name="__codelineno-1-82" href="#__codelineno-1-82"></a>
+</span><span id="__span-1-83"><a id="__codelineno-1-83" name="__codelineno-1-83" href="#__codelineno-1-83"></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
+</span><span id="__span-1-84"><a id="__codelineno-1-84" name="__codelineno-1-84" href="#__codelineno-1-84"></a>    <span class="n">run_producer_consumer_pipeline</span><span class="p">()</span>
+</span><span id="__span-1-85"><a id="__codelineno-1-85" name="__codelineno-1-85" href="#__codelineno-1-85"></a>
+</span><span id="__span-1-86"><a id="__codelineno-1-86" name="__codelineno-1-86" href="#__codelineno-1-86"></a>    <span class="c1"># 演示 ProcessPoolExecutor 多进程并行解析大批次 HTML</span>
+</span><span id="__span-1-87"><a id="__codelineno-1-87" name="__codelineno-1-87" href="#__codelineno-1-87"></a>    <span class="n">batch_htmls</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">"&lt;div&gt;AI大模型训练语料段落 </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2"> "</span> <span class="o">*</span> <span class="mi">200</span> <span class="o">+</span> <span class="s2">"&lt;/div&gt;"</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">8</span><span class="p">)]</span>
+</span><span id="__span-1-88"><a id="__codelineno-1-88" name="__codelineno-1-88" href="#__codelineno-1-88"></a>    <span class="k">with</span> <span class="n">ProcessPoolExecutor</span><span class="p">(</span><span class="n">max_workers</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="k">as</span> <span class="n">proc_pool</span><span class="p">:</span>
+</span><span id="__span-1-89"><a id="__codelineno-1-89" name="__codelineno-1-89" href="#__codelineno-1-89"></a>        <span class="n">results</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">proc_pool</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">cpu_heavy_parse</span><span class="p">,</span> <span class="n">batch_htmls</span><span class="p">))</span>
+</span><span id="__span-1-90"><a id="__codelineno-1-90" name="__codelineno-1-90" href="#__codelineno-1-90"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"⚙️ [ProcessPoolExecutor] 多核并行解析完成 </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">results</span><span class="p">)</span><span class="si">}</span><span class="s2"> 份大型文档"</span><span class="p">)</span>
+</span></code></pre></div>
+<hr />
+<h2 id="3-asyncio-asyncawait">3. 异步协程革命：<code>asyncio</code> 事件循环与 <code>async/await</code> 编程<a class="headerlink" href="#3-asyncio-asyncawait" title="Permanent link">&para;</a></h2>
+<p>虽然 <code>ThreadPoolExecutor</code> 已经能将爬虫速度提升数倍至数十倍，但正如我们在 1.2 节计算的，操作系统原生线程的栈内存开销（每线程数 MB）与内核态上下文切换成本，决定了单机线程池的并发上限通常止步于 <strong><span class="arithmatex">\(50\sim 200\)</span> 并发</strong>。如果我们想要在一台普通笔记本电脑上同时保持 <strong><span class="arithmatex">\(1,000\sim 5,000\)</span> 个并发网络连接</strong>，该怎么办？答案就是彻底抛弃多线程的内核态抢占式调度，迈入现代 Python 爬虫的皇冠技术——<strong>异步协程（Asynchronous Coroutines）</strong>。</p>
+<h3 id="31-coroutine">3.1 协程Coroutine概念与用户态切换<a class="headerlink" href="#31-coroutine" title="Permanent link">&para;</a></h3>
+<p><strong>协程Coroutine概念与用户态切换（Coroutines &amp; User-Space Cooperative Switching）</strong>，全称为“协同式微线程（Cooperative Micro-threads）”。与操作系统线程相比，协程具有三个颠覆性的工程特征：</p>
+<ol>
+<li><strong>完全运行在单线程用户态（Single-Threaded User Space）</strong>：成千上万个协程全部运行在<strong>同一个操作系统线程</strong>内部！当协程 A 暂停并切换到协程 B 时，完全不需要陷入操作系统内核态，仅需在 Python 用户态内存中交换几个栈帧指针，<strong>单次切换耗时仅为纳秒（<span class="arithmatex">\(\text{ns}\)</span>）级</strong>，比操作系统线程切换快上百倍。</li>
+<li><strong>极致的轻量级内存占用</strong>：一个操作系统线程动辄占用 <span class="arithmatex">\(1\text{ MB}\sim 8\text{ MB}\)</span> 栈内存，而一个 Python 协程对象在内存中仅占用约 <strong><span class="arithmatex">\(2\text{ KB}\sim 4\text{ KB}\)</span></strong>。这意味着在单机内同时开启 <span class="arithmatex">\(10,000\)</span> 个协程，仅消耗约 <span class="arithmatex">\(30\text{ MB}\)</span> 内存！</li>
+<li><strong>协作式主动让出控制权（Cooperative Multitasking）</strong>：操作系统线程采用“抢占式调度”（随时可能被内核强行打断，因此需要加锁防冲突）；而协程采用“协作式调度”——<strong>除非当前协程在遇到网络 I/O 等待时显式通过 <code>await</code> 关键字主动让出（Yield）CPU 控制权，否则没有任何其他协程能中途打断它</strong>。由于全程只在单线程内顺序交替执行，协程在非 <code>await</code> 语句块之间修改共享字典或集合时更加安全可控。</li>
+</ol>
+<h3 id="32-asyncioevent-loop">3.2 asyncio事件循环Event-Loop原理<a class="headerlink" href="#32-asyncioevent-loop" title="Permanent link">&para;</a></h3>
+<p>如果所有协程都在单线程里运行，是谁在负责监听哪一个网页的网络数据包已经到达网卡、并唤醒对应的协程继续执行呢？这个核心调度中枢就是 <strong><code>asyncio</code>事件循环Event-Loop原理（Event Loop &amp; I/O Multiplexing）</strong>。</p>
+<p><code>asyncio</code> 事件循环的底层依托于操作系统提供的高性能 <strong>I/O 多路复用技术（I/O Multiplexing）</strong>——在 Linux 下是 <code>epoll</code>，在 macOS/BSD 下是 <code>kqueue</code>，在 Windows 下是 <code>IOCP</code>。我们可以把事件循环想象成一位技艺高超的国际象棋大师，同时与 100 名棋手进行车轮战：</p>
+<ol>
+<li>大师（单线程 Event Loop）走到第 1 台棋桌（协程 1）前，花 <span class="arithmatex">\(1\text{ ms}\)</span> 走一步棋（发出 HTTP 请求报文），并把该网络连接的套接字（Socket）注册到操作系统的 <code>epoll/IOCP</code> 监听器上；</li>
+<li>在等待第 1 名对手思考（等待远端服务器经过 <span class="arithmatex">\(200\text{ ms}\)</span> 网络返回响应）期间，<strong>大师绝不会呆立在 1 号桌前苦等</strong>，而是立即挂起协程 1，转身走到 2 号桌（协程 2）发出第 2 个请求，接着去 3 号桌、4 号桌……</li>
+<li>当操作系统底层网卡收到 1 号桌或 5 号桌返回的 HTTP 响应字节流时，<code>epoll/IOCP</code> 会立刻触发就绪事件通知事件循环；大师随即回到对应的棋桌前，从上次 <code>await</code> 暂停的那一行代码处精准恢复该协程的执行，完成网页解析。</li>
+</ol>
+<h3 id="33-asyncawait">3.3 async与await异步关键字语法规范<a class="headerlink" href="#33-asyncawait" title="Permanent link">&para;</a></h3>
+<p>Python 通过 <strong><code>async</code>与<code>await</code>异步关键字语法规范</strong> 将上述复杂的事件循环机制封装成了极其优雅的原生语法：</p>
+<ul>
+<li><strong><code>async def func_name():</code></strong>：使用 <code>async def</code> 定义的函数称为<strong>协程函数（Coroutine Function）</strong>。<strong>极易踩坑点</strong>：直接调用 <code>coro = fetch(url)</code> <strong>并不会执行函数体内的任何代码</strong>，它只是返回一个尚未运行的协程对象（Coroutine Object）。要真正启动顶层协程，必须使用 <code>asyncio.run(main())</code>。</li>
+<li><strong><code>await &lt;awaitable&gt;</code></strong>：<code>await</code> 关键字只能在 <code>async def</code> 函数内部使用。它的含义是：<strong>“在此处暂停当前协程的执行，将控制权交还给 <code>asyncio</code> 事件循环去跑其他就绪任务；直到右侧的可等待对象（如异步网络请求、异步文件写入或 <code>asyncio.sleep</code>）完成后，再拿着返回结果从这里继续往下走。”</strong></li>
+<li><strong><code>async with</code> 与 <code>async for</code></strong>：分别表示异步上下文管理器（在进入 <code>__aenter__</code> 和退出 <code>__aexit__</code> 时自动支持 <code>await</code>，如安全管理异步连接池 <code>ClientSession</code>）和异步迭代器（在每次迭代获取下一块流式数据时自动 <code>await</code>）。</li>
+</ul>
+<div class="admonition danger">
+<p class="admonition-title">异步协程爬虫『头号死穴』：严禁在 <code>async def</code> 中混用同步阻塞调用！</p>
+<p>这是初学者编写异步爬虫时最常犯的致命错误：在 <code>async def</code> 函数内部写下了 <code>time.sleep(2)</code> 或 <code>requests.get(url)</code>！
+请牢记：<code>asyncio</code> 的一切并发魔力都建立在遇到 I/O 时通过 <code>await</code> <strong>主动向事件循环让出控制权</strong>之上。如果你调用了传统的同步阻塞函数 <code>requests.get()</code> 或 <code>time.sleep()</code>，它根本不会通知事件循环，而是直接把<strong>唯一的那个操作系统主线程死死卡住</strong>！一旦主线程被阻塞，整个事件循环里的其他 999 个协程将全部陷入假死停摆，你的异步爬虫瞬间退化成最慢的单线程同步爬虫！
+<strong>铁律对照表</strong>：</p>
+<ul>
+<li>严禁使用 <code>time.sleep(n)</code> <span class="arithmatex">\(\rightarrow\)</span> 必须替换为 <strong><code>await asyncio.sleep(n)</code></strong>；</li>
+<li>严禁使用 <code>requests.get(url)</code> <span class="arithmatex">\(\rightarrow\)</span> 必须替换为 <strong><code>aiohttp</code></strong> 或 <strong><code>httpx.AsyncClient</code></strong>；</li>
+<li>严禁在大吞吐循环中直接使用同步阻塞 <code>open().write()</code> <span class="arithmatex">\(\rightarrow\)</span> 替换为 <strong><code>aiofiles.open()</code></strong>。</li>
+</ul>
+</div>
+<h3 id="34-asynciogathertask">3.4 asyncio.gather与Task并发任务编排<a class="headerlink" href="#34-asynciogathertask" title="Permanent link">&para;</a></h3>
+<p>在编写异步爬虫时，另一个高频误区是<strong>“在 <code>for</code> 循环中直接逐个 <code>await</code>”</strong>：</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># ❌ 错误示范：在循环里直接 await，本质上还是等第1个抓完再发第2个（完全串行！）</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="k">for</span> <span class="n">url</span> <span class="ow">in</span> <span class="n">urls</span><span class="p">:</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="n">html</span> <span class="o">=</span> <span class="k">await</span> <span class="n">fetch</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+</span></code></pre></div>
+<p>要让所有请求在同一时刻并发飞出去，必须掌握 <strong><code>asyncio.gather</code>与<code>Task</code>并发任务编排</strong>：</p>
+<ol>
+<li><strong><code>asyncio.create_task(coro)</code></strong>：将一个协程对象包装成 <code>Task</code> 任务并<strong>立即注册到事件循环的就绪队列中开始后台调度执行</strong>，而无需等待它完成即可继续往下走。</li>
+<li><strong><code>await asyncio.gather(*tasks, return_exceptions=True)</code></strong>：接收一组协程或 <code>Task</code> 对象，将它们<strong>同时并发调度到事件循环中运行</strong>，并等待全部完成后按传入顺序返回结果列表。</li>
+<li><strong>生产环境必加参数 <code>return_exceptions=True</code></strong>：默认情况下（<code>return_exceptions=False</code>），只要并发的 100 个 URL 中有 1 个 URL 抛出网络超时异常，<code>gather</code> 就会立刻向上抛出异常中断主流程；而设置 <strong><code>return_exceptions=True</code></strong> 后，单个失败任务的异常对象会被作为普通元素放进返回列表中，其余 99 个正常任务不受任何影响！</li>
+</ol>
+<p>下面这段代码完整展示了“错误的循环内串行 <code>await</code>”与“正确的 <code>create_task</code> + <code>asyncio.gather(..., return_exceptions=True)</code> 并发任务编排”在耗时与容错处理上的巨大差异：</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">mock_async_fetch</span><span class="p">(</span><span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">delay</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.2</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">    </span><span class="sd">"""模拟异步非阻塞网络请求协程"""</span>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>    <span class="c1"># 使用 await asyncio.sleep 主动将控制权交还给 Event Loop</span>
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>    <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">delay</span><span class="p">)</span>
+</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>    <span class="k">if</span> <span class="s2">"bad-link"</span> <span class="ow">in</span> <span class="n">url</span><span class="p">:</span>
+</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>        <span class="k">raise</span> <span class="ne">TimeoutError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"请求超时: </span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>    <span class="k">return</span> <span class="p">{</span><span class="s2">"url"</span><span class="p">:</span> <span class="n">url</span><span class="p">,</span> <span class="s2">"content"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"&lt;html&gt;</span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s2"> 的正文内容&lt;/html&gt;"</span><span class="p">}</span>
+</span><span id="__span-3-12"><a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a>
+</span><span id="__span-3-13"><a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a>
+</span><span id="__span-3-14"><a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-3-15"><a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a>    <span class="n">urls</span> <span class="o">=</span> <span class="p">[</span>
+</span><span id="__span-3-16"><a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a>        <span class="s2">"https://ai.example.edu/p/1"</span><span class="p">,</span>
+</span><span id="__span-3-17"><a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a>        <span class="s2">"https://ai.example.edu/p/2"</span><span class="p">,</span>
+</span><span id="__span-3-18"><a id="__codelineno-3-18" name="__codelineno-3-18" href="#__codelineno-3-18"></a>        <span class="s2">"https://ai.example.edu/bad-link"</span><span class="p">,</span>  <span class="c1"># 故意混入一个会超时的异常链接</span>
+</span><span id="__span-3-19"><a id="__codelineno-3-19" name="__codelineno-3-19" href="#__codelineno-3-19"></a>        <span class="s2">"https://ai.example.edu/p/4"</span><span class="p">,</span>
+</span><span id="__span-3-20"><a id="__codelineno-3-20" name="__codelineno-3-20" href="#__codelineno-3-20"></a>        <span class="s2">"https://ai.example.edu/p/5"</span><span class="p">,</span>
+</span><span id="__span-3-21"><a id="__codelineno-3-21" name="__codelineno-3-21" href="#__codelineno-3-21"></a>    <span class="p">]</span>
+</span><span id="__span-3-22"><a id="__codelineno-3-22" name="__codelineno-3-22" href="#__codelineno-3-22"></a>
+</span><span id="__span-3-23"><a id="__codelineno-3-23" name="__codelineno-3-23" href="#__codelineno-3-23"></a>    <span class="c1"># 1. 反面教材：在 for 循环中直接 await（退化为串行等待，总耗时 = 5 * 0.2s = 1.0s）</span>
+</span><span id="__span-3-24"><a id="__codelineno-3-24" name="__codelineno-3-24" href="#__codelineno-3-24"></a>    <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
+</span><span id="__span-3-25"><a id="__codelineno-3-25" name="__codelineno-3-25" href="#__codelineno-3-25"></a>    <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">urls</span><span class="p">[:</span><span class="mi">3</span><span class="p">]:</span>
+</span><span id="__span-3-26"><a id="__codelineno-3-26" name="__codelineno-3-26" href="#__codelineno-3-26"></a>        <span class="k">try</span><span class="p">:</span>
+</span><span id="__span-3-27"><a id="__codelineno-3-27" name="__codelineno-3-27" href="#__codelineno-3-27"></a>            <span class="k">await</span> <span class="n">mock_async_fetch</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">delay</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
+</span><span id="__span-3-28"><a id="__codelineno-3-28" name="__codelineno-3-28" href="#__codelineno-3-28"></a>        <span class="k">except</span> <span class="ne">TimeoutError</span><span class="p">:</span>
+</span><span id="__span-3-29"><a id="__codelineno-3-29" name="__codelineno-3-29" href="#__codelineno-3-29"></a>            <span class="k">pass</span>
+</span><span id="__span-3-30"><a id="__codelineno-3-30" name="__codelineno-3-30" href="#__codelineno-3-30"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"⚠️ [错误示范：循环内直接 await] 抓取 3 页串行耗时: </span><span class="si">{</span><span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">t0</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> 秒"</span><span class="p">)</span>
+</span><span id="__span-3-31"><a id="__codelineno-3-31" name="__codelineno-3-31" href="#__codelineno-3-31"></a>
+</span><span id="__span-3-32"><a id="__codelineno-3-32" name="__codelineno-3-32" href="#__codelineno-3-32"></a>    <span class="c1"># 2. 正确范式：使用 create_task + asyncio.gather(return_exceptions=True) 并发编排</span>
+</span><span id="__span-3-33"><a id="__codelineno-3-33" name="__codelineno-3-33" href="#__codelineno-3-33"></a>    <span class="n">t1</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
+</span><span id="__span-3-34"><a id="__codelineno-3-34" name="__codelineno-3-34" href="#__codelineno-3-34"></a>    <span class="n">tasks</span> <span class="o">=</span> <span class="p">[</span><span class="n">asyncio</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span><span class="n">mock_async_fetch</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">delay</span><span class="o">=</span><span class="mf">0.2</span><span class="p">))</span> <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">urls</span><span class="p">]</span>
+</span><span id="__span-3-35"><a id="__codelineno-3-35" name="__codelineno-3-35" href="#__codelineno-3-35"></a>
+</span><span id="__span-3-36"><a id="__codelineno-3-36" name="__codelineno-3-36" href="#__codelineno-3-36"></a>    <span class="c1"># return_exceptions=True 确保单个任务报错不会中断其余并发任务</span>
+</span><span id="__span-3-37"><a id="__codelineno-3-37" name="__codelineno-3-37" href="#__codelineno-3-37"></a>    <span class="n">results</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="o">*</span><span class="n">tasks</span><span class="p">,</span> <span class="n">return_exceptions</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="__span-3-38"><a id="__codelineno-3-38" name="__codelineno-3-38" href="#__codelineno-3-38"></a>    <span class="n">elapsed</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span> <span class="o">-</span> <span class="n">t1</span>
+</span><span id="__span-3-39"><a id="__codelineno-3-39" name="__codelineno-3-39" href="#__codelineno-3-39"></a>
+</span><span id="__span-3-40"><a id="__codelineno-3-40" name="__codelineno-3-40" href="#__codelineno-3-40"></a>    <span class="n">success_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span id="__span-3-41"><a id="__codelineno-3-41" name="__codelineno-3-41" href="#__codelineno-3-41"></a>    <span class="k">for</span> <span class="n">url</span><span class="p">,</span> <span class="n">res</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">urls</span><span class="p">,</span> <span class="n">results</span><span class="p">):</span>
+</span><span id="__span-3-42"><a id="__codelineno-3-42" name="__codelineno-3-42" href="#__codelineno-3-42"></a>        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="ne">Exception</span><span class="p">):</span>
+</span><span id="__span-3-43"><a id="__codelineno-3-43" name="__codelineno-3-43" href="#__codelineno-3-43"></a>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  🛡️ [容错拦截] </span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s2"> 采集失败 -&gt; </span><span class="si">{</span><span class="n">res</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</span><span id="__span-3-44"><a id="__codelineno-3-44" name="__codelineno-3-44" href="#__codelineno-3-44"></a>        <span class="k">else</span><span class="p">:</span>
+</span><span id="__span-3-45"><a id="__codelineno-3-45" name="__codelineno-3-45" href="#__codelineno-3-45"></a>            <span class="n">success_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
+</span><span id="__span-3-46"><a id="__codelineno-3-46" name="__codelineno-3-46" href="#__codelineno-3-46"></a>
+</span><span id="__span-3-47"><a id="__codelineno-3-47" name="__codelineno-3-47" href="#__codelineno-3-47"></a>    <span class="nb">print</span><span class="p">(</span>
+</span><span id="__span-3-48"><a id="__codelineno-3-48" name="__codelineno-3-48" href="#__codelineno-3-48"></a>        <span class="sa">f</span><span class="s2">"⚡ [正确示范：asyncio.gather 并发] 同时抓取 </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">urls</span><span class="p">)</span><span class="si">}</span><span class="s2"> 页总耗时: "</span>
+</span><span id="__span-3-49"><a id="__codelineno-3-49" name="__codelineno-3-49" href="#__codelineno-3-49"></a>        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">elapsed</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> 秒 (成功 </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">success_list</span><span class="p">)</span><span class="si">}</span><span class="s2"> 页)"</span>
+</span><span id="__span-3-50"><a id="__codelineno-3-50" name="__codelineno-3-50" href="#__codelineno-3-50"></a>    <span class="p">)</span>
+</span><span id="__span-3-51"><a id="__codelineno-3-51" name="__codelineno-3-51" href="#__codelineno-3-51"></a>
+</span><span id="__span-3-52"><a id="__codelineno-3-52" name="__codelineno-3-52" href="#__codelineno-3-52"></a>
+</span><span id="__span-3-53"><a id="__codelineno-3-53" name="__codelineno-3-53" href="#__codelineno-3-53"></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
+</span><span id="__span-3-54"><a id="__codelineno-3-54" name="__codelineno-3-54" href="#__codelineno-3-54"></a>    <span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">main</span><span class="p">())</span>
+</span></code></pre></div>
+<p>在进入下一节工业级异步 HTTP 客户端实战之前，我们先通过下方的交互式微仿真对比“单线程同步阻塞”、“多线程池并发”与“单线程 <code>asyncio</code> 异步协程”三种模型在时间轴上的任务推进规律与吞吐量表现。</p>
+<h4 id="diagram-synchronous-vs-threaded-vs-asyncio-event-loop-concurrency-simulator">Diagram: Synchronous vs Threaded vs Asyncio Event Loop Concurrency Simulator<a class="headerlink" href="#diagram-synchronous-vs-threaded-vs-asyncio-event-loop-concurrency-simulator" title="Permanent link">&para;</a></h4>
+<pre class="mermaid"><code>sequenceDiagram
+    participant EvLoop as asyncio单线程事件循环
+    participant T1 as 协程Task1_URL1
+    participant T2 as 协程Task2_URL2
+    participant T3 as 协程Task3_URL3
+    EvLoop-&gt;&gt;T1: 1. 启动请求, 遇到 await client.get 挂起并让出控制权
+    EvLoop-&gt;&gt;T2: 2. 微秒级零开销切换, 发起请求并 await 挂起
+    EvLoop-&gt;&gt;T3: 3. 微秒级零开销切换, 发起请求并 await 挂起
+    Note over T1,T3: 三个网络 I/O 在操作系统内核态同时并行等待响应
+    T2--&gt;&gt;EvLoop: 4. URL2 响应率先到达, 唤醒 Task2 解析数据
+    T1--&gt;&gt;EvLoop: 5. URL1 响应到达, 唤醒 Task1 解析数据
+    T3--&gt;&gt;EvLoop: 6. URL3 响应到达, 唤醒 Task3 解析数据</code></pre>
+<details>
+<summary>Synchronous vs Threaded vs Asyncio Event Loop Concurrency Simulator</summary>
+<p>Type: microsim
+<strong>sim-id:</strong> concurrency-model-timeline-simulator<br/>
+<strong>Library:</strong> p5.js<br/>
+<strong>Status:</strong> Specified<br/>
+<strong>Bloom Level:</strong> Analyze<br/>
+<strong>Bloom Verb:</strong> compare<br/>
+<strong>Learning Objective:</strong> The learner will compare total elapsed time, throughput (pages/s), and CPU utilization across synchronous blocking, <code>ThreadPoolExecutor</code> multi-threading, and <code>asyncio</code> coroutine execution models for a configurable batch of web scraping tasks.</p>
+<p><strong>Prerequisites:</strong> Network I/O latency (<span class="arithmatex">\(T_{\text{io}}\)</span>), CPU parsing time (<span class="arithmatex">\(T_{\text{cpu}}\)</span>), synchronous blocking, <code>ThreadPoolExecutor</code> (<code>max_workers</code>), <code>asyncio</code> Event Loop, <code>await</code> cooperative yielding (all defined in Sections 1.1–3.4 above).</p>
+<p><strong>Evidence of Mastery:</strong> Across 3 diagnostic scenarios, the learner calculates and predicts the total elapsed time (to within <span class="arithmatex">\(\pm 0.1\text{ s}\)</span>) or identifies which concurrency model achieves the target throughput with the lowest memory footprint before running the timeline trace. Mastery is answering all 3 scenario challenges correctly within at most 2 attempts per challenge.</p>
+<p><strong>Misconceptions:</strong> (1) Increasing CPU clock speed significantly reduces the runtime of a single-threaded synchronous scraper when network I/O latency is <span class="arithmatex">\(200\text{ ms}\)</span> and CPU parse time is <span class="arithmatex">\(2\text{ ms}\)</span>. (2) <code>asyncio</code> coroutines achieve speedups by running on multiple CPU cores simultaneously rather than overlapping network I/O waits on a single thread. (3) Calling blocking <code>time.sleep()</code> inside an <code>async def</code> coroutine still allows other coroutines to run concurrently.</p>
+<p><strong>Instructional Rationale:</strong> Analyze-level comparison requires learners to compute how I/O waiting intervals overlap across worker lanes or coroutine slots and commit a quantitative prediction before inspecting the animated timeline bars.</p>
+<p><strong>Content:</strong></p>
+<p>Adjustable model parameters in free exploration mode:</p>
+<table>
+<thead>
+<tr>
+<th>Quantity</th>
+<th>Min</th>
+<th>Max</th>
+<th>Step</th>
+<th>Default</th>
+<th>Unit</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>待抓取网页总数 <span class="arithmatex">\(N\)</span></td>
+<td>10</td>
+<td>100</td>
+<td>10</td>
+<td>20</td>
+<td>页 (pages)</td>
+</tr>
+<tr>
+<td>单页网络 I/O 延迟 <span class="arithmatex">\(T_{\text{io}}\)</span></td>
+<td>0.10</td>
+<td>0.50</td>
+<td>0.10</td>
+<td>0.20</td>
+<td>s</td>
+</tr>
+<tr>
+<td>单页 CPU 解析耗时 <span class="arithmatex">\(T_{\text{cpu}}\)</span></td>
+<td>0.002</td>
+<td>0.010</td>
+<td>0.002</td>
+<td>0.002</td>
+<td>s</td>
+</tr>
+<tr>
+<td>并发度 <span class="arithmatex">\(C\)</span> (线程数或协程并发槽位)</td>
+<td>1</td>
+<td>20</td>
+<td>1</td>
+<td>5</td>
+<td>并发槽 (slots)</td>
+</tr>
+</tbody>
+</table>
+<p>Three execution models compared side by side:
+1. <code>Model A: 单线程同步阻塞 (requests)</code>: Always processes 1 page at a time sequentially (<span class="arithmatex">\(C = 1\)</span>). Memory overhead: <span class="arithmatex">\(25\text{ MB}\)</span> base process.
+2. <code>Model B: 多线程池并发 (ThreadPoolExecutor)</code>: Processes up to <span class="arithmatex">\(C\)</span> pages per wave, releasing the GIL during <span class="arithmatex">\(T_{\text{io}}\)</span>. Memory overhead: <span class="arithmatex">\(25\text{ MB} + C \times 2.0\text{ MB}\)</span> OS thread stacks.
+3. <code>Model C: 单线程异步协程 (asyncio + aiohttp)</code>: Overlaps <span class="arithmatex">\(C\)</span> coroutines on 1 OS thread via Event Loop <code>await</code> switching during <span class="arithmatex">\(T_{\text{io}}\)</span>. Memory overhead: <span class="arithmatex">\(25\text{ MB} + C \times 0.003\text{ MB}\)</span> coroutine frames.</p>
+<p>Three diagnostic challenges (fixed order):</p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Scenario Parameters</th>
+<th>Question Prompt</th>
+<th>Correct Answer</th>
+<th>Tolerance / Rule</th>
+<th>Feedback When Wrong</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><span class="arithmatex">\(N = 20\)</span> 页, <span class="arithmatex">\(T_{\text{io}} = 0.20\text{ s}\)</span>, <span class="arithmatex">\(T_{\text{cpu}} = 0.002\text{ s}\)</span>, 并发度 <span class="arithmatex">\(C = 5\)</span></td>
+<td>在 <code>ThreadPoolExecutor(max_workers=5)</code> 下，20 个网页分 4 批（<span class="arithmatex">\(\lceil 20 / 5 \rceil = 4\)</span>）完成网络 I/O 等待，请计算总耗时约为多少秒？</td>
+<td><code>0.84</code> s (or <code>0.81</code>–<code>0.85</code> s)</td>
+<td>Numeric input within <span class="arithmatex">\(\pm 0.10\text{ s}\)</span> of <span class="arithmatex">\(0.84\text{ s}\)</span></td>
+<td>20 个网页由 5 个线程分 4 波并发等待 I/O（<span class="arithmatex">\(4 \times 0.20\text{ s} = 0.80\text{ s}\)</span>），加上总计 <span class="arithmatex">\(20 \times 0.002\text{ s} = 0.04\text{ s}\)</span> 的 GIL 串行 CPU 解析时间，总耗时约为 <span class="arithmatex">\(0.84\text{ 秒}\)</span>，而非单线程的 <span class="arithmatex">\(4.04\text{ 秒}\)</span>。</td>
+</tr>
+<tr>
+<td>2</td>
+<td><span class="arithmatex">\(N = 100\)</span> 页, <span class="arithmatex">\(T_{\text{io}} = 0.20\text{ s}\)</span>, <span class="arithmatex">\(T_{\text{cpu}} = 0.002\text{ s}\)</span>, 并发度 <span class="arithmatex">\(C = 20\)</span></td>
+<td>当并发度设为 <span class="arithmatex">\(C = 20\)</span> 时，对比 <code>ThreadPoolExecutor</code> 与 <code>asyncio</code> 协程：哪一种方案在保持约 <span class="arithmatex">\(83\text{ 页/秒}\)</span> 高吞吐量的同时，仅需单线程用户态切换且新增内存不足 <span class="arithmatex">\(0.1\text{ MB}\)</span>？</td>
+<td><code>Model C: 单线程异步协程 (asyncio + aiohttp)</code></td>
+<td>Exact selection among Models A, B, C</td>
+<td><code>ThreadPoolExecutor</code> 开启 20 个操作系统线程需额外消耗约 <span class="arithmatex">\(40\text{ MB}\)</span> 栈内存并伴随内核态切换；而 <code>asyncio</code> 在单线程内切换 20 个协程仅增加约 <span class="arithmatex">\(0.06\text{ MB}\)</span> 内存。</td>
+</tr>
+<tr>
+<td>3</td>
+<td><span class="arithmatex">\(N = 10\)</span> 页, <span class="arithmatex">\(T_{\text{io}} = 0.20\text{ s}\)</span>, 开发者在 <code>async def</code> 中错误使用了同步 <code>time.sleep(0.20)</code> 代替 <code>await asyncio.sleep(0.20)</code></td>
+<td>此时开启 10 个协程并发执行 <code>asyncio.gather</code>，实际总耗时将变成多少秒？</td>
+<td><code>2.02</code> s</td>
+<td>Numeric input within <span class="arithmatex">\(\pm 0.10\text{ s}\)</span> of <span class="arithmatex">\(2.02\text{ s}\)</span></td>
+<td>在协程中调用同步阻塞的 <code>time.sleep(0.20)</code> 不会向事件循环让出控制权，导致单线程 Event Loop 被彻底卡死，10 个协程退化为完全串行执行：<span class="arithmatex">\(10 \times (0.20 + 0.002) = 2.02\text{ 秒}\)</span>！</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Provenance:</strong> Derived directly from the analytical equations in Chapter 8 Section 1.1 and the timing benchmarks in Sections 2.1 and 3.4.</p>
+<p><strong>Rules:</strong>
+- For <code>Model A (Sync)</code>: <span class="arithmatex">\(\text{Total Time} = N \times (T_{\text{io}} + T_{\text{cpu}})\)</span>.
+- For <code>Model B (ThreadPool)</code> and <code>Model C (Asyncio)</code> with concurrency <span class="arithmatex">\(C\)</span>: number of waves <span class="arithmatex">\(W = \lceil N / C \rceil\)</span>. Since CPU parsing holds the GIL or runs on the single event loop thread while I/O waits overlap across <span class="arithmatex">\(C\)</span> concurrent slots, <span class="arithmatex">\(\text{Total Time} = W \times T_{\text{io}} + N \times T_{\text{cpu}}\)</span>.
+- Throughput <span class="arithmatex">\(\text{RPS} = N / \text{Total Time}\)</span>.
+- CPU Utilization <span class="arithmatex">\(\eta_{\text{cpu}} = (N \times T_{\text{cpu}}) / \text{Total Time} \times 100\%\)</span>.
+- When the "Blocking <code>time.sleep</code> bug" toggle is active in Model C, <span class="arithmatex">\(C\)</span> is forced to <span class="arithmatex">\(1\)</span> because the event loop cannot switch during <span class="arithmatex">\(T_{\text{io}}\)</span>.</p>
+<p><strong>Learner Activity:</strong></p>
+<ol>
+<li>The learner reads Challenge 1 (<span class="arithmatex">\(N=20, T_{\text{io}}=0.20\text{ s}, C=5\)</span>), types the predicted total time in seconds, and submits the check.</li>
+<li>The sim renders the three timeline Gantt charts showing I/O wait segments and CPU parse segments, confirming the <span class="arithmatex">\(4.04\text{ s}\)</span> (Sync) vs. <span class="arithmatex">\(0.84\text{ s}\)</span> (Concurrent) contrast.</li>
+<li>The learner completes Challenges 2 and 3, observing the memory comparison bar and the effect of the blocking call bug on the Event Loop timeline.</li>
+<li>After completing the 3 challenges, the learner adjusts the sliders (<span class="arithmatex">\(N, T_{\text{io}}, T_{\text{cpu}}, C\)</span>) in free exploration mode to observe how RPS and CPU utilization scale with concurrency.</li>
+</ol>
+<p><strong>Feedback:</strong> 3 challenges in fixed order, 2 attempts per challenge. Correct: "计算与分析完全正确！" followed by the model metrics. Incorrect: displays the corresponding <code>Feedback When Wrong</code> explanation from the Content table. After the second wrong attempt, the exact answer and formula breakdown are revealed. Score counter displays <code>并发模型分析闯关：n / 3</code>.</p>
+<p><strong>Starting State:</strong> Challenge 1 is active with parameters preset to <span class="arithmatex">\(N = 20, T_{\text{io}} = 0.20\text{ s}, T_{\text{cpu}} = 0.002\text{ s}, C = 5\)</span>. Model A shows a completed <span class="arithmatex">\(4.04\text{ s}\)</span> bar, while Models B and C await the learner's time prediction with the prompt: "请计算在 5 并发槽位下抓取 20 页所需的总耗时（秒），然后点击验证运行时间轴对比。"</p>
+<p><strong>Chapter Anchors:</strong> Matches Section 1.1 (<span class="arithmatex">\(T_{\text{io}} = 200\text{ ms}\)</span>, <span class="arithmatex">\(T_{\text{cpu}} = 2\text{ ms}\)</span>, <span class="arithmatex">\(\eta_{\text{cpu}} \approx 0.99\%\)</span>), Section 2.1 (20 pages with <code>max_workers=5</code> taking <span class="arithmatex">\(\sim 0.81\text{ s}\)</span> vs. <span class="arithmatex">\(\sim 4.02\text{ s}\)</span> sync), and Section 3.3 (blocking <code>time.sleep</code> inside <code>async def</code> stalls the entire Event Loop).</p>
+</details>
+<hr />
+<h2 id="4-aiohttphttpx-playwright">4. 异步网络请求生态：<code>aiohttp</code>、<code>httpx</code> 与异步 Playwright<a class="headerlink" href="#4-aiohttphttpx-playwright" title="Permanent link">&para;</a></h2>
+<p>理解了 <code>asyncio</code> 事件循环与 <code>async/await</code> 语法后，我们需要将底层的阻塞式 <code>requests</code> 库替换为真正支持异步非阻塞 Socket 通信的工业级客户端库。目前 Python 异步爬虫生态呈现出 <strong><code>aiohttp</code></strong>、<strong><code>httpx</code></strong> 与 <strong>异步 Playwright</strong> 三驾马车并驾齐驱的格局。</p>
+<h3 id="41-aiohttpsession">4.1 aiohttp异步客户端与Session复用<a class="headerlink" href="#41-aiohttpsession" title="Permanent link">&para;</a></h3>
+<p><strong><code>aiohttp</code>异步客户端与Session复用（<code>aiohttp.ClientSession</code> Reuse）</strong> 是 Python 异步 HTTP 领域历史最悠久、单机吞吐性能最极致的核心库（安装命令：<code>pip install aiohttp</code>）。在使用 <code>aiohttp</code> 编写高并发爬虫时，有三条必须严格遵守的工程规范：</p>
+<ol>
+<li><strong>全局复用唯一的 <code>aiohttp.ClientSession</code></strong><br />
+<strong>严禁在每个单页抓取函数内部新建 <code>ClientSession()</code>！</strong> 因为 <code>ClientSession</code> 内部维护着底层的 <strong>TCP 连接池（<code>TCPConnector</code>）</strong>、DNS 缓存和 Cookie 罐。如果每抓一个网页都新建一个 Session，不仅无法复用 HTTP Keep-Alive 长连接（每次都要重新经历昂贵的 TCP 三次握手与 TLS 握手），更会在高并发下迅速耗尽操作系统的本地临时端口（Ephemeral Ports）与文件描述符。正确做法是在 <code>main()</code> 函数顶层通过 <code>async with aiohttp.ClientSession(...) as session:</code> 创建一个全局会话，并将其作为参数传递给所有并发子任务。</li>
+<li><strong>注意响应读取方法是协程（需加 <code>await</code>）</strong><br />
+   在同步 <code>requests</code> 中，<code>resp.text</code> 是属性，<code>resp.json()</code> 是普通方法；而在 <code>aiohttp</code> 中，读取响应体字节流同样是一个网络 I/O 过程，因此<strong>必须写成 <code>html = await resp.text()</code>、<code>data = await resp.json()</code> 或 <code>raw_bytes = await resp.read()</code></strong>。</li>
+<li><strong>显式配置 <code>ClientTimeout</code> 与 <code>TCPConnector</code></strong><br />
+   通过 <code>aiohttp.ClientTimeout(total=10, connect=3)</code> 设置总超时与连接建立超时，并通过 <code>aiohttp.TCPConnector(limit=100, ssl=False)</code> 管控连接池的最大并行 TCP 连接数。</li>
+</ol>
+<h3 id="42-httpxasyncclient">4.2 httpx.AsyncClient异步连接池调优<a class="headerlink" href="#42-httpxasyncclient" title="Permanent link">&para;</a></h3>
+<p>如果你非常喜欢第 3 章所学 <code>requests</code> 的简洁 API（如直接访问 <code>resp.text</code> 属性和调用 <code>resp.json()</code> 方法），同时又需要请求开启了 <strong>HTTP/2 多路复用协议</strong> 或需要兼顾同步/异步双模式的现代网站，那么 <strong><code>httpx.AsyncClient</code>异步连接池调优</strong> 是最佳选择（安装命令：<code>pip install "httpx[http2]"</code>）。</p>
+<p><code>httpx.AsyncClient</code> 同样采用 <code>async with httpx.AsyncClient(http2=True, limits=limits, timeout=10.0) as client:</code> 顶层上下文复用机制。其连接池调优通过 <code>httpx.Limits</code> 对象精细控制：</p>
+<ul>
+<li><strong><code>max_connections=100</code></strong>：允许客户端同时打开的最大 TCP 连接总数。</li>
+<li><strong><code>max_keepalive_connections=20</code></strong>：允许在连接池中保持长连接复用（Keep-Alive）的最大空闲连接数。当开启 <code>http2=True</code> 时，<code>httpx</code> 甚至可以在<strong>单条 TCP 连接</strong>上通过二进制帧多路复用并发传输数十个请求，极大降低了握手延迟与被防火墙识别为连接洪泛的风险。</li>
+</ul>
+<p>下面这段代码对比展示了如何使用 <code>aiohttp.ClientSession</code> 与 <code>httpx.AsyncClient</code> 编写规范的连接池复用高并发采集器：</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="kn">import</span><span class="w"> </span><span class="nn">aiohttp</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="kn">import</span><span class="w"> </span><span class="nn">httpx</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="c1"># 方案 A：使用 aiohttp.ClientSession 实现高吞吐异步抓取</span>
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">fetch_with_aiohttp</span><span class="p">(</span>
+</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>    <span class="n">session</span><span class="p">:</span> <span class="n">aiohttp</span><span class="o">.</span><span class="n">ClientSession</span><span class="p">,</span> <span class="n">url</span><span class="p">:</span> <span class="nb">str</span>
+</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span><span class="p">]:</span>
+</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="w">    </span><span class="sd">"""复用顶层传入的 aiohttp.ClientSession 发起非阻塞请求"""</span>
+</span><span id="__span-4-11"><a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a>    <span class="k">async</span> <span class="k">with</span> <span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span> <span class="k">as</span> <span class="n">resp</span><span class="p">:</span>
+</span><span id="__span-4-12"><a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a>        <span class="c1"># 注意：在 aiohttp 中读取响应文本必须加 await！</span>
+</span><span id="__span-4-13"><a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a>        <span class="n">text</span> <span class="o">=</span> <span class="k">await</span> <span class="n">resp</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
+</span><span id="__span-4-14"><a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a>        <span class="k">return</span> <span class="p">{</span><span class="s2">"engine"</span><span class="p">:</span> <span class="s2">"aiohttp"</span><span class="p">,</span> <span class="s2">"url"</span><span class="p">:</span> <span class="n">url</span><span class="p">,</span> <span class="s2">"status"</span><span class="p">:</span> <span class="n">resp</span><span class="o">.</span><span class="n">status</span><span class="p">,</span> <span class="s2">"length"</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">text</span><span class="p">)}</span>
+</span><span id="__span-4-15"><a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a>
+</span><span id="__span-4-16"><a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a>
+</span><span id="__span-4-17"><a id="__codelineno-4-17" name="__codelineno-4-17" href="#__codelineno-4-17"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">run_aiohttp_batch</span><span class="p">(</span><span class="n">urls</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
+</span><span id="__span-4-18"><a id="__codelineno-4-18" name="__codelineno-4-18" href="#__codelineno-4-18"></a>    <span class="c1"># 配置连接池上限为 50，总超时为 10 秒</span>
+</span><span id="__span-4-19"><a id="__codelineno-4-19" name="__codelineno-4-19" href="#__codelineno-4-19"></a>    <span class="n">connector</span> <span class="o">=</span> <span class="n">aiohttp</span><span class="o">.</span><span class="n">TCPConnector</span><span class="p">(</span><span class="n">limit</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">limit_per_host</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+</span><span id="__span-4-20"><a id="__codelineno-4-20" name="__codelineno-4-20" href="#__codelineno-4-20"></a>    <span class="n">timeout</span> <span class="o">=</span> <span class="n">aiohttp</span><span class="o">.</span><span class="n">ClientTimeout</span><span class="p">(</span><span class="n">total</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">connect</span><span class="o">=</span><span class="mf">3.0</span><span class="p">)</span>
+</span><span id="__span-4-21"><a id="__codelineno-4-21" name="__codelineno-4-21" href="#__codelineno-4-21"></a>    <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"User-Agent"</span><span class="p">:</span> <span class="s2">"Mozilla/5.0 (AICorpusCrawler/2.0)"</span><span class="p">}</span>
+</span><span id="__span-4-22"><a id="__codelineno-4-22" name="__codelineno-4-22" href="#__codelineno-4-22"></a>
+</span><span id="__span-4-23"><a id="__codelineno-4-23" name="__codelineno-4-23" href="#__codelineno-4-23"></a>    <span class="c1"># 顶层创建唯一 ClientSession，全批次共享 TCP Keep-Alive 连接池</span>
+</span><span id="__span-4-24"><a id="__codelineno-4-24" name="__codelineno-4-24" href="#__codelineno-4-24"></a>    <span class="k">async</span> <span class="k">with</span> <span class="n">aiohttp</span><span class="o">.</span><span class="n">ClientSession</span><span class="p">(</span>
+</span><span id="__span-4-25"><a id="__codelineno-4-25" name="__codelineno-4-25" href="#__codelineno-4-25"></a>        <span class="n">connector</span><span class="o">=</span><span class="n">connector</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span>
+</span><span id="__span-4-26"><a id="__codelineno-4-26" name="__codelineno-4-26" href="#__codelineno-4-26"></a>    <span class="p">)</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
+</span><span id="__span-4-27"><a id="__codelineno-4-27" name="__codelineno-4-27" href="#__codelineno-4-27"></a>        <span class="n">tasks</span> <span class="o">=</span> <span class="p">[</span><span class="n">asyncio</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span><span class="n">fetch_with_aiohttp</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">u</span><span class="p">))</span> <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">urls</span><span class="p">]</span>
+</span><span id="__span-4-28"><a id="__codelineno-4-28" name="__codelineno-4-28" href="#__codelineno-4-28"></a>        <span class="k">return</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="o">*</span><span class="n">tasks</span><span class="p">,</span> <span class="n">return_exceptions</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="__span-4-29"><a id="__codelineno-4-29" name="__codelineno-4-29" href="#__codelineno-4-29"></a>
+</span><span id="__span-4-30"><a id="__codelineno-4-30" name="__codelineno-4-30" href="#__codelineno-4-30"></a>
+</span><span id="__span-4-31"><a id="__codelineno-4-31" name="__codelineno-4-31" href="#__codelineno-4-31"></a><span class="c1"># 方案 B：使用 httpx.AsyncClient 开启连接池调优与 HTTP/2 支持</span>
+</span><span id="__span-4-32"><a id="__codelineno-4-32" name="__codelineno-4-32" href="#__codelineno-4-32"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">run_httpx_batch</span><span class="p">(</span><span class="n">urls</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
+</span><span id="__span-4-33"><a id="__codelineno-4-33" name="__codelineno-4-33" href="#__codelineno-4-33"></a>    <span class="n">limits</span> <span class="o">=</span> <span class="n">httpx</span><span class="o">.</span><span class="n">Limits</span><span class="p">(</span><span class="n">max_connections</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">max_keepalive_connections</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+</span><span id="__span-4-34"><a id="__codelineno-4-34" name="__codelineno-4-34" href="#__codelineno-4-34"></a>    <span class="n">timeout</span> <span class="o">=</span> <span class="n">httpx</span><span class="o">.</span><span class="n">Timeout</span><span class="p">(</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">connect</span><span class="o">=</span><span class="mf">3.0</span><span class="p">)</span>
+</span><span id="__span-4-35"><a id="__codelineno-4-35" name="__codelineno-4-35" href="#__codelineno-4-35"></a>
+</span><span id="__span-4-36"><a id="__codelineno-4-36" name="__codelineno-4-36" href="#__codelineno-4-36"></a>    <span class="k">async</span> <span class="k">with</span> <span class="n">httpx</span><span class="o">.</span><span class="n">AsyncClient</span><span class="p">(</span><span class="n">limits</span><span class="o">=</span><span class="n">limits</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+</span><span id="__span-4-37"><a id="__codelineno-4-37" name="__codelineno-4-37" href="#__codelineno-4-37"></a>        <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_get_one</span><span class="p">(</span><span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span><span class="p">]:</span>
+</span><span id="__span-4-38"><a id="__codelineno-4-38" name="__codelineno-4-38" href="#__codelineno-4-38"></a>            <span class="n">resp</span> <span class="o">=</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+</span><span id="__span-4-39"><a id="__codelineno-4-39" name="__codelineno-4-39" href="#__codelineno-4-39"></a>            <span class="c1"># 在 httpx 中，resp.await 完成后响应体已读入内存，resp.text 是普通属性</span>
+</span><span id="__span-4-40"><a id="__codelineno-4-40" name="__codelineno-4-40" href="#__codelineno-4-40"></a>            <span class="k">return</span> <span class="p">{</span><span class="s2">"engine"</span><span class="p">:</span> <span class="s2">"httpx"</span><span class="p">,</span> <span class="s2">"url"</span><span class="p">:</span> <span class="n">url</span><span class="p">,</span> <span class="s2">"status"</span><span class="p">:</span> <span class="n">resp</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span> <span class="s2">"length"</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">resp</span><span class="o">.</span><span class="n">text</span><span class="p">)}</span>
+</span><span id="__span-4-41"><a id="__codelineno-4-41" name="__codelineno-4-41" href="#__codelineno-4-41"></a>
+</span><span id="__span-4-42"><a id="__codelineno-4-42" name="__codelineno-4-42" href="#__codelineno-4-42"></a>        <span class="n">tasks</span> <span class="o">=</span> <span class="p">[</span><span class="n">asyncio</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span><span class="n">_get_one</span><span class="p">(</span><span class="n">u</span><span class="p">))</span> <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">urls</span><span class="p">]</span>
+</span><span id="__span-4-43"><a id="__codelineno-4-43" name="__codelineno-4-43" href="#__codelineno-4-43"></a>        <span class="k">return</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="o">*</span><span class="n">tasks</span><span class="p">,</span> <span class="n">return_exceptions</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span></code></pre></div>
+<h3 id="43-playwrightapi">4.3 Playwright异步API多页面并发渲染<a class="headerlink" href="#43-playwrightapi" title="Permanent link">&para;</a></h3>
+<p>在第 6 章中，我们已经学习了如何使用 Playwright 攻克 Vue/React 动态渲染页面。但如果你在一个浏览器实例里串行打开 100 个网页，由于每个网页都要等待 JS 引擎执行与网络空闲，采集速度依然缓慢。那么，能否把 <code>asyncio</code> 并发思想应用到无头浏览器上呢？这就是 <strong><code>Playwright</code>异步API多页面并发渲染（<code>playwright.async_api</code> Multi-Page Concurrent Rendering）</strong>。</p>
+<p>在异步 Playwright 架构中，为了兼顾性能与内存安全，我们遵循<strong>“单 Browser 进程 + 单/多 BrowserContext 上下文 + 多 Page 标签页并发 + Semaphore 限制同时打开的标签页数”</strong>的黄金工程模式：</p>
+<ol>
+<li><strong>绝不并发启动多个 <code>chromium.launch()</code> 浏览器进程</strong>：一个 Chromium 实例占用的内存高达数百 MB。正确做法是全局只启动 <strong>1 个 <code>browser</code> 实例</strong>。</li>
+<li><strong>并发打开多个轻量级 <code>context.new_page()</code> 标签页</strong>：在同一个 <code>BrowserContext</code> 下通过 <code>asyncio.gather</code> 同时打开 <span class="arithmatex">\(3\sim 8\)</span> 个 <code>Page</code> 标签页并发渲染，用完后在 <code>finally</code> 块中立即调用 <code>await page.close()</code> 释放 DOM 内存，并配合路由拦截（<code>page.route</code>）屏蔽无关图片以进一步提速。</li>
+</ol>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">playwright.async_api</span><span class="w"> </span><span class="kn">import</span> <span class="n">BrowserContext</span><span class="p">,</span> <span class="n">async_playwright</span>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">render_single_spa_page</span><span class="p">(</span>
+</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>    <span class="n">context</span><span class="p">:</span> <span class="n">BrowserContext</span><span class="p">,</span> <span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">sem</span><span class="p">:</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">Semaphore</span>
+</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="w">    </span><span class="sd">"""在共享的 BrowserContext 中受控并发打开独立 Page 标签页渲染动态网页"""</span>
+</span><span id="__span-5-9"><a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>    <span class="k">async</span> <span class="k">with</span> <span class="n">sem</span><span class="p">:</span>  <span class="c1"># 限制同时打开的浏览器标签页数量，防止内存爆满</span>
+</span><span id="__span-5-10"><a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>        <span class="n">page</span> <span class="o">=</span> <span class="k">await</span> <span class="n">context</span><span class="o">.</span><span class="n">new_page</span><span class="p">()</span>
+</span><span id="__span-5-11"><a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a>        <span class="k">try</span><span class="p">:</span>
+</span><span id="__span-5-12"><a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a>            <span class="c1"># 拦截图片与字体资源，大幅加快并发渲染速度</span>
+</span><span id="__span-5-13"><a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a>            <span class="k">await</span> <span class="n">page</span><span class="o">.</span><span class="n">route</span><span class="p">(</span>
+</span><span id="__span-5-14"><a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a>                <span class="s2">"**/*.{png,jpg,jpeg,webp,woff,woff2}"</span><span class="p">,</span>
+</span><span id="__span-5-15"><a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a>                <span class="k">lambda</span> <span class="n">route</span><span class="p">:</span> <span class="n">route</span><span class="o">.</span><span class="n">abort</span><span class="p">(),</span>
+</span><span id="__span-5-16"><a id="__codelineno-5-16" name="__codelineno-5-16" href="#__codelineno-5-16"></a>            <span class="p">)</span>
+</span><span id="__span-5-17"><a id="__codelineno-5-17" name="__codelineno-5-17" href="#__codelineno-5-17"></a>            <span class="k">await</span> <span class="n">page</span><span class="o">.</span><span class="n">goto</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">wait_until</span><span class="o">=</span><span class="s2">"domcontentloaded"</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">15000</span><span class="p">)</span>
+</span><span id="__span-5-18"><a id="__codelineno-5-18" name="__codelineno-5-18" href="#__codelineno-5-18"></a>            <span class="n">title</span> <span class="o">=</span> <span class="k">await</span> <span class="n">page</span><span class="o">.</span><span class="n">title</span><span class="p">()</span>
+</span><span id="__span-5-19"><a id="__codelineno-5-19" name="__codelineno-5-19" href="#__codelineno-5-19"></a>            <span class="k">return</span> <span class="p">{</span><span class="s2">"url"</span><span class="p">:</span> <span class="n">url</span><span class="p">,</span> <span class="s2">"title"</span><span class="p">:</span> <span class="n">title</span><span class="p">,</span> <span class="s2">"status"</span><span class="p">:</span> <span class="s2">"rendered"</span><span class="p">}</span>
+</span><span id="__span-5-20"><a id="__codelineno-5-20" name="__codelineno-5-20" href="#__codelineno-5-20"></a>        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+</span><span id="__span-5-21"><a id="__codelineno-5-21" name="__codelineno-5-21" href="#__codelineno-5-21"></a>            <span class="k">return</span> <span class="p">{</span><span class="s2">"url"</span><span class="p">:</span> <span class="n">url</span><span class="p">,</span> <span class="s2">"title"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span> <span class="s2">"status"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"error: </span><span class="si">{</span><span class="n">err</span><span class="si">}</span><span class="s2">"</span><span class="p">}</span>
+</span><span id="__span-5-22"><a id="__codelineno-5-22" name="__codelineno-5-22" href="#__codelineno-5-22"></a>        <span class="k">finally</span><span class="p">:</span>
+</span><span id="__span-5-23"><a id="__codelineno-5-23" name="__codelineno-5-23" href="#__codelineno-5-23"></a>            <span class="c1"># 关键：渲染提取完毕后必须立即关闭标签页，回收渲染进程内存！</span>
+</span><span id="__span-5-24"><a id="__codelineno-5-24" name="__codelineno-5-24" href="#__codelineno-5-24"></a>            <span class="k">await</span> <span class="n">page</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</span><span id="__span-5-25"><a id="__codelineno-5-25" name="__codelineno-5-25" href="#__codelineno-5-25"></a>
+</span><span id="__span-5-26"><a id="__codelineno-5-26" name="__codelineno-5-26" href="#__codelineno-5-26"></a>
+</span><span id="__span-5-27"><a id="__codelineno-5-27" name="__codelineno-5-27" href="#__codelineno-5-27"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">run_concurrent_playwright</span><span class="p">(</span><span class="n">urls</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">max_tabs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
+</span><span id="__span-5-28"><a id="__codelineno-5-28" name="__codelineno-5-28" href="#__codelineno-5-28"></a><span class="w">    </span><span class="sd">"""单浏览器实例 + 多标签页受控并发渲染主流程"""</span>
+</span><span id="__span-5-29"><a id="__codelineno-5-29" name="__codelineno-5-29" href="#__codelineno-5-29"></a>    <span class="n">sem</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">Semaphore</span><span class="p">(</span><span class="n">max_tabs</span><span class="p">)</span>
+</span><span id="__span-5-30"><a id="__codelineno-5-30" name="__codelineno-5-30" href="#__codelineno-5-30"></a>    <span class="k">async</span> <span class="k">with</span> <span class="n">async_playwright</span><span class="p">()</span> <span class="k">as</span> <span class="n">p</span><span class="p">:</span>
+</span><span id="__span-5-31"><a id="__codelineno-5-31" name="__codelineno-5-31" href="#__codelineno-5-31"></a>        <span class="n">browser</span> <span class="o">=</span> <span class="k">await</span> <span class="n">p</span><span class="o">.</span><span class="n">chromium</span><span class="o">.</span><span class="n">launch</span><span class="p">(</span><span class="n">headless</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="__span-5-32"><a id="__codelineno-5-32" name="__codelineno-5-32" href="#__codelineno-5-32"></a>        <span class="n">context</span> <span class="o">=</span> <span class="k">await</span> <span class="n">browser</span><span class="o">.</span><span class="n">new_context</span><span class="p">(</span>
+</span><span id="__span-5-33"><a id="__codelineno-5-33" name="__codelineno-5-33" href="#__codelineno-5-33"></a>            <span class="n">user_agent</span><span class="o">=</span><span class="s2">"Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/128.0.0.0"</span>
+</span><span id="__span-5-34"><a id="__codelineno-5-34" name="__codelineno-5-34" href="#__codelineno-5-34"></a>        <span class="p">)</span>
+</span><span id="__span-5-35"><a id="__codelineno-5-35" name="__codelineno-5-35" href="#__codelineno-5-35"></a>        <span class="n">tasks</span> <span class="o">=</span> <span class="p">[</span>
+</span><span id="__span-5-36"><a id="__codelineno-5-36" name="__codelineno-5-36" href="#__codelineno-5-36"></a>            <span class="n">asyncio</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span><span class="n">render_single_spa_page</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="n">sem</span><span class="p">))</span>
+</span><span id="__span-5-37"><a id="__codelineno-5-37" name="__codelineno-5-37" href="#__codelineno-5-37"></a>            <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">urls</span>
+</span><span id="__span-5-38"><a id="__codelineno-5-38" name="__codelineno-5-38" href="#__codelineno-5-38"></a>        <span class="p">]</span>
+</span><span id="__span-5-39"><a id="__codelineno-5-39" name="__codelineno-5-39" href="#__codelineno-5-39"></a>        <span class="n">results</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="o">*</span><span class="n">tasks</span><span class="p">)</span>
+</span><span id="__span-5-40"><a id="__codelineno-5-40" name="__codelineno-5-40" href="#__codelineno-5-40"></a>        <span class="k">await</span> <span class="n">browser</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</span><span id="__span-5-41"><a id="__codelineno-5-41" name="__codelineno-5-41" href="#__codelineno-5-41"></a>        <span class="k">return</span> <span class="n">results</span>
+</span></code></pre></div>
+<hr />
+<h2 id="5">5. 受控并发、平滑限流与异步全链路压测<a class="headerlink" href="#5" title="Permanent link">&para;</a></h2>
+<p>掌握了 <code>asyncio.gather</code> 与 <code>aiohttp</code> 后，很多同学会兴奋地把 <span class="arithmatex">\(10,000\)</span> 个 URL 一次性塞进 <code>asyncio.gather(*tasks)</code>。然而运行后的结果往往是灾难性的：</p>
+<ol>
+<li><strong>瞬间打崩目标服务器或触发 WAF 封禁</strong>：10,000 个 HTTP 请求在短短几十毫秒内像海啸一样同时砸向目标服务器，轻则返回满屏的 <code>429 Too Many Requests</code> / <code>503 Service Unavailable</code> 并封禁你的 IP，重则涉嫌构成 DDoS 攻击；</li>
+<li><strong>撑爆本机资源</strong>：操作系统的并发 Socket 句柄被耗尽，抛出 <code>Too many open files</code> 或连接重置错误。</li>
+</ol>
+<p>真正的工业级异步爬虫，追求的绝不是“失控的裸奔并发”，而是<strong>“受控并发（Controlled Concurrency）与平滑速率限制（Smooth Rate Limiting）”</strong>。</p>
+<h3 id="51-semaphore">5.1 Semaphore信号量控制最大并发数<a class="headerlink" href="#51-semaphore" title="Permanent link">&para;</a></h3>
+<p><strong><code>Semaphore</code>信号量控制最大并发数（<code>asyncio.Semaphore</code>）</strong> 是控制<strong>同一时刻处于飞行/处理状态的最大并发任务数（In-Flight Requests）</strong>的标准原语。我们可以把 <code>sem = asyncio.Semaphore(K)</code> 想象成一家只有 <span class="arithmatex">\(K\)</span> 张餐桌的餐厅门口的叫号机：</p>
+<ul>
+<li>信号量内部维护一个初始值为 <span class="arithmatex">\(K\)</span>（例如 <code>K = 20</code>）的计数器；</li>
+<li>每当一个协程进入 <code>async with sem:</code> 代码块时，计数器减 1（占用一张餐桌）；</li>
+<li>当第 21 个协程到达 <code>async with sem:</code> 时，此时计数器为 <code>0</code>，该协程会自动在门口挂起排队，不会发起网络请求；</li>
+<li>只要前 20 个协程中有任意一个完成了网页下载并退出 <code>async with sem:</code> 块，计数器立即加 1，排在队首的第 21 个协程瞬间被唤醒补位！</li>
+</ul>
+<p>这样一来，无论你有 1,000 个还是 100 万个待抓取 URL，网络上<strong>同一时刻正在进行的并发连接数永远严格 <span class="arithmatex">\(\le K\)</span></strong>。</p>
+<h3 id="52-aiolimiter">5.2 令牌桶算法与aiolimiter异步限流<a class="headerlink" href="#52-aiolimiter" title="Permanent link">&para;</a></h3>
+<p>虽然 <code>Semaphore(20)</code> 限制了同时在飞的请求数不超过 20 个，但它并不能直接控制<strong>每秒发出的请求速率（RPS / QPS）</strong>。例如，如果目标服务器响应极快（仅需 <span class="arithmatex">\(20\text{ ms}\)</span>），那么 20 个并发槽位每秒依然会倾泻出 <span class="arithmatex">\(20 / 0.02\text{ s} = 1,000\)</span> 次请求！如果目标サイトの反爬风控规则是“单 IP 每秒最多允许 10 次请求，允许短时突发 15 次”，我们就需要引入经典的<strong>令牌桶算法与<code>aiolimiter</code>异步限流（Token Bucket Algorithm &amp; <code>aiolimiter</code>）</strong>（安装命令：<code>pip install aiolimiter</code>）。</p>
+<p><strong>令牌桶算法（Token Bucket）</strong>的数学与物理模型如下：</p>
+<ol>
+<li>系统有一个最大容量为 <span class="arithmatex">\(B\)</span>（Burst Capacity，最大突发令牌数）的桶；</li>
+<li>系统以恒定速率 <span class="arithmatex">\(r\)</span>（Refill Rate，每秒生成令牌数，即长期平均 RPS 上限）向桶中匀速放入令牌；如果桶已装满 <span class="arithmatex">\(B\)</span> 个令牌，新生成的令牌则溢出丢弃；</li>
+<li>每当爬虫准备发起 1 次 HTTP 请求前，必须先从桶中取走 1 个令牌：</li>
+<li>若桶中当前令牌数 <span class="arithmatex">\(\ge 1\)</span>，则立即取走 1 个令牌并发起请求（无需等待）；</li>
+<li>若桶已空，则协程在 <code>async with limiter:</code> 处平滑挂起等待 <span class="arithmatex">\(\frac{1}{r}\)</span> 秒，直到新令牌生成。</li>
+</ol>
+<p>因此，在时长为 <span class="arithmatex">\(T\)</span> 秒的任意时间窗口内，令牌桶允许通过的最大请求总数 <span class="arithmatex">\(M(T)\)</span> 严格满足线性上界公式：</p>
+<div class="arithmatex">\[
+M(T) \le B + r \times T
+\]</div>
+<p>在 Python 中，我们使用 <code>from aiolimiter import AsyncLimiter</code> 即可一行代码创建令牌桶：例如 <code>limiter = AsyncLimiter(max_rate=10, time_period=1.0)</code> 表示每秒最多通过 10 个请求。在工业实践中，<strong>将 <code>asyncio.Semaphore</code>（控最大并发连接数）与 <code>AsyncLimiter</code>（控每秒请求发包速率）双剑合璧</strong>，是既不触发 <code>429</code> 封禁又能榨干合规带宽的黄金法则。</p>
+<p>下面请通过交互式仿真器亲自调整 <code>Semaphore</code> 并发上限与令牌桶速率参数，观察爬虫如何在“超高吞吐量”与“零 429 封禁率”之间找到最优工程平衡点。</p>
+<h4 id="diagram-asyncio-semaphore-and-token-bucket-rate-limiter-simulator">Diagram: Asyncio Semaphore and Token Bucket Rate Limiter Simulator<a class="headerlink" href="#diagram-asyncio-semaphore-and-token-bucket-rate-limiter-simulator" title="Permanent link">&para;</a></h4>
+<pre class="mermaid"><code>flowchart LR
+    Tasks["1000 个待执行协程任务"] --&gt; Sem["第一道阀门: asyncio.Semaphore(20)&lt;br/&gt;控制同一时刻最大在途连接数 &lt;= 20"]
+    Sem --&gt; Bucket["第二道阀门: AsyncLimiter / 令牌桶&lt;br/&gt;控制每秒新增发包速率 &lt;= 10 QPS"]
+    Bucket --&gt; Client["httpx.AsyncClient / aiohttp 连接池复用发送"]
+    Client --&gt; FileIO["aiofiles 异步非阻塞流式追加写入 .jsonl"]</code></pre>
+<details>
+<summary>Asyncio Semaphore and Token Bucket Rate Limiter Simulator</summary>
+<p>Type: microsim
+<strong>sim-id:</strong> semaphore-token-bucket-limiter<br/>
+<strong>Library:</strong> p5.js<br/>
+<strong>Status:</strong> Specified<br/>
+<strong>Bloom Level:</strong> Apply<br/>
+<strong>Bloom Verb:</strong> configure<br/>
+<strong>Learning Objective:</strong> The learner will configure <code>asyncio.Semaphore</code> concurrency limits and Token Bucket (<code>AsyncLimiter</code>) refill rates so a 60-request scraping batch finishes within a target time budget while keeping HTTP 429 rate-limit errors at zero.</p>
+<p><strong>Prerequisites:</strong> <code>asyncio.Semaphore</code> (maximum in-flight concurrent requests <span class="arithmatex">\(K\)</span>), Token Bucket burst capacity (<span class="arithmatex">\(B\)</span>) and refill rate (<span class="arithmatex">\(r\)</span>), HTTP <code>429 Too Many Requests</code> anti-scraping threshold (all defined in Sections 5.1 and 5.2 above).</p>
+<p><strong>Evidence of Mastery:</strong> Across 3 engineering tuning tasks, the learner configures the Semaphore limit <span class="arithmatex">\(K\)</span> and Token Bucket rate <span class="arithmatex">\(r\)</span> (requests/s) and runs the 60-request simulation. A configuration is correct when it satisfies both the server's zero-429 safety rule and the task's completion time target. Mastery is passing all 3 tuning tasks.</p>
+<p><strong>Misconceptions:</strong> (1) Setting <code>Semaphore(10)</code> guarantees the request rate will never exceed 10 requests per second even when server latency is <span class="arithmatex">\(0.05\text{ s}\)</span> (where 10 slots actually fire <span class="arithmatex">\(10 / 0.05 = 200\text{ req/s}\)</span>). (2) Setting an unbounded <code>asyncio.gather</code> without a Semaphore or Token Bucket finishes faster when the target server enforces a strict 429 rate limit with a <span class="arithmatex">\(5\text{ s}\)</span> penalty cooldown.</p>
+<p><strong>Instructional Rationale:</strong> Apply-level configuration requires learners to translate server anti-scraping constraints (max concurrent connections and max RPS) into concrete <code>Semaphore(K)</code> and <code>AsyncLimiter(r)</code> parameter settings and verify the resulting request flow and 429 error count.</p>
+<p><strong>Content:</strong></p>
+<p>Adjustable learner controls:</p>
+<table>
+<thead>
+<tr>
+<th>Quantity</th>
+<th>Min</th>
+<th>Max</th>
+<th>Step</th>
+<th>Default</th>
+<th>Unit</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>信号量并发上限 <code>Semaphore(K)</code></td>
+<td>2</td>
+<td>50</td>
+<td>2</td>
+<td>20</td>
+<td>并发连接 (connections)</td>
+</tr>
+<tr>
+<td>令牌桶补充速率 <code>AsyncLimiter(r)</code></td>
+<td>5</td>
+<td>50</td>
+<td>5</td>
+<td>25</td>
+<td>请求/秒 (req/s)</td>
+</tr>
+<tr>
+<td>令牌桶初始突发容量 <span class="arithmatex">\(B\)</span></td>
+<td>5</td>
+<td>20</td>
+<td>5</td>
+<td>10</td>
+<td>令牌 (tokens)</td>
+</tr>
+</tbody>
+</table>
+<p>Fixed simulation environment parameters displayed on screen:
+- 总待抓取任务数：<span class="arithmatex">\(M_{\text{total}} = 60\)</span> 个请求
+- 单次请求服务器响应延迟：<span class="arithmatex">\(T_{\text{io}} = 0.20\text{ s}\)</span>
+- 目标服务器 WAF 风控规则：
+  1. <strong>最大允许同时在线连接数</strong>：<span class="arithmatex">\(K_{\text{max}} = 12\)</span> 个连接（若 <code>Semaphore(K) &gt; 12</code>，超出部分的请求将立即返回 <code>HTTP 429/503 Connection Limit Exceeded</code>）。
+  2. <strong>最大允许持续请求速率</strong>：<span class="arithmatex">\(r_{\text{max}} = 15\text{ req/s}\)</span>，允许初始突发容量 <span class="arithmatex">\(B_{\text{max}} = 10\)</span>（若 <code>AsyncLimiter(r) &gt; 15</code> 或 <code>B &gt; 10</code>，超出配额的请求将触发 <code>HTTP 429 Too Many Requests</code> 并强制惩罚等待 <span class="arithmatex">\(5.0\text{ s}\)</span>）。</p>
+<p>Three engineering tuning tasks (fixed order):</p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Task Scenario &amp; Goal</th>
+<th>Valid Parameter Condition</th>
+<th>Expected Clean Time at Optimal Setting</th>
+<th>Feedback When Wrong</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><strong>诊断裸奔并发灾难</strong>：保持默认的 <code>Semaphore(20)</code> 与 <code>AsyncLimiter(25)</code> 直接点击运行，观察触发了多少次 <code>HTTP 429</code> 拦截，随后将 <code>Semaphore(K)</code> 调低至满足服务器最大连接数限制（<span class="arithmatex">\(\le 12\)</span>），并将 <code>AsyncLimiter(r)</code> 调至安全速率（<span class="arithmatex">\(\le 15\text{ req/s}\)</span>，<span class="arithmatex">\(B \le 10\)</span>），实现 <strong>0 次 429 报错</strong>完成全部 60 页抓取。</td>
+<td><span class="arithmatex">\(K \le 12\)</span> AND <span class="arithmatex">\(r \le 15\)</span> AND <span class="arithmatex">\(B \le 10\)</span></td>
+<td><span class="arithmatex">\(3.53\text{ s}\)</span> at <span class="arithmatex">\(K=10, r=15, B=10\)</span></td>
+<td>当前参数违反了服务器风控阈值（要求同时连接数 <span class="arithmatex">\(K \le 12\)</span>、持续速率 <span class="arithmatex">\(r \le 15\text{ req/s}\)</span>、突发桶容量 <span class="arithmatex">\(B \le 10\)</span>），导致大量请求返回 HTTP 429！请调低信号量或令牌桶速率。</td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>极限合规提速挑战</strong>：在保证 <strong>0 次 HTTP 429 报错</strong>（即 <span class="arithmatex">\(K \le 12, r \le 15, B \le 10\)</span>）的前提下，优化配置使 60 个请求的总完成耗时 <strong><span class="arithmatex">\(\le 3.80\text{ 秒}\)</span></strong>。</td>
+<td><span class="arithmatex">\(6 \le K \le 12\)</span> AND <span class="arithmatex">\(r = 15\)</span> AND <span class="arithmatex">\(B = 10\)</span></td>
+<td><span class="arithmatex">\(3.53\text{ s}\)</span></td>
+<td>虽然未触发 429 报错，但你的并发度 <span class="arithmatex">\(K\)</span> 或令牌速率 <span class="arithmatex">\(r\)</span> 设置过于保守，导致总耗时超过 <span class="arithmatex">\(3.80\text{ 秒}\)</span>。提示：将令牌速率推满至合规上限 <span class="arithmatex">\(r = 15\text{ req/s}\)</span>、突发容量 <span class="arithmatex">\(B = 10\)</span>，并确保 <span class="arithmatex">\(K \ge 6\)</span>（因为 <span class="arithmatex">\(15\text{ req/s} \times 0.20\text{ s} = 3\)</span>，留出余量 <span class="arithmatex">\(K=6\sim 12\)</span> 即可跑满速率）。</td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>低延迟高 RPS 陷阱排查</strong>：假设服务器升级后响应延迟缩短至 <span class="arithmatex">\(T_{\text{io}} = 0.05\text{ s}\)</span>（极快响应），服务器取消了突发配额（要求 <span class="arithmatex">\(B = 5\)</span>）且严格限制持续速率 <span class="arithmatex">\(r \le 10\text{ req/s}\)</span>、连接数 <span class="arithmatex">\(K \le 8\)</span>。请重新配置参数，在 <strong>0 次 429 报错</strong>下以 <strong><span class="arithmatex">\(\le 5.80\text{ 秒}\)</span></strong> 完成 60 页采集。</td>
+<td><span class="arithmatex">\(2 \le K \le 8\)</span> AND <span class="arithmatex">\(r = 10\)</span> AND <span class="arithmatex">\(B = 5\)</span></td>
+<td><span class="arithmatex">\(5.55\text{ s}\)</span></td>
+<td>当服务器响应极快（<span class="arithmatex">\(0.05\text{ s}\)</span>）时，仅靠 <code>Semaphore(8)</code> 会产生 <span class="arithmatex">\(8 / 0.05 = 160\text{ req/s}\)</span> 的瞬间洪峰！必须同时设置 <code>AsyncLimiter(r=10)</code> 与突发容量 <span class="arithmatex">\(B=5\)</span> 才能压住发包速率。</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Provenance:</strong> Formulated from the Token Bucket upper-bound equation <span class="arithmatex">\(M(T) \le B + r \times T\)</span> and <code>asyncio.Semaphore</code> + <code>aiolimiter</code> co-design in Chapter 8 Sections 5.1 and 5.2.</p>
+<p><strong>Rules:</strong>
+- Effective instantaneous concurrency is bounded by <span class="arithmatex">\(K\)</span>. Without token bucket throttling, <span class="arithmatex">\(K\)</span> slots with latency <span class="arithmatex">\(T_{\text{io}}\)</span> generate up to <span class="arithmatex">\(K / T_{\text{io}}\)</span> requests/s.
+- With Token Bucket <span class="arithmatex">\((r, B)\)</span> and Semaphore <span class="arithmatex">\(K\)</span>, the first <span class="arithmatex">\(\min(K, B)\)</span> requests launch immediately at <span class="arithmatex">\(t = 0\)</span>, and the remaining <span class="arithmatex">\(M_{\text{total}} - B\)</span> requests are paced by <span class="arithmatex">\(\min(r, K / T_{\text{io}})\)</span>. Thus clean completion time (when <span class="arithmatex">\(K \le K_{\text{max}}, r \le r_{\text{max}}, B \le B_{\text{max}}\)</span>) is:
+  [
+  T_{\text{total}} = \frac{M_{\text{total}} - B}{\min(r, K / T_{\text{io}})} + T_{\text{io}}
+  ]
+- Whenever <span class="arithmatex">\(K &gt; K_{\text{max}}\)</span> or <span class="arithmatex">\(r &gt; r_{\text{max}}\)</span> or <span class="arithmatex">\(B &gt; B_{\text{max}}\)</span>, the simulation flags HTTP 429 errors and adds a <span class="arithmatex">\(+5.0\text{ s}\)</span> penalty cooldown.</p>
+<p><strong>Learner Activity:</strong></p>
+<ol>
+<li>In Task 1, the learner observes the default configuration (<span class="arithmatex">\(K=20, r=25, B=10\)</span>) trigger HTTP 429 errors, then adjusts <span class="arithmatex">\(K \le 12\)</span> and <span class="arithmatex">\(r \le 15\)</span> and re-runs to achieve 0 errors.</li>
+<li>In Task 2, the learner tunes <span class="arithmatex">\(K, r, B\)</span> to finish all 60 requests in <span class="arithmatex">\(\le 3.80\text{ s}\)</span> with 0 errors.</li>
+<li>In Task 3 (where server latency drops to <span class="arithmatex">\(T_{\text{io}} = 0.05\text{ s}\)</span> and limits tighten to <span class="arithmatex">\(K_{\text{max}}=8, r_{\text{max}}=10, B_{\text{max}}=5\)</span>), the learner sets <span class="arithmatex">\(K \le 8, r = 10, B = 5\)</span> and verifies smooth token-paced completion in <span class="arithmatex">\(5.55\text{ s}\)</span>.</li>
+</ol>
+<p><strong>Feedback:</strong> 3 tasks in fixed order, unlimited trial runs with immediate diagnostic feedback on each run. Passing a task displays: "✅ 调优达标！60 页全部成功（429 报错：0 次），总耗时 <T_total> 秒。" Failing a task displays the specific <code>Feedback When Wrong</code> message and highlights which constraint (<span class="arithmatex">\(K\)</span>, <span class="arithmatex">\(r\)</span>, <span class="arithmatex">\(B\)</span>, or time budget) was violated. Progress indicator: <code>限流调优实训进度：n / 3</code>.</p>
+<p><strong>Starting State:</strong> Task 1 is active with <span class="arithmatex">\(K = 20\)</span>, <span class="arithmatex">\(r = 25\text{ req/s}\)</span>, <span class="arithmatex">\(B = 10\)</span>, showing the target server's red-line badges (<code>最大连接数 &lt;= 12</code>, <code>最大速率 &lt;= 15 req/s</code>, <code>突发容量 &lt;= 10</code>) and the prompt: "请调整 Semaphore 并发数与令牌桶速率参数，消除 HTTP 429 封禁报错并完成全部 60 页采集。"</p>
+<p><strong>Chapter Anchors:</strong> Matches the Token Bucket formula <span class="arithmatex">\(M(T) \le B + r \times T\)</span> and the <code>asyncio.Semaphore</code> + <code>aiolimiter.AsyncLimiter</code> dual-control pattern in Sections 5.1–5.3.</p>
+</details>
+<h3 id="53-aiofiles">5.3 aiofiles异步非阻塞文件写入与完整生产级管道<a class="headerlink" href="#53-aiofiles" title="Permanent link">&para;</a></h3>
+<p>在解决了网络层的异步并发与平滑限流之后，整个异步流水线还剩下最后一块拼图：<strong>磁盘文件写入</strong>。虽然本地 SSD 固态硬盘的写入速度远快于网络请求，但如果在每秒处理数百个网页的协程里频繁调用同步的 <code>with open(...) as f: f.write()</code>，遇到操作系统磁盘缓冲区刷盘（Flush）或机械硬盘寻道时，依然会短暂阻塞事件循环主线程。</p>
+<p>为此，我们使用 <strong><code>aiofiles</code>异步非阻塞文件写入</strong>（安装命令：<code>pip install aiofiles</code>）。<code>aiofiles</code> 底层利用内部线程池将阻塞的操作系统文件 I/O 包装成标准的 <code>async with aiofiles.open(...) as f:</code> 与 <code>await f.write(...)</code> 协程接口，从而保证事件循环主线程实现 <span class="arithmatex">\(100\%\)</span> 纯非阻塞运转。</p>
+<p>下面这段生产级实战代码，将本章所学的 <strong><code>aiohttp.ClientSession</code> 连接池复用</strong>、<strong><code>asyncio.Semaphore</code> 最大并发连接控制</strong>、<strong><code>aiolimiter.AsyncLimiter</code> 令牌桶平滑限流</strong> 以及 <strong><code>aiofiles</code> 异步 JSONL 语料落盘</strong> 四大核心技术完美融合成一套可直接用于大模型语料采集的标准工程模板：</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="kn">import</span><span class="w"> </span><span class="nn">aiofiles</span>
+</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="kn">import</span><span class="w"> </span><span class="nn">aiohttp</span>
+</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="kn">from</span><span class="w"> </span><span class="nn">aiolimiter</span><span class="w"> </span><span class="kn">import</span> <span class="n">AsyncLimiter</span>
+</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="kn">from</span><span class="w"> </span><span class="nn">parsel</span><span class="w"> </span><span class="kn">import</span> <span class="n">Selector</span>
+</span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>
+</span><span id="__span-6-9"><a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>
+</span><span id="__span-6-10"><a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a><span class="k">class</span><span class="w"> </span><span class="nc">AsyncCorpusCrawler</span><span class="p">:</span>
+</span><span id="__span-6-11"><a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a><span class="w">    </span><span class="sd">"""生产级受控并发异步爬虫：集成 Session 复用 + Semaphore + 令牌桶 + aiofiles"""</span>
+</span><span id="__span-6-12"><a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a>
+</span><span id="__span-6-13"><a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+</span><span id="__span-6-14"><a id="__codelineno-6-14" name="__codelineno-6-14" href="#__codelineno-6-14"></a>        <span class="bp">self</span><span class="p">,</span>
+</span><span id="__span-6-15"><a id="__codelineno-6-15" name="__codelineno-6-15" href="#__codelineno-6-15"></a>        <span class="n">max_concurrency</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+</span><span id="__span-6-16"><a id="__codelineno-6-16" name="__codelineno-6-16" href="#__codelineno-6-16"></a>        <span class="n">rate_per_sec</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">15</span><span class="p">,</span>
+</span><span id="__span-6-17"><a id="__codelineno-6-17" name="__codelineno-6-17" href="#__codelineno-6-17"></a>        <span class="n">output_file</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"async_corpus.jsonl"</span><span class="p">,</span>
+</span><span id="__span-6-18"><a id="__codelineno-6-18" name="__codelineno-6-18" href="#__codelineno-6-18"></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-6-19"><a id="__codelineno-6-19" name="__codelineno-6-19" href="#__codelineno-6-19"></a>        <span class="c1"># 1. Semaphore 控制同一时刻处于飞行状态的连接数上限</span>
+</span><span id="__span-6-20"><a id="__codelineno-6-20" name="__codelineno-6-20" href="#__codelineno-6-20"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">sem</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">Semaphore</span><span class="p">(</span><span class="n">max_concurrency</span><span class="p">)</span>
+</span><span id="__span-6-21"><a id="__codelineno-6-21" name="__codelineno-6-21" href="#__codelineno-6-21"></a>        <span class="c1"># 2. AsyncLimiter 令牌桶控制每秒发出的最大请求数 (平滑限流防 429)</span>
+</span><span id="__span-6-22"><a id="__codelineno-6-22" name="__codelineno-6-22" href="#__codelineno-6-22"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">limiter</span> <span class="o">=</span> <span class="n">AsyncLimiter</span><span class="p">(</span><span class="n">max_rate</span><span class="o">=</span><span class="n">rate_per_sec</span><span class="p">,</span> <span class="n">time_period</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+</span><span id="__span-6-23"><a id="__codelineno-6-23" name="__codelineno-6-23" href="#__codelineno-6-23"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">output_file</span> <span class="o">=</span> <span class="n">output_file</span>
+</span><span id="__span-6-24"><a id="__codelineno-6-24" name="__codelineno-6-24" href="#__codelineno-6-24"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">write_lock</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">Lock</span><span class="p">()</span>
+</span><span id="__span-6-25"><a id="__codelineno-6-25" name="__codelineno-6-25" href="#__codelineno-6-25"></a>
+</span><span id="__span-6-26"><a id="__codelineno-6-26" name="__codelineno-6-26" href="#__codelineno-6-26"></a>    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">fetch_and_parse</span><span class="p">(</span>
+</span><span id="__span-6-27"><a id="__codelineno-6-27" name="__codelineno-6-27" href="#__codelineno-6-27"></a>        <span class="bp">self</span><span class="p">,</span>
+</span><span id="__span-6-28"><a id="__codelineno-6-28" name="__codelineno-6-28" href="#__codelineno-6-28"></a>        <span class="n">session</span><span class="p">:</span> <span class="n">aiohttp</span><span class="o">.</span><span class="n">ClientSession</span><span class="p">,</span>
+</span><span id="__span-6-29"><a id="__codelineno-6-29" name="__codelineno-6-29" href="#__codelineno-6-29"></a>        <span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+</span><span id="__span-6-30"><a id="__codelineno-6-30" name="__codelineno-6-30" href="#__codelineno-6-30"></a>        <span class="n">out_f</span><span class="p">:</span> <span class="n">aiofiles</span><span class="o">.</span><span class="n">threadpool</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">AsyncTextIOWrapper</span><span class="p">,</span>
+</span><span id="__span-6-31"><a id="__codelineno-6-31" name="__codelineno-6-31" href="#__codelineno-6-31"></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+</span><span id="__span-6-32"><a id="__codelineno-6-32" name="__codelineno-6-32" href="#__codelineno-6-32"></a><span class="w">        </span><span class="sd">"""单页受控抓取、XPath/CSS 解析与异步非阻塞落盘"""</span>
+</span><span id="__span-6-33"><a id="__codelineno-6-33" name="__codelineno-6-33" href="#__codelineno-6-33"></a>        <span class="c1"># 先获取 Semaphore 并发槽位，再向令牌桶申请发包令牌</span>
+</span><span id="__span-6-34"><a id="__codelineno-6-34" name="__codelineno-6-34" href="#__codelineno-6-34"></a>        <span class="k">async</span> <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">sem</span><span class="p">:</span>
+</span><span id="__span-6-35"><a id="__codelineno-6-35" name="__codelineno-6-35" href="#__codelineno-6-35"></a>            <span class="k">async</span> <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">limiter</span><span class="p">:</span>
+</span><span id="__span-6-36"><a id="__codelineno-6-36" name="__codelineno-6-36" href="#__codelineno-6-36"></a>                <span class="k">try</span><span class="p">:</span>
+</span><span id="__span-6-37"><a id="__codelineno-6-37" name="__codelineno-6-37" href="#__codelineno-6-37"></a>                    <span class="k">async</span> <span class="k">with</span> <span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span> <span class="k">as</span> <span class="n">resp</span><span class="p">:</span>
+</span><span id="__span-6-38"><a id="__codelineno-6-38" name="__codelineno-6-38" href="#__codelineno-6-38"></a>                        <span class="k">if</span> <span class="n">resp</span><span class="o">.</span><span class="n">status</span> <span class="o">!=</span> <span class="mi">200</span><span class="p">:</span>
+</span><span id="__span-6-39"><a id="__codelineno-6-39" name="__codelineno-6-39" href="#__codelineno-6-39"></a>                            <span class="k">return</span> <span class="kc">False</span>
+</span><span id="__span-6-40"><a id="__codelineno-6-40" name="__codelineno-6-40" href="#__codelineno-6-40"></a>                        <span class="n">html</span> <span class="o">=</span> <span class="k">await</span> <span class="n">resp</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
+</span><span id="__span-6-41"><a id="__codelineno-6-41" name="__codelineno-6-41" href="#__codelineno-6-41"></a>                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+</span><span id="__span-6-42"><a id="__codelineno-6-42" name="__codelineno-6-42" href="#__codelineno-6-42"></a>                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"[请求异常] </span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</span><span id="__span-6-43"><a id="__codelineno-6-43" name="__codelineno-6-43" href="#__codelineno-6-43"></a>                    <span class="k">return</span> <span class="kc">False</span>
+</span><span id="__span-6-44"><a id="__codelineno-6-44" name="__codelineno-6-44" href="#__codelineno-6-44"></a>
+</span><span id="__span-6-45"><a id="__codelineno-6-45" name="__codelineno-6-45" href="#__codelineno-6-45"></a>        <span class="c1"># CPU 轻量解析：从 HTML 中提取结构化语料字段</span>
+</span><span id="__span-6-46"><a id="__codelineno-6-46" name="__codelineno-6-46" href="#__codelineno-6-46"></a>        <span class="n">sel</span> <span class="o">=</span> <span class="n">Selector</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">html</span><span class="p">)</span>
+</span><span id="__span-6-47"><a id="__codelineno-6-47" name="__codelineno-6-47" href="#__codelineno-6-47"></a>        <span class="n">record</span> <span class="o">=</span> <span class="p">{</span>
+</span><span id="__span-6-48"><a id="__codelineno-6-48" name="__codelineno-6-48" href="#__codelineno-6-48"></a>            <span class="s2">"url"</span><span class="p">:</span> <span class="n">url</span><span class="p">,</span>
+</span><span id="__span-6-49"><a id="__codelineno-6-49" name="__codelineno-6-49" href="#__codelineno-6-49"></a>            <span class="s2">"title"</span><span class="p">:</span> <span class="n">sel</span><span class="o">.</span><span class="n">css</span><span class="p">(</span><span class="s2">"title::text"</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="s2">"未命名文档"</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span>
+</span><span id="__span-6-50"><a id="__codelineno-6-50" name="__codelineno-6-50" href="#__codelineno-6-50"></a>            <span class="s2">"char_length"</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">html</span><span class="p">),</span>
+</span><span id="__span-6-51"><a id="__codelineno-6-51" name="__codelineno-6-51" href="#__codelineno-6-51"></a>            <span class="s2">"timestamp"</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">(),</span> <span class="mi">3</span><span class="p">),</span>
+</span><span id="__span-6-52"><a id="__codelineno-6-52" name="__codelineno-6-52" href="#__codelineno-6-52"></a>        <span class="p">}</span>
+</span><span id="__span-6-53"><a id="__codelineno-6-53" name="__codelineno-6-53" href="#__codelineno-6-53"></a>
+</span><span id="__span-6-54"><a id="__codelineno-6-54" name="__codelineno-6-54" href="#__codelineno-6-54"></a>        <span class="c1"># 使用 aiofiles 异步非阻塞写入 JSON Lines 文件</span>
+</span><span id="__span-6-55"><a id="__codelineno-6-55" name="__codelineno-6-55" href="#__codelineno-6-55"></a>        <span class="n">line</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">record</span><span class="p">,</span> <span class="n">ensure_ascii</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">+</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span>
+</span><span id="__span-6-56"><a id="__codelineno-6-56" name="__codelineno-6-56" href="#__codelineno-6-56"></a>        <span class="k">async</span> <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">write_lock</span><span class="p">:</span>
+</span><span id="__span-6-57"><a id="__codelineno-6-57" name="__codelineno-6-57" href="#__codelineno-6-57"></a>            <span class="k">await</span> <span class="n">out_f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+</span><span id="__span-6-58"><a id="__codelineno-6-58" name="__codelineno-6-58" href="#__codelineno-6-58"></a>        <span class="k">return</span> <span class="kc">True</span>
+</span><span id="__span-6-59"><a id="__codelineno-6-59" name="__codelineno-6-59" href="#__codelineno-6-59"></a>
+</span><span id="__span-6-60"><a id="__codelineno-6-60" name="__codelineno-6-60" href="#__codelineno-6-60"></a>    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">urls</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-6-61"><a id="__codelineno-6-61" name="__codelineno-6-61" href="#__codelineno-6-61"></a>        <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
+</span><span id="__span-6-62"><a id="__codelineno-6-62" name="__codelineno-6-62" href="#__codelineno-6-62"></a>        <span class="n">connector</span> <span class="o">=</span> <span class="n">aiohttp</span><span class="o">.</span><span class="n">TCPConnector</span><span class="p">(</span><span class="n">limit</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+</span><span id="__span-6-63"><a id="__codelineno-6-63" name="__codelineno-6-63" href="#__codelineno-6-63"></a>        <span class="n">timeout</span> <span class="o">=</span> <span class="n">aiohttp</span><span class="o">.</span><span class="n">ClientTimeout</span><span class="p">(</span><span class="n">total</span><span class="o">=</span><span class="mf">10.0</span><span class="p">)</span>
+</span><span id="__span-6-64"><a id="__codelineno-6-64" name="__codelineno-6-64" href="#__codelineno-6-64"></a>
+</span><span id="__span-6-65"><a id="__codelineno-6-65" name="__codelineno-6-65" href="#__codelineno-6-65"></a>        <span class="c1"># 同时管理异步 HTTP 会话池与异步文件句柄</span>
+</span><span id="__span-6-66"><a id="__codelineno-6-66" name="__codelineno-6-66" href="#__codelineno-6-66"></a>        <span class="k">async</span> <span class="k">with</span> <span class="p">(</span>
+</span><span id="__span-6-67"><a id="__codelineno-6-67" name="__codelineno-6-67" href="#__codelineno-6-67"></a>            <span class="n">aiohttp</span><span class="o">.</span><span class="n">ClientSession</span><span class="p">(</span><span class="n">connector</span><span class="o">=</span><span class="n">connector</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span> <span class="k">as</span> <span class="n">session</span><span class="p">,</span>
+</span><span id="__span-6-68"><a id="__codelineno-6-68" name="__codelineno-6-68" href="#__codelineno-6-68"></a>            <span class="n">aiofiles</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_file</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">"w"</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span> <span class="k">as</span> <span class="n">out_f</span><span class="p">,</span>
+</span><span id="__span-6-69"><a id="__codelineno-6-69" name="__codelineno-6-69" href="#__codelineno-6-69"></a>        <span class="p">):</span>
+</span><span id="__span-6-70"><a id="__codelineno-6-70" name="__codelineno-6-70" href="#__codelineno-6-70"></a>            <span class="n">tasks</span> <span class="o">=</span> <span class="p">[</span>
+</span><span id="__span-6-71"><a id="__codelineno-6-71" name="__codelineno-6-71" href="#__codelineno-6-71"></a>                <span class="n">asyncio</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fetch_and_parse</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="n">out_f</span><span class="p">))</span>
+</span><span id="__span-6-72"><a id="__codelineno-6-72" name="__codelineno-6-72" href="#__codelineno-6-72"></a>                <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">urls</span>
+</span><span id="__span-6-73"><a id="__codelineno-6-73" name="__codelineno-6-73" href="#__codelineno-6-73"></a>            <span class="p">]</span>
+</span><span id="__span-6-74"><a id="__codelineno-6-74" name="__codelineno-6-74" href="#__codelineno-6-74"></a>            <span class="n">results</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="o">*</span><span class="n">tasks</span><span class="p">,</span> <span class="n">return_exceptions</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="__span-6-75"><a id="__codelineno-6-75" name="__codelineno-6-75" href="#__codelineno-6-75"></a>
+</span><span id="__span-6-76"><a id="__codelineno-6-76" name="__codelineno-6-76" href="#__codelineno-6-76"></a>        <span class="n">success_cnt</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="mi">1</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">results</span> <span class="k">if</span> <span class="n">r</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">)</span>
+</span><span id="__span-6-77"><a id="__codelineno-6-77" name="__codelineno-6-77" href="#__codelineno-6-77"></a>        <span class="n">elapsed</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span> <span class="o">-</span> <span class="n">t0</span>
+</span><span id="__span-6-78"><a id="__codelineno-6-78" name="__codelineno-6-78" href="#__codelineno-6-78"></a>        <span class="nb">print</span><span class="p">(</span>
+</span><span id="__span-6-79"><a id="__codelineno-6-79" name="__codelineno-6-79" href="#__codelineno-6-79"></a>            <span class="sa">f</span><span class="s2">"🎉 异步全链路采集完成！成功 </span><span class="si">{</span><span class="n">success_cnt</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">urls</span><span class="p">)</span><span class="si">}</span><span class="s2"> 页 | "</span>
+</span><span id="__span-6-80"><a id="__codelineno-6-80" name="__codelineno-6-80" href="#__codelineno-6-80"></a>            <span class="sa">f</span><span class="s2">"总耗时: </span><span class="si">{</span><span class="n">elapsed</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">s | 平均吞吐量: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">urls</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">elapsed</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> 页/秒"</span>
+</span><span id="__span-6-81"><a id="__codelineno-6-81" name="__codelineno-6-81" href="#__codelineno-6-81"></a>        <span class="p">)</span>
+</span></code></pre></div>
+<h3 id="54">5.4 多线程与异步协程爬虫压测对比<a class="headerlink" href="#54" title="Permanent link">&para;</a></h3>
+<p>在结束本章之前，我们将所学的四种爬虫执行架构放在同一组基准压测条件（目标抓取 <span class="arithmatex">\(N = 1,000\)</span> 个网页，平均单页网络 I/O 延迟 <span class="arithmatex">\(T_{\text{io}} = 200\text{ ms}\)</span>，单页轻量 DOM 解析 <span class="arithmatex">\(T_{\text{cpu}} = 2\text{ ms}\)</span>）下进行全维度的<strong>多线程与异步协程爬虫压测对比（Benchmark Comparison）</strong>。下表汇总了四者的核心工程指标与选型建议：</p>
+<table>
+<thead>
+<tr>
+<th>并发架构方案</th>
+<th>核心技术栈</th>
+<th>1,000 页实测总耗时</th>
+<th>平均吞吐量 (RPS)</th>
+<th>峰值内存占用</th>
+<th>上下文切换层级</th>
+<th>最佳工程适用场景</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>单线程同步阻塞</strong></td>
+<td><code>requests.Session</code> + <code>for</code> 循环</td>
+<td><span class="arithmatex">\(\approx 202.0\text{ s}\)</span></td>
+<td><span class="arithmatex">\(\approx 4.9\text{ 页/秒}\)</span></td>
+<td><span class="arithmatex">\(\approx 28\text{ MB}\)</span></td>
+<td>无并发切换</td>
+<td>几百页以内的小型脚本、极严苛反爬站点低速采集、快速原型验证</td>
+</tr>
+<tr>
+<td><strong>多线程池并发 (20 线程)</strong></td>
+<td><code>ThreadPoolExecutor</code> + <code>requests</code></td>
+<td><span class="arithmatex">\(\approx 10.5\text{ s}\)</span></td>
+<td><span class="arithmatex">\(\approx 95.2\text{ 页/秒}\)</span></td>
+<td><span class="arithmatex">\(\approx 68\text{ MB}\)</span></td>
+<td>操作系统内核态切换 (<span class="arithmatex">\(\mu\text{s}\)</span> 级)</td>
+<td>中等规模采集（万级页面）、需直接复用同步第三方 SDK（如传统数据库驱动）</td>
+</tr>
+<tr>
+<td><strong>多进程池并行 (8 进程)</strong></td>
+<td><code>ProcessPoolExecutor</code> + <code>parsel</code>/<code>re</code></td>
+<td>不适合纯网络等待；专用于 CPU 解析加速</td>
+<td>取决于 CPU 物理核心数</td>
+<td><span class="arithmatex">\(\approx 260\text{ MB}\)</span></td>
+<td>操作系统内核态进程切换 (重度)</td>
+<td>超大 HTML DOM 树解析、密集正则清洗、SimHash 计算、OCR 图像识别</td>
+</tr>
+<tr>
+<td><strong>单线程异步协程 (100 并发槽)</strong></td>
+<td><code>asyncio</code> + <code>aiohttp</code> / <code>httpx</code> + <code>aiofiles</code></td>
+<td><span class="arithmatex">\(\approx 2.2\text{ s}\)</span></td>
+<td><span class="arithmatex">\(\approx 454.5\text{ 页/秒}\)</span></td>
+<td><span class="arithmatex">\(\approx 36\text{ MB}\)</span></td>
+<td>单线程用户态极速切换 (<span class="arithmatex">\(\text{ns}\)</span> 级)</td>
+<td><strong>百万级大规模 AI 语料采集、高频实时监控、高并发 API 抓取首选架构</strong></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="6">6. 本章小结与思考练习<a class="headerlink" href="#6" title="Permanent link">&para;</a></h2>
+<h3 id="61">6.1 核心要点回顾<a class="headerlink" href="#61" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>找准性能瓶颈</strong>：网络爬虫的下载阶段是典型的<strong>网络 I/O 密集型任务</strong>（超过 <span class="arithmatex">\(99\%\)</span> 的时间在等待网络响应），而复杂 HTML 解析与特征计算属于 <strong>CPU 密集型任务</strong>。</li>
+<li><strong>正确理解 GIL 与多线程/多进程</strong>：虽然 Python 的全局解释器锁（GIL）限制同一进程内同一时刻只能有一个线程执行字节码，但<strong>线程在等待网络 I/O 时会主动释放 GIL</strong>，因此 <code>ThreadPoolExecutor</code> 结合 <code>queue.Queue</code> 能显著加速网页下载；而重度 CPU 解析任务则应交由 <code>ProcessPoolExecutor</code> 多进程池绕过 GIL 实现多核并行。</li>
+<li><strong><code>asyncio</code> 协程单线程高并发</strong>：协程运行在单线程用户态，内存占用仅数 KB，切换开销为纳秒级；通过 <code>async def</code> 定义协程、在 I/O 处使用 <code>await</code> 主动让出控制权给事件循环（Event Loop），并使用 <code>asyncio.gather(*tasks, return_exceptions=True)</code> 实现高容错并发编排。</li>
+<li><strong>异步生态与受控限流</strong>：使用 <code>aiohttp.ClientSession</code> 或 <code>httpx.AsyncClient</code> 全局复用 TCP 连接池，配合 <code>Playwright</code> 异步多标签页渲染动态网页；在生产环境中必须使用 <strong><code>asyncio.Semaphore</code> 限制最大在途连接数</strong>，并结合 <strong><code>aiolimiter.AsyncLimiter</code> 令牌桶算法限制每秒请求速率</strong>，最后通过 <code>aiofiles</code> 实现非阻塞落盘。</li>
+</ul>
+<h3 id="62">6.2 思考与自测练习<a class="headerlink" href="#62" title="Permanent link">&para;</a></h3>
+<details class="question">
+<summary>思考题 1：既然 Python 存在全局解释器锁（GIL），为什么使用 <code>ThreadPoolExecutor</code> 开启 20 个线程抓取网页，速度依然能比单线程快将近 20 倍？什么情况下多线程反而不会提速？</summary>
+<p>因为网络爬虫的下载阶段是<strong>网络 I/O 密集型任务</strong>。CPython 解释器在线程发起底层 Socket 网络等待（或 <code>time.sleep</code>）之前会<strong>主动释放 GIL 锁</strong>，使得其他 19 个线程可以依次获取 GIL 并发出各自的 HTTP 请求，从而让 20 个网页的网络等待时间在时间轴上高度重叠。但是，如果任务是<strong>纯 CPU 密集型计算</strong>（例如对已经加载到内存中的海量字符串做复杂正则表达式匹配或加密哈希运算），线程不会释放 GIL，多线程不仅无法利用多核并行，反而会因为频繁争夺 GIL 锁而比单线程更慢，此时必须改用 <code>ProcessPoolExecutor</code> 多进程。</p>
+</details>
+<details class="question">
+<summary>思考题 2：在编写 <code>aiohttp</code> 异步爬虫时，如果一位同学把 <code>async with aiohttp.ClientSession() as session:</code> 写在了单个网页的抓取函数 <code>fetch_one(url)</code> 内部，然后并发调用了 5,000 次 <code>fetch_one(url)</code>，会发生什么严重后果？</summary>
+<p>这是异步爬虫中最典型的反模式！将 <code>ClientSession</code> 写在单页函数内部会导致程序瞬间创建 <strong>5,000 个独立的连接池实例</strong>：一方面彻底丧失了 HTTP Keep-Alive 长连接复用与 DNS 缓存能力，每次请求都必须重新进行 TCP 三次握手与 TLS 握手；另一方面会导致操作系统的本地临时端口与文件描述符（File Descriptors）瞬间耗尽，抛出 <code>OSError: Too many open files</code> 或连接崩溃。正确做法是在 <code>main()</code> 顶层只创建<strong>唯一一个</strong> <code>ClientSession</code> 并传给所有子协程复用。</p>
+</details>
+<details class="question">
+<summary>思考题 3：已经使用了 <code>asyncio.Semaphore(20)</code> 将最大并发连接数限制为 20，为什么在抓取某个响应极快（平均响应耗时仅 25ms）的目标 API 时，依然触发了网站的 <code>HTTP 429 Too Many Requests</code> 速率封禁？该如何解决？</summary>
+<p>因为 <code>asyncio.Semaphore(20)</code> 只限制<strong>“同一时刻正在传输中的并发请求数（In-Flight Connections）”</strong>，而不限制<strong>“每秒钟累计发出的请求频次（RPS）”</strong>。当目标接口响应耗时仅为 <span class="arithmatex">\(25\text{ ms}\)</span>（<span class="arithmatex">\(0.025\text{ s}\)</span>）时，每个并发槽位每秒钟可以连续周转 <span class="arithmatex">\(1 / 0.025 = 40\)</span> 次，20 个并发槽位合起来每秒钟会向服务器倾泻 <span class="arithmatex">\(20 \times 40 = 800\)</span> 次请求！解决办法是在 <code>Semaphore</code> 内部叠加一层基于令牌桶算法的 <strong><code>aiolimiter.AsyncLimiter(max_rate=10, time_period=1.0)</code></strong>，强制限制每秒生成和消耗的请求令牌数，实现平滑限流。</p>
+</details>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../07-anti-scraping-and-countermeasures/" class="md-footer__link md-footer__link--prev" aria-label="Previous: 7. 反爬虫机制原理与工程对抗策略">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                7. 反爬虫机制原理与工程对抗策略
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../09-data-cleaning-and-storage/" class="md-footer__link md-footer__link--next" aria-label="Next: 9. 数据清洗流水线与多源持久化存储">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                9. 数据清洗流水线与多源持久化存储
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2026 AI教材编写组. Licensed under <a href="license/">CC BY-NC-SA 4.0</a> for non-commercial use.
+    </div>
+  
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["content.code.copy", "content.action.edit", "navigation.expand", "navigation.path", "navigation.prune", "navigation.indexes", "navigation.top", "navigation.footer", "toc.follow", "search.suggest", "search.highlight", "search.share"], "search": "../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.c21346df.min.js"></script>
+      
+    
+  </body>
+</html>

@@ -1,0 +1,2185 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="聚焦人工智能技术应用专业核心需求，深入讲解大模型预训练语料标准、Trafilatura正文抽取、HTML转Markdown、Crawl4AI异步框架、LLM Function Calling零样本解析、SFT指令微调集构建、语义分块写入向量数据库及PII脱敏与MinHash去重。">
+      
+      
+        <meta name="author" content="AI教材编写组">
+      
+      
+        <link rel="canonical" href="https://minssnail.github.io/crawbug/chapters/11-ai-powered-scraping-and-datasets/">
+      
+      
+        <link rel="prev" href="../10-scrapy-industrial-framework/">
+      
+      
+        <link rel="next" href="../12-engineering-deployment-and-capstone/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.0">
+    
+    
+      
+        <title>面向大模型与RAG的AI智能爬虫 - 网络爬虫技术</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.57a0d79d.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.fb2fffe2.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../css/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="orange">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#ragai" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="网络爬虫技术" class="md-header__button md-logo" aria-label="网络爬虫技术" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            网络爬虫技术
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              面向大模型与RAG的AI智能爬虫
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/Minssnail/crawbug" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Minssnail/crawbug
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="网络爬虫技术" class="md-nav__button md-logo" aria-label="网络爬虫技术" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    网络爬虫技术
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/Minssnail/crawbug" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Minssnail/crawbug
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../about/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    About
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../course-description/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Course Description
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Chapters
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_4" id="__nav_4_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Chapters
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../01-intro-and-ethics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1. 网络爬虫导论与数据合规基石
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../02-web-and-http-fundamentals/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    2. Web前端基石与HTTP通信原理
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../03-python-http-requests/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    3. Python网络请求核心编程
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-static-html-parsing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    4. 静态网页结构化解析与正则提取
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../05-ajax-and-api-scraping/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    5. 异步加载与Web接口逆向采集
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../06-browser-automation-playwright/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    6. 动态渲染网页与Playwright浏览器自动化
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../07-anti-scraping-and-countermeasures/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    7. 反爬虫机制原理与工程对抗策略
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../08-concurrent-and-async-scraping/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    8. 高性能并发与异步协程爬虫编程
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../09-data-cleaning-and-storage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    9. 数据清洗流水线与多源持久化存储
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../10-scrapy-industrial-framework/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    10. Scrapy工业级异步爬虫框架实战
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    11. 面向大模型与RAG的AI智能爬虫
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    11. 面向大模型与RAG的AI智能爬虫
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#concepts-covered" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Concepts Covered
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. 大模型训练数据生命周期与高质量网页正文抽取
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. 大模型训练数据生命周期与高质量网页正文抽取">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-ai" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 AI 与大模型训练数据生命周期及语料质量标准
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-trafilatura-crawl4ai-markdown" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 启发式正文抽取（Trafilatura）与 Crawl4AI Markdown 转换
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-llm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. 基于 LLM 的零样本网页解析与自愈修复爬虫
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. 基于 LLM 的零样本网页解析与自愈修复爬虫">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-dom-pruning-function-calling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 DOM 树精简（Pruning）与 Function Calling 零样本解析
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-llm-ai-agent" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 LLM 自动生成选择器自愈爬虫与 AI 视觉 Agent
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2.2 LLM 自动生成选择器自愈爬虫与 AI 视觉 Agent">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#diagram-llm-xpath" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagram: LLM 零样本网页解析与 XPath 选择器自愈修复工作台
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-llm-xpath" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3 LLM 自动生成与热修复 XPath 选择器的代码落地
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-sft-rag" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. 指令微调（SFT）数据集构建与 RAG 向量库流水线
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. 指令微调（SFT）数据集构建与 RAG 向量库流水线">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-alpaca-sharegpt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 Alpaca / ShareGPT 格式与垂直社区问答采集
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-rag-chunking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 RAG 实时更新、文档语义分块（Chunking）与向量数据库写入
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3.2 RAG 实时更新、文档语义分块（Chunking）与向量数据库写入">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#diagram-rag-sft" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagram: 面向 RAG 与 SFT 的智能网页语料清洗及分块沙盒
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-pii" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. 多模态图文对齐、隐私脱敏（PII）与大规模去重
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. 章节复习与实战思考题
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../12-engineering-deployment-and-capstone/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    12. 爬虫工程化运维部署与综合实训项目
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../learning-graph/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Learning Graph
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../sims/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MicroSims
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../license/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    License
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contact/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contact
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#concepts-covered" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Concepts Covered
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. 大模型训练数据生命周期与高质量网页正文抽取
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. 大模型训练数据生命周期与高质量网页正文抽取">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-ai" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 AI 与大模型训练数据生命周期及语料质量标准
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-trafilatura-crawl4ai-markdown" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 启发式正文抽取（Trafilatura）与 Crawl4AI Markdown 转换
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-llm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. 基于 LLM 的零样本网页解析与自愈修复爬虫
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. 基于 LLM 的零样本网页解析与自愈修复爬虫">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-dom-pruning-function-calling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 DOM 树精简（Pruning）与 Function Calling 零样本解析
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-llm-ai-agent" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 LLM 自动生成选择器自愈爬虫与 AI 视觉 Agent
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2.2 LLM 自动生成选择器自愈爬虫与 AI 视觉 Agent">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#diagram-llm-xpath" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagram: LLM 零样本网页解析与 XPath 选择器自愈修复工作台
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-llm-xpath" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3 LLM 自动生成与热修复 XPath 选择器的代码落地
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-sft-rag" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. 指令微调（SFT）数据集构建与 RAG 向量库流水线
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. 指令微调（SFT）数据集构建与 RAG 向量库流水线">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-alpaca-sharegpt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 Alpaca / ShareGPT 格式与垂直社区问答采集
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-rag-chunking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 RAG 实时更新、文档语义分块（Chunking）与向量数据库写入
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3.2 RAG 实时更新、文档语义分块（Chunking）与向量数据库写入">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#diagram-rag-sft" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagram: 面向 RAG 与 SFT 的智能网页语料清洗及分块沙盒
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-pii" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. 多模态图文对齐、隐私脱敏（PII）与大规模去重
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. 章节复习与实战思考题
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+                
+
+
+
+  
+
+
+  <nav class="md-path" aria-label="Navigation" >
+    <ol class="md-path__list">
+      
+        
+  
+  
+    <li class="md-path__item">
+      <a href="../.." class="md-path__link">
+        
+  <span class="md-ellipsis">
+    Home
+  </span>
+
+      </a>
+    </li>
+  
+
+      
+      
+        
+  
+  
+    
+    
+      <li class="md-path__item">
+        <a href="../" class="md-path__link">
+          
+  <span class="md-ellipsis">
+    Chapters
+  </span>
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ol>
+  </nav>
+
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+    <a href="https://github.com/Minssnail/crawbug/blob/main/docs/chapters/11-ai-powered-scraping-and-datasets/index.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
+    </a>
+  
+  
+
+
+<h1 id="ragai">面向大模型与RAG的AI智能爬虫<a class="headerlink" href="#ragai" title="Permanent link">&para;</a></h1>
+<h2 id="summary">Summary<a class="headerlink" href="#summary" title="Permanent link">&para;</a></h2>
+<p>紧密贴合人工智能技术应用专业的培养定位，本章将传统爬虫升级为面向大语言模型（LLM）与多模态模型的智能数据引擎。内容涵盖 LLM 预训练语料质量标准、<code>Readability</code> 与 <code>Trafilatura</code> 正文启发式抽取、网页噪音过滤与 HTML-to-Markdown 结构化转换（<code>Jina Reader</code>、<code>Firecrawl</code>、<code>Crawl4AI</code>）。重点实战利用 LLM Prompt 与 Function Calling 进行零样本自适应网页解析、DOM 树精简降本、选择器自愈修复、Alpaca/ShareGPT 指令微调（SFT）数据集构建、多模态图文对对齐过滤、PII 隐私擦除，以及文档语义分块（Chunking）写入向量数据库构建实时 RAG 系统。</p>
+<h2 id="concepts-covered">Concepts Covered<a class="headerlink" href="#concepts-covered" title="Permanent link">&para;</a></h2>
+<p>This chapter covers the following 18 concepts from the learning graph:</p>
+<table>
+<thead>
+<tr>
+<th>Concept</th>
+<th>Concept Impact Score</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AI与大模型训练数据生命周期全貌</td>
+<td>36</td>
+</tr>
+<tr>
+<td>LLM预训练语料Corpus质量标准</td>
+<td>27</td>
+</tr>
+<tr>
+<td>网页正文抽取Readability与Trafilatura</td>
+<td>23</td>
+</tr>
+<tr>
+<td>网页噪音剔除与样板文本过滤</td>
+<td>4</td>
+</tr>
+<tr>
+<td>HTML转Markdown结构化保留代码表格</td>
+<td>18</td>
+</tr>
+<tr>
+<td>Jina-Reader与Firecrawl网页提取</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Crawl4AI大模型友好型异步爬虫</td>
+<td>2</td>
+</tr>
+<tr>
+<td>基于LLM与Function-Calling零样本解析</td>
+<td>7</td>
+</tr>
+<tr>
+<td>DOM树精简Pruning降低Token消耗</td>
+<td>1</td>
+</tr>
+<tr>
+<td>LLM自动生成选择器与自愈修复爬虫</td>
+<td>4</td>
+</tr>
+<tr>
+<td>AI视觉Agent结合截图识别复杂交互</td>
+<td>1</td>
+</tr>
+<tr>
+<td>指令微调SFT数据集Alpaca/ShareGPT格式</td>
+<td>3</td>
+</tr>
+<tr>
+<td>垂直社区问答采集构建领域SFT语料</td>
+<td>2</td>
+</tr>
+<tr>
+<td>RAG检索增强生成与知识库实时更新</td>
+<td>4</td>
+</tr>
+<tr>
+<td>文档语义分块Chunking与元数据保留</td>
+<td>3</td>
+</tr>
+<tr>
+<td>Embedding向量化与向量数据库写入</td>
+<td>2</td>
+</tr>
+<tr>
+<td>多模态图文对采集与CLIP对齐过滤</td>
+<td>1</td>
+</tr>
+<tr>
+<td>语料隐私脱敏PII擦除与MinHash去重</td>
+<td>3</td>
+</tr>
+</tbody>
+</table>
+<h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">&para;</a></h2>
+<p>This chapter builds on concepts from:</p>
+<ul>
+<li><a href="../01-intro-and-ethics/">Chapter 1: 网络爬虫导论与数据合规基石</a></li>
+<li><a href="../04-static-html-parsing/">Chapter 4: 静态网页结构化解析与正则提取</a></li>
+<li><a href="../05-ajax-and-api-scraping/">Chapter 5: 异步加载与Web接口逆向采集</a></li>
+<li><a href="../06-browser-automation-playwright/">Chapter 6: 动态渲染网页与Playwright浏览器自动化</a></li>
+<li><a href="../07-anti-scraping-and-countermeasures/">Chapter 7: 反爬虫机制原理与工程对抗策略</a></li>
+<li><a href="../08-concurrent-and-async-scraping/">Chapter 8: 高性能并发与异步协程爬虫编程</a></li>
+<li><a href="../09-data-cleaning-and-storage/">Chapter 9: 数据清洗流水线与多源持久化存储</a></li>
+<li><a href="../10-scrapy-industrial-framework/">Chapter 10: Scrapy工业级异步爬虫框架实战</a></li>
+</ul>
+<hr />
+<h2 id="1">1. 大模型训练数据生命周期与高质量网页正文抽取<a class="headerlink" href="#1" title="Permanent link">&para;</a></h2>
+<p>在人工智能进入大语言模型（LLM）与检索增强生成（RAG）的时代后，网络爬虫与AI工程之间产生了双向的深度化学反应：一方面，<strong>“爬虫为 AI 供数（Scraping for AI）”</strong>——无论是训练百亿参数的基座模型、微调医疗法律垂直大模型，还是为企业知识库注入实时外部资讯，90% 以上的原始语料都来自网络爬虫；另一方面，<strong>“AI 赋能智能爬虫（AI for Scraping）”</strong>——借助大模型的语义理解与视觉能力，爬虫不再需要针对每个网站手写脆弱的 XPath 规则，而是具备了零样本自适应解析与代码自愈修复能力。</p>
+<h3 id="11-ai">1.1 AI 与大模型训练数据生命周期及语料质量标准<a class="headerlink" href="#11-ai" title="Permanent link">&para;</a></h3>
+<p>在人工智能技术应用专业岗位中，理解 <strong>AI 与大模型训练数据生命周期全貌</strong> 是数据工程师的核心竞争力。大模型的数据供给贯穿以下四大阶段：</p>
+<ol>
+<li><strong>基座预训练阶段（Pre-training Corpus）</strong>：需要数万亿 Token 的海量高质量自然语言长文本（如百科、技术文档、新闻深度报道、学术论文、开源代码），让模型习得世界知识与语言逻辑。</li>
+<li><strong>有监督指令微调阶段（Supervised Fine-Tuning, SFT）</strong>：需要数万至数十万条高质量的“指令-输入-回答（Instruction-Input-Output）”或高赞多轮专家问答对，教会模型遵循人类指令并以特定领域专家的口吻作答。</li>
+<li><strong>偏好对齐阶段（RLHF / DPO）</strong>：采集同一问题下不同采纳度或点赞数的回答对，构建 <code>{prompt, chosen, rejected}</code> 偏好数据集。</li>
+<li><strong>检索增强生成阶段（RAG Knowledge Base）</strong>：无需重新训练模型权重，而是通过爬虫实时采集最新政策、财报、产品手册，经语义分块与向量化后存入向量数据库，在用户提问时精准召回并注入 Prompt 上下文，彻底消除大模型“幻觉”与知识过时问题。</li>
+</ol>
+<p>在构建上述语料时，为什么不能直接用 <code>soup.get_text()</code> 把整个网页文字全部塞给大模型？这就涉及到严格的 <strong>LLM 预训练语料 <code>Corpus</code> 质量标准</strong>。原始网页中充斥着导航栏菜单、侧边栏猜你喜欢、页脚备案号、登录注册提示以及SEO垃圾关键词堆砌。如果将这些低信息密度的样板噪音（Boilerplate Noise）喂给模型或存入 RAG 向量库，不仅会白白浪费昂贵的 GPU 算力与上下文窗口，还会导致向量检索召回大量无意义的页眉页脚，严重污染模型输出质量。</p>
+<h3 id="12-trafilatura-crawl4ai-markdown">1.2 启发式正文抽取（<code>Trafilatura</code>）与 <code>Crawl4AI</code> Markdown 转换<a class="headerlink" href="#12-trafilatura-crawl4ai-markdown" title="Permanent link">&para;</a></h3>
+<p>想象一下：如果你要从全国 5,000 个不同地方政府网站和科技媒体采集文章构建政策大模型，显然不可能为 5,000 个网站分别手写 5,000 条 XPath 规则。此时，我们需要不依赖特定网站 DOM 结构的通用 <strong>网页正文抽取 <code>Readability</code> 与 <code>Trafilatura</code></strong> 算法，配合 <strong>网页噪音剔除与样板文本过滤</strong>。</p>
+<p>早期通用正文抽取算法（如 Mozilla Readability 和基于行块分布函数的文本密度算法）主要依靠统计每个 DOM 节点的“文字长度与超链接标签数量之比（Link Density）”以及标点符号密度来识别正文区。而在当前 LLM 语料工程界，公认综合准确率（F1-Score）最高的开源黄金标准是 Python 库 <strong><code>trafilatura</code></strong>。它融合了启发式 DOM 剪枝、文本密度计算与回退机制，能够自动剥离导航栏、广告与评论区，精准提取标题、作者、发布日期与纯净正文。</p>
+<p>更进一步，对于大模型和 RAG 系统而言，纯文本（Plain Text）会丢失掉极为关键的<strong>章节标题层级（<code>#</code>、<code>##</code>）、代码缩进块（<code>```python</code>）和二维对比表格（<code>| 列1 | 列2 |</code>）</strong>。因此，现代 AI 爬虫的标准输出格式不再是纯文本或原始 HTML，而是兼具高可读性与极低 Token 占用的 <strong>HTML 转 Markdown 结构化保留代码表格</strong>！围绕这一需求，业界形成了三套主流工具链：</p>
+<ul>
+<li><strong><code>Jina Reader</code> 与 <code>Firecrawl</code> 网页提取</strong>：云端 API 方案。例如在任意网址前直接拼接 <code>https://r.jina.ai/https://example.com</code>，即可直接获取由云端无头浏览器渲染并净化后的大模型友好型 Markdown 文本。</li>
+<li><strong><code>Crawl4AI</code> 大模型友好型异步爬虫</strong>：目前 GitHub 上最火热的开源 AI 爬虫框架，底层基于异步 Playwright 构建，原生支持一键输出净化后的 <code>fit_markdown</code>（经启发式噪音剔除的精简 Markdown），并内置了与 LLM 提取器的无缝对接。</li>
+</ul>
+<p>下面演示使用 <code>trafilatura</code> 与 <code>Crawl4AI</code> 思想将嘈杂 HTML 一键转化为保留代码块与表格的高信噪比 Markdown 语料：</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">trafilatura</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="k">def</span><span class="w"> </span><span class="nf">extract_llm_ready_markdown</span><span class="p">(</span><span class="n">raw_html</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">source_url</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">    </span><span class="sd">"""</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="sd">    使用 Trafilatura 从任意未知结构的网页中剔除样板噪音，</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="sd">    并提取保留了标题层级、代码块与表格的 Markdown 语料及元数据</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="sd">    """</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>    <span class="c1"># 1. 提取文章元数据（标题、作者、发布时间、站点名）</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>    <span class="n">metadata</span> <span class="o">=</span> <span class="n">trafilatura</span><span class="o">.</span><span class="n">extract_metadata</span><span class="p">(</span><span class="n">raw_html</span><span class="p">,</span> <span class="n">default_url</span><span class="o">=</span><span class="n">source_url</span><span class="p">)</span>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>    <span class="c1"># 2. 启发式抽取核心正文并直接转换为结构化 Markdown 格式</span>
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>    <span class="n">clean_markdown</span> <span class="o">=</span> <span class="n">trafilatura</span><span class="o">.</span><span class="n">extract</span><span class="p">(</span>
+</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>        <span class="n">raw_html</span><span class="p">,</span>
+</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>        <span class="n">url</span><span class="o">=</span><span class="n">source_url</span><span class="p">,</span>
+</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>        <span class="n">output_format</span><span class="o">=</span><span class="s2">"markdown"</span><span class="p">,</span>
+</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>        <span class="n">include_tables</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>      <span class="c1"># 保留关键数据表格</span>
+</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>        <span class="n">include_Formatting</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>  <span class="c1"># 保留加粗、列表与代码块层级</span>
+</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>        <span class="n">include_links</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>      <span class="c1"># 剔除干扰注意力的内链 URL</span>
+</span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>        <span class="n">deduplicate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>         <span class="c1"># 开启段落级重复文本剔除</span>
+</span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>    <span class="p">)</span>
+</span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a>
+</span><span id="__span-0-23"><a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a>    <span class="k">return</span> <span class="p">{</span>
+</span><span id="__span-0-24"><a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a>        <span class="s2">"title"</span><span class="p">:</span> <span class="n">metadata</span><span class="o">.</span><span class="n">title</span> <span class="k">if</span> <span class="n">metadata</span> <span class="k">else</span> <span class="s2">""</span><span class="p">,</span>
+</span><span id="__span-0-25"><a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a>        <span class="s2">"author"</span><span class="p">:</span> <span class="n">metadata</span><span class="o">.</span><span class="n">author</span> <span class="k">if</span> <span class="n">metadata</span> <span class="k">else</span> <span class="s2">""</span><span class="p">,</span>
+</span><span id="__span-0-26"><a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a>        <span class="s2">"date"</span><span class="p">:</span> <span class="n">metadata</span><span class="o">.</span><span class="n">date</span> <span class="k">if</span> <span class="n">metadata</span> <span class="k">else</span> <span class="s2">""</span><span class="p">,</span>
+</span><span id="__span-0-27"><a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a>        <span class="s2">"url"</span><span class="p">:</span> <span class="n">source_url</span><span class="p">,</span>
+</span><span id="__span-0-28"><a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a>        <span class="s2">"markdown_content"</span><span class="p">:</span> <span class="n">clean_markdown</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">,</span>
+</span><span id="__span-0-29"><a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a>    <span class="p">}</span>
+</span><span id="__span-0-30"><a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a>
+</span><span id="__span-0-31"><a id="__codelineno-0-31" name="__codelineno-0-31" href="#__codelineno-0-31"></a>
+</span><span id="__span-0-32"><a id="__codelineno-0-32" name="__codelineno-0-32" href="#__codelineno-0-32"></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
+</span><span id="__span-0-33"><a id="__codelineno-0-33" name="__codelineno-0-33" href="#__codelineno-0-33"></a>    <span class="n">noisy_html</span> <span class="o">=</span> <span class="s2">"""</span>
+</span><span id="__span-0-34"><a id="__codelineno-0-34" name="__codelineno-0-34" href="#__codelineno-0-34"></a><span class="s2">    &lt;html&gt;&lt;body&gt;</span>
+</span><span id="__span-0-35"><a id="__codelineno-0-35" name="__codelineno-0-35" href="#__codelineno-0-35"></a><span class="s2">      &lt;nav&gt;&lt;a href="/"&gt;首页&lt;/a&gt; | &lt;a href="/login"&gt;登录&lt;/a&gt; | 热门搜索：手机 电脑&lt;/nav&gt;</span>
+</span><span id="__span-0-36"><a id="__codelineno-0-36" name="__codelineno-0-36" href="#__codelineno-0-36"></a><span class="s2">      &lt;article&gt;</span>
+</span><span id="__span-0-37"><a id="__codelineno-0-37" name="__codelineno-0-37" href="#__codelineno-0-37"></a><span class="s2">        &lt;h1&gt;DeepSeek-R1 强化学习推理模型技术解读&lt;/h1&gt;</span>
+</span><span id="__span-0-38"><a id="__codelineno-0-38" name="__codelineno-0-38" href="#__codelineno-0-38"></a><span class="s2">        &lt;p&gt;本文深入分析大模型如何通过纯强化学习（RL）涌现出自我反思与长思维链能力。&lt;/p&gt;</span>
+</span><span id="__span-0-39"><a id="__codelineno-0-39" name="__codelineno-0-39" href="#__codelineno-0-39"></a><span class="s2">        &lt;table&gt;</span>
+</span><span id="__span-0-40"><a id="__codelineno-0-40" name="__codelineno-0-40" href="#__codelineno-0-40"></a><span class="s2">          &lt;thead&gt;&lt;tr&gt;&lt;th&gt;模型版本&lt;/th&gt;&lt;th&gt;AIME 2024 准确率&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;</span>
+</span><span id="__span-0-41"><a id="__codelineno-0-41" name="__codelineno-0-41" href="#__codelineno-0-41"></a><span class="s2">          &lt;tbody&gt;&lt;tr&gt;&lt;td&gt;DeepSeek-R1&lt;/td&gt;&lt;td&gt;79.8%&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;</span>
+</span><span id="__span-0-42"><a id="__codelineno-0-42" name="__codelineno-0-42" href="#__codelineno-0-42"></a><span class="s2">        &lt;/table&gt;</span>
+</span><span id="__span-0-43"><a id="__codelineno-0-43" name="__codelineno-0-43" href="#__codelineno-0-43"></a><span class="s2">      &lt;/article&gt;</span>
+</span><span id="__span-0-44"><a id="__codelineno-0-44" name="__codelineno-0-44" href="#__codelineno-0-44"></a><span class="s2">      &lt;aside&gt;猜你喜欢：点击领取双十一大促优惠券！&lt;/aside&gt;</span>
+</span><span id="__span-0-45"><a id="__codelineno-0-45" name="__codelineno-0-45" href="#__codelineno-0-45"></a><span class="s2">      &lt;footer&gt;Copyright 2026 ICP备888888号 联系我们&lt;/footer&gt;</span>
+</span><span id="__span-0-46"><a id="__codelineno-0-46" name="__codelineno-0-46" href="#__codelineno-0-46"></a><span class="s2">    &lt;/body&gt;&lt;/html&gt;</span>
+</span><span id="__span-0-47"><a id="__codelineno-0-47" name="__codelineno-0-47" href="#__codelineno-0-47"></a><span class="s2">    """</span>
+</span><span id="__span-0-48"><a id="__codelineno-0-48" name="__codelineno-0-48" href="#__codelineno-0-48"></a>    <span class="n">doc</span> <span class="o">=</span> <span class="n">extract_llm_ready_markdown</span><span class="p">(</span><span class="n">noisy_html</span><span class="p">,</span> <span class="s2">"https://ai.example.com/post/101"</span><span class="p">)</span>
+</span><span id="__span-0-49"><a id="__codelineno-0-49" name="__codelineno-0-49" href="#__codelineno-0-49"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"标题: </span><span class="si">{</span><span class="n">doc</span><span class="p">[</span><span class="s1">'title'</span><span class="p">]</span><span class="si">}</span><span class="se">\n</span><span class="s2">--- 净化后的 Markdown 正文 ---</span><span class="se">\n</span><span class="si">{</span><span class="n">doc</span><span class="p">[</span><span class="s1">'markdown_content'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</span></code></pre></div>
+<hr />
+<h2 id="2-llm">2. 基于 LLM 的零样本网页解析与自愈修复爬虫<a class="headerlink" href="#2-llm" title="Permanent link">&para;</a></h2>
+<p>当我们需要从结构各异的网站中提取高度结构化的业务字段（例如从 200 家不同医院官网提取“科室名称、主任医师、擅长疾病、出诊时间”），传统方法需要编写 200 套解析代码；而借助大语言模型，我们可以构建<strong>零样本（Zero-Shot）自适应智能爬虫</strong>。</p>
+<h3 id="21-dom-pruning-function-calling">2.1 DOM 树精简（Pruning）与 Function Calling 零样本解析<a class="headerlink" href="#21-dom-pruning-function-calling" title="Permanent link">&para;</a></h3>
+<p>如果直接把一个动辄 300 KB（约合 80,000 Tokens）的原始 HTML 源码原封不动地发给大模型 API，不仅单页调用成本高达数角钱，而且绝大部分 Token 都被无意义的 <code>&lt;svg&gt;</code> 图标路径、<code>&lt;style&gt;</code> 样式、<code>&lt;script&gt;</code> 脚本和冗长的 <code>class="flex items-center justify-between..."</code> 样式类名浪费掉了。</p>
+<p>因此，在调用大模型前必须先执行 <strong>DOM 树精简 <code>Pruning</code> 降低 Token 消耗</strong>：
+1. 彻底移除 <code>&lt;script&gt;</code>、<code>&lt;style&gt;</code>、<code>&lt;svg&gt;</code>、<code>&lt;noscript&gt;</code>、<code>&lt;iframe&gt;</code> 及 HTML 注释节点。
+2. 剥离所有标签上的 <code>style</code>、<code>onclick</code>、<code>data-*</code> 以及无语义的 Tailwind/Bootstrap 原子化 CSS 类名，仅保留核心文本结构与 <code>href</code> 属性。经过这一步精简，HTML 的 Token 体积通常能<strong>压缩 85%～95%</strong>！</p>
+<p>随后，我们利用 <strong>基于 LLM 与 <code>Function-Calling</code> 零样本解析</strong>（或 OpenAI / DeepSeek / 通义千问兼容的 <code>Structured Outputs</code> + <code>Pydantic</code> 模型约束）：只需定义一个描述目标字段的 <code>Pydantic</code> 数据类，大模型就会自动阅读精简后的网页文本，并严格按照 JSON Schema 输出类型安全的字典列表，彻底告别输出格式不稳定或幻觉寒暄语。</p>
+<h3 id="22-llm-ai-agent">2.2 LLM 自动生成选择器自愈爬虫与 AI 视觉 Agent<a class="headerlink" href="#22-llm-ai-agent" title="Permanent link">&para;</a></h3>
+<p>虽然用 LLM 逐页解析网页非常省心，但如果某个网站有 100 万个详情页，每页都调一次大模型 API 依然是一笔不小的开销。在工业界，性价比最高的设计模式是 <strong>LLM 自动生成选择器与自愈修复爬虫（Self-Healing Scraper）</strong>：</p>
+<ul>
+<li><strong>工作流机制</strong>：平时爬虫依然使用完全免费且毫秒级运行的传统 XPath / CSS 选择器执行高速采集；一旦监控模块发现目标网站前端改版导致原有 XPath 提取结果为空（触发页面结构漂移异常），系统会自动截取当前最新的精简版 HTML 样本发送给大模型，指示大模型根据字段语义<strong>自动推断并编写出适配新版页面的 XPath/CSS 选择器规则</strong>，经沙盒验证通过后热更新到配置中心，实现无人值守的“自愈修复”！</li>
+<li><strong>AI 视觉 Agent 结合截图识别复杂交互</strong>：面对使用 Canvas 绘制数据或 DOM 结构极度混淆的页面，还可以结合多模态视觉大模型（VLM，如 Qwen-VL、GPT-4o），通过 Set-of-Mark（SoM）技术在 Playwright 页面截图上为所有可交互元素打上数字编号角标，让视觉 Agent 直接看图输出“点击 12 号按钮、在 5 号输入框填入关键词”的操控指令。</li>
+</ul>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">lxml</span><span class="w"> </span><span class="kn">import</span> <span class="n">etree</span><span class="p">,</span> <span class="n">html</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseModel</span><span class="p">,</span> <span class="n">Field</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="kn">from</span><span class="w"> </span><span class="nn">openai</span><span class="w"> </span><span class="kn">import</span> <span class="n">OpenAI</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="c1"># 1. 定义期望提取的 Pydantic 结构化 Schema</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="n">classClinicalExpert</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>    <span class="n">doctor_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">"专家姓名"</span><span class="p">)</span>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>    <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">"职称，如主任医师、教授"</span><span class="p">)</span>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>    <span class="n">department</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">"所属科室"</span><span class="p">)</span>
+</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>    <span class="n">specialties</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">"擅长治疗的疾病或研究方向列表"</span><span class="p">)</span>
+</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>
+</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="k">class</span><span class="w"> </span><span class="nc">ExpertListSchema</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>    <span class="n">experts</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">classClinicalExpert</span><span class="p">]</span>
+</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>
+</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a><span class="k">def</span><span class="w"> </span><span class="nf">prune_dom_for_llm</span><span class="p">(</span><span class="n">raw_html</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a><span class="w">    </span><span class="sd">"""DOM 树精简函数：移除脚本、样式、SVG 及冗余属性，降低 90% Token 消耗"""</span>
+</span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>    <span class="n">tree</span> <span class="o">=</span> <span class="n">html</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="n">raw_html</span><span class="p">)</span>
+</span><span id="__span-1-19"><a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>    <span class="c1"># 移除所有无意义噪音标签</span>
+</span><span id="__span-1-20"><a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a>    <span class="n">etree</span><span class="o">.</span><span class="n">strip_elements</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="s2">"script"</span><span class="p">,</span> <span class="s2">"style"</span><span class="p">,</span> <span class="s2">"svg"</span><span class="p">,</span> <span class="s2">"noscript"</span><span class="p">,</span> <span class="s2">"iframe"</span><span class="p">,</span> <span class="s2">"footer"</span><span class="p">,</span> <span class="n">with_tail</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</span><span id="__span-1-21"><a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a>    <span class="c1"># 剥离所有冗余属性，仅保留 a 标签的 href</span>
+</span><span id="__span-1-22"><a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a>    <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">tree</span><span class="o">.</span><span class="n">iter</span><span class="p">():</span>
+</span><span id="__span-1-23"><a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a>        <span class="n">allowed_href</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">attrib</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"href"</span><span class="p">)</span>
+</span><span id="__span-1-24"><a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a>        <span class="n">elem</span><span class="o">.</span><span class="n">attrib</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+</span><span id="__span-1-25"><a id="__codelineno-1-25" name="__codelineno-1-25" href="#__codelineno-1-25"></a>        <span class="k">if</span> <span class="n">elem</span><span class="o">.</span><span class="n">tag</span> <span class="o">==</span> <span class="s2">"a"</span> <span class="ow">and</span> <span class="n">allowed_href</span><span class="p">:</span>
+</span><span id="__span-1-26"><a id="__codelineno-1-26" name="__codelineno-1-26" href="#__codelineno-1-26"></a>            <span class="n">elem</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s2">"href"</span><span class="p">]</span> <span class="o">=</span> <span class="n">allowed_href</span>
+</span><span id="__span-1-27"><a id="__codelineno-1-27" name="__codelineno-1-27" href="#__codelineno-1-27"></a>    <span class="k">return</span> <span class="n">html</span><span class="o">.</span><span class="n">tostring</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"unicode"</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">"html"</span><span class="p">)</span>
+</span><span id="__span-1-28"><a id="__codelineno-1-28" name="__codelineno-1-28" href="#__codelineno-1-28"></a>
+</span><span id="__span-1-29"><a id="__codelineno-1-29" name="__codelineno-1-29" href="#__codelineno-1-29"></a><span class="k">def</span><span class="w"> </span><span class="nf">zero_shot_extract_with_llm</span><span class="p">(</span><span class="n">raw_html</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">api_key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">base_url</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+</span><span id="__span-1-30"><a id="__codelineno-1-30" name="__codelineno-1-30" href="#__codelineno-1-30"></a><span class="w">    </span><span class="sd">"""使用 DOM 精简 + LLM JSON Schema 结构化输出实现零样本网页解析"""</span>
+</span><span id="__span-1-31"><a id="__codelineno-1-31" name="__codelineno-1-31" href="#__codelineno-1-31"></a>    <span class="n">pruned_html</span> <span class="o">=</span> <span class="n">prune_dom_for_llm</span><span class="p">(</span><span class="n">raw_html</span><span class="p">)</span>
+</span><span id="__span-1-32"><a id="__codelineno-1-32" name="__codelineno-1-32" href="#__codelineno-1-32"></a>    <span class="n">client</span> <span class="o">=</span> <span class="n">OpenAI</span><span class="p">(</span><span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span><span class="p">,</span> <span class="n">base_url</span><span class="o">=</span><span class="n">base_url</span><span class="p">)</span>
+</span><span id="__span-1-33"><a id="__codelineno-1-33" name="__codelineno-1-33" href="#__codelineno-1-33"></a>
+</span><span id="__span-1-34"><a id="__codelineno-1-34" name="__codelineno-1-34" href="#__codelineno-1-34"></a>    <span class="n">response</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">beta</span><span class="o">.</span><span class="n">chat</span><span class="o">.</span><span class="n">completions</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span>
+</span><span id="__span-1-35"><a id="__codelineno-1-35" name="__codelineno-1-35" href="#__codelineno-1-35"></a>        <span class="n">model</span><span class="o">=</span><span class="s2">"qwen-plus"</span><span class="p">,</span>  <span class="c1"># 或 gpt-4o-mini / deepseek-chat</span>
+</span><span id="__span-1-36"><a id="__codelineno-1-36" name="__codelineno-1-36" href="#__codelineno-1-36"></a>        <span class="n">messages</span><span class="o">=</span><span class="p">[</span>
+</span><span id="__span-1-37"><a id="__codelineno-1-37" name="__codelineno-1-37" href="#__codelineno-1-37"></a>            <span class="p">{</span><span class="s2">"role"</span><span class="p">:</span> <span class="s2">"system"</span><span class="p">,</span> <span class="s2">"content"</span><span class="p">:</span> <span class="s2">"你是一个精准的网页结构化数据抽取引擎，请严格按照 Schema 提取信息。"</span><span class="p">},</span>
+</span><span id="__span-1-38"><a id="__codelineno-1-38" name="__codelineno-1-38" href="#__codelineno-1-38"></a>            <span class="p">{</span><span class="s2">"role"</span><span class="p">:</span> <span class="s2">"user"</span><span class="p">,</span> <span class="s2">"content"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"请从以下精简 HTML 中提取所有医生专家信息：</span><span class="se">\n</span><span class="si">{</span><span class="n">pruned_html</span><span class="si">}</span><span class="s2">"</span><span class="p">},</span>
+</span><span id="__span-1-39"><a id="__codelineno-1-39" name="__codelineno-1-39" href="#__codelineno-1-39"></a>        <span class="p">],</span>
+</span><span id="__span-1-40"><a id="__codelineno-1-40" name="__codelineno-1-40" href="#__codelineno-1-40"></a>        <span class="n">response_format</span><span class="o">=</span><span class="n">ExpertListSchema</span><span class="p">,</span>
+</span><span id="__span-1-41"><a id="__codelineno-1-41" name="__codelineno-1-41" href="#__codelineno-1-41"></a>        <span class="n">temperature</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+</span><span id="__span-1-42"><a id="__codelineno-1-42" name="__codelineno-1-42" href="#__codelineno-1-42"></a>    <span class="p">)</span>
+</span><span id="__span-1-43"><a id="__codelineno-1-43" name="__codelineno-1-43" href="#__codelineno-1-43"></a>    <span class="n">parsed_obj</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">choices</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">parsed</span>
+</span><span id="__span-1-44"><a id="__codelineno-1-44" name="__codelineno-1-44" href="#__codelineno-1-44"></a>    <span class="k">return</span> <span class="n">parsed_obj</span><span class="o">.</span><span class="n">model_dump</span><span class="p">()</span> <span class="k">if</span> <span class="n">parsed_obj</span> <span class="k">else</span> <span class="p">{</span><span class="s2">"experts"</span><span class="p">:</span> <span class="p">[]}</span>
+</span></code></pre></div>
+<h4 id="diagram-llm-xpath">Diagram: LLM 零样本网页解析与 XPath 选择器自愈修复工作台<a class="headerlink" href="#diagram-llm-xpath" title="Permanent link">&para;</a></h4>
+<pre class="mermaid"><code>flowchart TD
+    Fetch["获取网页 HTML"] --&gt; FastPath["常态模式: 本地 lxml 执行缓存 XPath (零 Token 成本)"]
+    FastPath --&gt; Check{"字段非空率检查是否触发结构漂移?"}
+    Check --&gt;|"正常: 非空率达标"| Output["直接输出结构化字典"]
+    Check --&gt;|"异常: 网站改版导致提取为空"| Prune["启动自愈: DOM 树精简 Pruning 降本 90%"]
+    Prune --&gt; LLM["调用 LLM Structured Outputs 推断新版 XPath 规则"]
+    LLM --&gt; Sandbox{"本地 lxml 沙盒验证新 XPath 是否非空?"}
+    Sandbox --&gt;|"沙盒验证通过"| HotUpdate["热更新配置中心选择器并恢复高速采集"]</code></pre>
+<details>
+<summary>Interactive MicroSim: LLM 零样本网页解析与 XPath 选择器自愈修复工作台</summary>
+<p>Type: microsim</p>
+<p><strong>sim-id:</strong> ch11-llm-self-healing-scraper<br/>
+<strong>Library:</strong> p5.js<br/>
+<strong>Status:</strong> Specified<br/>
+<strong>Bloom Level:</strong> Apply<br/>
+<strong>Bloom Verb:</strong> Implement<br/>
+<strong>Learning Objective:</strong> The learner will implement a hybrid self-healing scraper workflow that combines DOM tree pruning, LLM Function Calling zero-shot extraction, and automated XPath selector regeneration when target website layouts change.</p>
+<p><strong>Prerequisites:</strong> DOM树精简Pruning降低Token消耗, 基于LLM与Function-Calling零样本解析, LLM自动生成选择器与自愈修复爬虫</p>
+<p><strong>Evidence of Mastery:</strong>
+- 能够量化对比“每页直接调用 LLM 解析”与“LLM 生成/自愈 XPath + 本地 <code>lxml</code> 批量解析”在 10 万页采集规模下的 API 费用与耗时差距
+- 能够配置正确的 DOM Pruning 过滤规则，在保留关键业务文本与层级结构的前提下将单页输入 Token 从 45,000 压缩至 3,000 以内</p>
+<p><strong>Misconceptions:</strong>
+- 在百万级页面采集中对每一个页面都调用一次大模型 API（导致账单高达数万元且并发速度受限于大模型 TPM 速率配额）
+- 在 DOM 精简时不小心删掉了包裹核心字段的父容器标签，导致大模型无法生成具有区分度的相对路径选择器</p>
+<p><strong>Instructional Rationale:</strong>
+通过可视化仿真“正常高速运行 -&gt; 网站前端改版触发字段空置告警 -&gt; 自动执行 DOM 精简并调用大模型推断新版 XPath -&gt; 沙盒验证通过后热更新恢复采集”的四步闭环，让学习者深入理解 AI 赋能传统爬虫的工程范式。</p>
+<p><strong>Content:</strong>
+- 左上状态机：展示爬虫从“本地 XPath 极速模式（0 成本，500 页/秒）”到“漂移熔断”再到“LLM 自愈修复”的状态流转动画
+- 右上 DOM 精简对比器：实时显示原始 HTML（42,800 Tokens）经过剔除 <code>&lt;script&gt;</code>/<code>&lt;style&gt;</code>/<code>&lt;svg&gt;</code> 及无意义属性后变为精简 HTML（2,650 Tokens）的体积压缩柱状图
+- 底部交互控制台：提供“一键模拟目标网站改版（将 <code>.price-num</code> 改为 <code>.v2-cost-tag</code>）”、“触发 LLM 选择器自愈”与“切换全量 LLM vs 混合自愈成本核算器”</p>
+<p><strong>Provenance:</strong> 依据本章第 2.1 与 2.2 节智能解析与自愈架构设计。</p>
+<p><strong>Rules:</strong>
+- 当点击“模拟目标网站改版”时，原有 XPath <code>//span[@class="price-num"]/text()</code> 提取结果瞬间归零，监控面板亮起红灯并触发自愈工作流
+- 当启用 DOM Pruning 后再调用 LLM 自愈生成新 XPath <code>//div[contains(@class, "v2-cost-tag")]/text()</code> 时，单次修复仅耗时 1.2 秒、消耗 $0.001，随后无缝切回本地高速解析模式</p>
+<p><strong>Learner Activity:</strong>
+1. 勾选不同的 DOM 节点剥离选项，观察 Token 压缩率与字段信息保留完整度。
+2. 触发网站改版故障，观察 LLM 如何根据旧字段样本值在新版 DOM 树中反推出新的 XPath 表达式并完成热修复。</p>
+<p><strong>Feedback:</strong>
+- 实时核算 100,000 页采集任务的总 API 账单成本（美元/人民币）、平均单页延迟（ms）以及改版自愈成功率。</p>
+<p><strong>Starting State:</strong>
+默认处于“本地 XPath 高速采集”状态，等待学习者点击“模拟网站前端改版”按钮观察自愈闭环。</p>
+<p><strong>Chapter Anchors:</strong> 2.1 DOM 树精简（Pruning）与 Function Calling 零样本解析, 2.2 LLM 自动生成选择器自愈爬虫与 AI 视觉 Agent</p>
+</details>
+<h3 id="23-llm-xpath">2.3 LLM 自动生成与热修复 XPath 选择器的代码落地<a class="headerlink" href="#23-llm-xpath" title="Permanent link">&para;</a></h3>
+<p>为了让同学们亲手实现上述“平时本地 <code>lxml</code> 零成本高速跑，改版后自动调大模型修复选择器”的自愈架构，下面给出完整的代码实现：</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">lxml</span><span class="w"> </span><span class="kn">import</span> <span class="n">etree</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseModel</span><span class="p">,</span> <span class="n">Field</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">openai</span><span class="w"> </span><span class="kn">import</span> <span class="n">OpenAI</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="k">class</span><span class="w"> </span><span class="nc">HealedSelectorSchema</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>    <span class="n">field_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">"目标字段名称"</span><span class="p">)</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>    <span class="n">new_xpath</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">"适配新版 HTML 结构的 XPath 表达式，必须以 // 开头且直接提取文本或属性"</span><span class="p">)</span>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>    <span class="n">reasoning</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">"简述如何根据页面语义定位到该节点的推理过程"</span><span class="p">)</span>
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>
+</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="k">def</span><span class="w"> </span><span class="nf">auto_heal_xpath_with_llm</span><span class="p">(</span>
+</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>    <span class="n">new_raw_html</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>    <span class="n">field_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>    <span class="n">broken_xpath</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+</span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>    <span class="n">sample_expected_hint</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+</span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a>    <span class="n">client</span><span class="p">:</span> <span class="n">OpenAI</span><span class="p">,</span>
+</span><span id="__span-2-16"><a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span id="__span-2-17"><a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a><span class="w">    </span><span class="sd">"""</span>
+</span><span id="__span-2-18"><a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a><span class="sd">    当检测到旧 XPath 因网页改版失效（返回空列表）时，</span>
+</span><span id="__span-2-19"><a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a><span class="sd">    自动对新版 HTML 进行 DOM 精简，调用大模型生成新 XPath 并在本地沙盒验证通过后返回</span>
+</span><span id="__span-2-20"><a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a><span class="sd">    """</span>
+</span><span id="__span-2-21"><a id="__codelineno-2-21" name="__codelineno-2-21" href="#__codelineno-2-21"></a>    <span class="n">pruned_snippet</span> <span class="o">=</span> <span class="n">prune_dom_for_llm</span><span class="p">(</span><span class="n">new_raw_html</span><span class="p">)[:</span><span class="mi">12000</span><span class="p">]</span>
+</span><span id="__span-2-22"><a id="__codelineno-2-22" name="__codelineno-2-22" href="#__codelineno-2-22"></a>    <span class="n">prompt</span> <span class="o">=</span> <span class="p">(</span>
+</span><span id="__span-2-23"><a id="__codelineno-2-23" name="__codelineno-2-23" href="#__codelineno-2-23"></a>        <span class="sa">f</span><span class="s2">"目标网站刚刚发生了前端改版，原先用于提取字段【</span><span class="si">{</span><span class="n">field_name</span><span class="si">}</span><span class="s2">】的 XPath `</span><span class="si">{</span><span class="n">broken_xpath</span><span class="si">}</span><span class="s2">` 已失效。</span><span class="se">\n</span><span class="s2">"</span>
+</span><span id="__span-2-24"><a id="__codelineno-2-24" name="__codelineno-2-24" href="#__codelineno-2-24"></a>        <span class="sa">f</span><span class="s2">"该字段的典型内容特征为：</span><span class="si">{</span><span class="n">sample_expected_hint</span><span class="si">}</span><span class="s2">。</span><span class="se">\n</span><span class="s2">"</span>
+</span><span id="__span-2-25"><a id="__codelineno-2-25" name="__codelineno-2-25" href="#__codelineno-2-25"></a>        <span class="sa">f</span><span class="s2">"请分析以下精简后的新版 HTML 源码，生成一条全新的、稳健的 XPath 表达式：</span><span class="se">\n</span><span class="si">{</span><span class="n">pruned_snippet</span><span class="si">}</span><span class="s2">"</span>
+</span><span id="__span-2-26"><a id="__codelineno-2-26" name="__codelineno-2-26" href="#__codelineno-2-26"></a>    <span class="p">)</span>
+</span><span id="__span-2-27"><a id="__codelineno-2-27" name="__codelineno-2-27" href="#__codelineno-2-27"></a>
+</span><span id="__span-2-28"><a id="__codelineno-2-28" name="__codelineno-2-28" href="#__codelineno-2-28"></a>    <span class="n">resp</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">beta</span><span class="o">.</span><span class="n">chat</span><span class="o">.</span><span class="n">completions</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span>
+</span><span id="__span-2-29"><a id="__codelineno-2-29" name="__codelineno-2-29" href="#__codelineno-2-29"></a>        <span class="n">model</span><span class="o">=</span><span class="s2">"qwen-plus"</span><span class="p">,</span>
+</span><span id="__span-2-30"><a id="__codelineno-2-30" name="__codelineno-2-30" href="#__codelineno-2-30"></a>        <span class="n">messages</span><span class="o">=</span><span class="p">[</span>
+</span><span id="__span-2-31"><a id="__codelineno-2-31" name="__codelineno-2-31" href="#__codelineno-2-31"></a>            <span class="p">{</span><span class="s2">"role"</span><span class="p">:</span> <span class="s2">"system"</span><span class="p">,</span> <span class="s2">"content"</span><span class="p">:</span> <span class="s2">"你是一个精通 lxml 与 XPath 1.0 语法的爬虫自愈修复专家。"</span><span class="p">},</span>
+</span><span id="__span-2-32"><a id="__codelineno-2-32" name="__codelineno-2-32" href="#__codelineno-2-32"></a>            <span class="p">{</span><span class="s2">"role"</span><span class="p">:</span> <span class="s2">"user"</span><span class="p">,</span> <span class="s2">"content"</span><span class="p">:</span> <span class="n">prompt</span><span class="p">},</span>
+</span><span id="__span-2-33"><a id="__codelineno-2-33" name="__codelineno-2-33" href="#__codelineno-2-33"></a>        <span class="p">],</span>
+</span><span id="__span-2-34"><a id="__codelineno-2-34" name="__codelineno-2-34" href="#__codelineno-2-34"></a>        <span class="n">response_format</span><span class="o">=</span><span class="n">HealedSelectorSchema</span><span class="p">,</span>
+</span><span id="__span-2-35"><a id="__codelineno-2-35" name="__codelineno-2-35" href="#__codelineno-2-35"></a>        <span class="n">temperature</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+</span><span id="__span-2-36"><a id="__codelineno-2-36" name="__codelineno-2-36" href="#__codelineno-2-36"></a>    <span class="p">)</span>
+</span><span id="__span-2-37"><a id="__codelineno-2-37" name="__codelineno-2-37" href="#__codelineno-2-37"></a>    <span class="n">healed</span> <span class="o">=</span> <span class="n">resp</span><span class="o">.</span><span class="n">choices</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">parsed</span>
+</span><span id="__span-2-38"><a id="__codelineno-2-38" name="__codelineno-2-38" href="#__codelineno-2-38"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">healed</span><span class="p">:</span>
+</span><span id="__span-2-39"><a id="__codelineno-2-39" name="__codelineno-2-39" href="#__codelineno-2-39"></a>        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">"LLM 未能生成有效的自愈选择器"</span><span class="p">)</span>
+</span><span id="__span-2-40"><a id="__codelineno-2-40" name="__codelineno-2-40" href="#__codelineno-2-40"></a>
+</span><span id="__span-2-41"><a id="__codelineno-2-41" name="__codelineno-2-41" href="#__codelineno-2-41"></a>    <span class="c1"># 在本地 lxml 沙盒中立即验证新生成的 XPath 是否真的能提取出非空数据</span>
+</span><span id="__span-2-42"><a id="__codelineno-2-42" name="__codelineno-2-42" href="#__codelineno-2-42"></a>    <span class="n">tree</span> <span class="o">=</span> <span class="n">etree</span><span class="o">.</span><span class="n">HTML</span><span class="p">(</span><span class="n">new_raw_html</span><span class="p">)</span>
+</span><span id="__span-2-43"><a id="__codelineno-2-43" name="__codelineno-2-43" href="#__codelineno-2-43"></a>    <span class="n">test_result</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">xpath</span><span class="p">(</span><span class="n">healed</span><span class="o">.</span><span class="n">new_xpath</span><span class="p">)</span>
+</span><span id="__span-2-44"><a id="__codelineno-2-44" name="__codelineno-2-44" href="#__codelineno-2-44"></a>    <span class="n">cleaned_vals</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">test_result</span> <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()]</span>
+</span><span id="__span-2-45"><a id="__codelineno-2-45" name="__codelineno-2-45" href="#__codelineno-2-45"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">cleaned_vals</span><span class="p">:</span>
+</span><span id="__span-2-46"><a id="__codelineno-2-46" name="__codelineno-2-46" href="#__codelineno-2-46"></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"自愈生成的 XPath `</span><span class="si">{</span><span class="n">healed</span><span class="o">.</span><span class="n">new_xpath</span><span class="si">}</span><span class="s2">` 在沙盒验证中仍返回空结果"</span><span class="p">)</span>
+</span><span id="__span-2-47"><a id="__codelineno-2-47" name="__codelineno-2-47" href="#__codelineno-2-47"></a>
+</span><span id="__span-2-48"><a id="__codelineno-2-48" name="__codelineno-2-48" href="#__codelineno-2-48"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"[自愈成功] 字段 [</span><span class="si">{</span><span class="n">field_name</span><span class="si">}</span><span class="s2">] 新 XPath: </span><span class="si">{</span><span class="n">healed</span><span class="o">.</span><span class="n">new_xpath</span><span class="si">}</span><span class="s2"> | 沙盒提取样本: </span><span class="si">{</span><span class="n">cleaned_vals</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</span><span id="__span-2-49"><a id="__codelineno-2-49" name="__codelineno-2-49" href="#__codelineno-2-49"></a>    <span class="k">return</span> <span class="n">healed</span><span class="o">.</span><span class="n">new_xpath</span>
+</span></code></pre></div>
+<hr />
+<h2 id="3-sft-rag">3. 指令微调（SFT）数据集构建与 RAG 向量库流水线<a class="headerlink" href="#3-sft-rag" title="Permanent link">&para;</a></h2>
+<h3 id="31-alpaca-sharegpt">3.1 Alpaca / ShareGPT 格式与垂直社区问答采集<a class="headerlink" href="#31-alpaca-sharegpt" title="Permanent link">&para;</a></h3>
+<p>当为医疗、法律、编程或农业等垂直行业微调专属大模型时，我们需要通过 <strong>垂直社区问答采集构建领域 SFT 语料</strong>（如从技术问答社区 StackOverflow、GitHub Issues、政务民生问答平台或开源医患问答库中采集数据）。为了过滤掉低质量的灌水回复，采集管道必须设置严格的质量门禁：例如<strong>仅保留带有 <code>is_accepted=True</code>（被题主采纳）标记或高赞数 <code>upvotes &gt;= 10</code>、且正文字数大于 150 字、包含代码块或法规引用的专业回答</strong>。</p>
+<p>在落盘导出时，主流微调框架（如 LLaMA-Factory、Swift）普遍要求遵循 <strong>指令微调 SFT 数据集 <code>Alpaca</code> / <code>ShareGPT</code> 格式</strong>：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">数据集标准格式</th>
+<th style="text-align: left;">JSON 核心字段结构</th>
+<th style="text-align: left;">适用训练场景</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Alpaca 格式</strong></td>
+<td style="text-align: left;"><code>{"instruction": "任务指令/问题标题", "input": "补充上下文/问题详情", "output": "高赞采纳回答", "system": "系统人设"}</code></td>
+<td style="text-align: left;">单轮指令遵循微调、知识问答、文本摘要与结构化提取任务</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>ShareGPT 格式</strong></td>
+<td style="text-align: left;"><code>{"conversations": [{"from": "system", "value": "..."}, {"from": "human", "value": "..."}, {"from": "gpt", "value": "..."}]}</code></td>
+<td style="text-align: left;">多轮连续对话微调（支持题主追问与专家二次解答的完整上下文）</td>
+</tr>
+</tbody>
+</table>
+<h3 id="32-rag-chunking">3.2 RAG 实时更新、文档语义分块（Chunking）与向量数据库写入<a class="headerlink" href="#32-rag-chunking" title="Permanent link">&para;</a></h3>
+<p>在企业级 AI 应用落地中，<strong>RAG 检索增强生成与知识库实时更新</strong> 是需求量最大的工程场景。当爬虫采集并转换出纯净的 Markdown 文档后，不能直接把整篇长达一万字的文章塞进单个向量里（否则语义会被严重稀释，且超出 Embedding 模型的窗口上限），而必须依次执行 <strong>文档语义分块 <code>Chunking</code> 与元数据保留</strong> 及 <strong><code>Embedding</code> 向量化与向量数据库写入</strong>：</p>
+<ol>
+<li><strong>文档语义分块（Semantic / Markdown-Aware Chunking）</strong>：
+   切忌简单粗暴地每隔 500 个字符硬切一刀（这会把一个完整的表格或一段 Python 函数从中间腰斩！）。正确的做法是按 Markdown 标题层级（<code># -&gt; ## -&gt; ###</code>）与双换行符 <code>\n\n</code> 进行递归语义切块，控制每个分块（Chunk）在 <code>300 ~ 800 Tokens</code> 之间，并保留 <code>10% ~ 15%</code> 的相邻重叠窗口（Overlap）以防止上下文断裂。</li>
+<li><strong>元数据全程绑定（Metadata Preservation）</strong>：
+   每一个切出来的文本块都必须携带其源网页的 <code>source_url</code>、<code>title</code>、<code>publish_date</code> 以及当前所属的章节面包屑路径（如 <code>"第一章 &gt; 申报条件"</code>）。这样大模型在生成回答时才能精准附上可点击的溯源引用链接。</li>
+<li><strong>Embedding 向量化与向量数据库（Chroma / Milvus）幂等写入</strong>：
+   调用文本嵌入模型（如开源王者 <code>BAAI/bge-m3</code> 或在线 Embedding API）将每个文本块映射为高维稠密向量（如 1024 维浮点数数组），并以 <code>url + chunk_index</code> 的哈希值作为唯一主键写入向量数据库（如轻量级本地库 <code>ChromaDB</code> 或分布式引擎 <code>Milvus</code> / <code>Qdrant</code>）。</li>
+</ol>
+<h4 id="diagram-rag-sft">Diagram: 面向 RAG 与 SFT 的智能网页语料清洗及分块沙盒<a class="headerlink" href="#diagram-rag-sft" title="Permanent link">&para;</a></h4>
+<pre class="mermaid"><code>flowchart LR
+    RawHTML["原始嘈杂网页 HTML"] --&gt; Clean["1. Trafilatura / Crawl4AI&lt;br/&gt;剔除导航广告噪音并转结构化 Markdown"]
+    Clean --&gt; PII["2. 合规净化流水线&lt;br/&gt;正则/NER 擦除手机号身份证 PII + MinHash 去重"]
+    PII --&gt; Branch{"语料下游用途"}
+    Branch --&gt;|有监督微调 SFT| SFT["组装 Alpaca / ShareGPT 多轮问答 JSONL"]
+    Branch --&gt;|检索增强生成 RAG| Chunk["3. 按 Markdown 标题层级与段落边界语义分块 (Chunking + Overlap)"]
+    Chunk --&gt; Vec["4. 绑定 source_url 元数据 + BGE Embedding 写入 ChromaDB/Milvus"]</code></pre>
+<details>
+<summary>Interactive MicroSim: 面向 RAG 与 SFT 的智能网页语料清洗及分块沙盒</summary>
+<p>Type: microsim</p>
+<p><strong>sim-id:</strong> ch11-rag-chunking-pipeline-sim<br/>
+<strong>Library:</strong> p5.js<br/>
+<strong>Status:</strong> Specified<br/>
+<strong>Bloom Level:</strong> Evaluate<br/>
+<strong>Bloom Verb:</strong> Optimize<br/>
+<strong>Learning Objective:</strong> The learner will optimize an end-to-end AI scraping pipeline by adjusting boilerplate removal, DOM pruning, Markdown semantic chunking parameters (<code>chunk_size</code>, <code>chunk_overlap</code>), and PII scrubbing rules to maximize RAG retrieval precision and Token cost efficiency.</p>
+<p><strong>Prerequisites:</strong> 网页正文抽取Readability与Trafilatura, HTML转Markdown结构化保留代码表格, 文档语义分块Chunking与元数据保留, 语料隐私脱敏PII擦除与MinHash去重</p>
+<p><strong>Evidence of Mastery:</strong>
+- 能够对比“固定字符硬切分（Fixed-Size Chunking）”与“Markdown 标题感知语义切分（Markdown-Aware Chunking）”在处理跨行表格与代码块时的完整性差异
+- 能够解释为什么在清洗阶段保留 <code>source_url</code> 和 <code>heading_hierarchy</code> 元数据对于消除 RAG 问答幻觉至关重要</p>
+<p><strong>Misconceptions:</strong>
+- 认为 <code>chunk_size</code> 设得越大越好（实际上块过大不仅降低向量余弦相似度的局部区分度，还会把无关段落带入大模型上下文）
+- 直接将未做 PII 脱敏的爬虫原始文本用于微调，导致大模型在推理时泄露真实公民手机号与邮箱</p>
+<p><strong>Instructional Rationale:</strong>
+通过可视化四阶流水线（原始嘈杂 HTML -&gt; Trafilatura Markdown 净化 -&gt; PII 隐私擦除与 MinHash 去重 -&gt; 语义分块与 Embedding 入库），让学习者实时调整参数并观察右侧“RAG 模拟提问检索召回率”与“Token 账单成本”的动态变化。</p>
+<p><strong>Content:</strong>
+- 阶段 1（噪音剥离）：展示网页中的导航栏、广告侧边栏与正文代码块，支持切换 <code>soup.get_text()</code> 与 <code>trafilatura (Markdown)</code>
+- 阶段 2（合规净化）：展示内含真实姓名、手机号、身份证号的论坛问答贴，开关控制正则 PII 掩码替换与 MinHash 近重复过滤
+- 阶段 3（分块策略）：提供“固定 300 字硬切” vs “按 Markdown 标题与代码块边界语义切分”对比视图，以及 <code>chunk_size</code>（128～1024）和 <code>overlap</code>（0～200）滑块
+- 阶段 4（RAG 检索测试）：模拟用户提问“如何配置异步限流并发数？”，展示召回的 Top-3 Chunks 及余弦相似度得分</p>
+<p><strong>Provenance:</strong> 依据本章第 1 节、第 3 节与第 4 节 AI 数据工程流水线设计。</p>
+<p><strong>Rules:</strong>
+- 当使用“固定字符硬切分”时，画布中的 Python 代码块和 Markdown 表格被红色切割线从中间劈开，RAG 检索测试提示：“召回的代码片段缺失上半部分导入语句，无法运行！”
+- 当启用“Markdown 语义分块 + 元数据绑定 + PII 脱敏”时，代码块完整保留在同一 Chunk 内，RAG 召回准确率跃升至 96%，且隐私合规检查绿灯通过</p>
+<p><strong>Learner Activity:</strong>
+1. 对比未净化 HTML 与精简 Markdown 在 Token 消耗量上的差异。
+2. 调节分块策略与 <code>chunk_size</code> / <code>overlap</code> 滑块，使测试问题能够完整召回包含表格与代码的目标分块。</p>
+<p><strong>Feedback:</strong>
+- 实时输出 4 项核心工程指标：Token 压缩率（%）、代码块/表格结构完整度、PII 隐私残留风险、RAG Top-1 余弦相似度。</p>
+<p><strong>Starting State:</strong>
+默认加载一篇包含技术表格、Python 代码块及页脚联系手机号的混合网页，初始处于“未开启噪音过滤 + 固定字符硬切分”的低效状态，等待学习者优化流水线参数。</p>
+<p><strong>Chapter Anchors:</strong> 1.2 启发式正文抽取（Trafilatura）与 Crawl4AI Markdown 转换, 3.2 RAG 实时更新、文档语义分块（Chunking）与向量数据库写入, 4. 多模态图文对齐、隐私脱敏（PII）与大规模去重</p>
+</details>
+<hr />
+<h2 id="4-pii">4. 多模态图文对齐、隐私脱敏（PII）与大规模去重<a class="headerlink" href="#4-pii" title="Permanent link">&para;</a></h2>
+<p>在构建工业级预训练语料与多模态数据集时，最后一道不可或缺的工序是多模态对齐与数据安全合规审计：</p>
+<ol>
+<li><strong>多模态图文对采集与 CLIP 对齐过滤</strong>：
+   在训练文生图大模型（如 Stable Diffusion、Flux）或视觉理解大模型时，爬虫需要从网页中成对采集图片 URL（<code>&lt;img&gt;</code> 的 <code>src</code> 或 <code>data-src</code>）及其对应的描述文本（优先取 <code>&lt;figcaption&gt;</code> 图注，其次取 <code>alt</code> 属性或图片前后的说明段落）。但由于网页上有大量装饰性小图标、广告横幅或图文完全不符的“标题党”配图，采集パイプライン需要执行两级过滤：第一级剔除宽高小于 <code>256x256</code> 像素或长宽比极端的无效小图；第二级使用预训练的 <strong>CLIP（Contrastive Language-Image Pre-training）</strong> 模型分别计算图片向量与文本向量的余弦相似度，剔除相似度低于阈值（如 <code>&lt; 0.25</code>）的图文不符噪声对。</li>
+<li><strong>语料隐私脱敏 <code>PII</code> 擦除与 <code>MinHash</code> 去重</strong>：</li>
+<li><strong>PII（Personally Identifiable Information，个人身份信息）隐私脱敏</strong>：在将爬取的网页语料送入大模型训练或共享发布前，必须严格依照《个人信息保护法》使用高召回率正则或 NER 模型，将正文中的手机号、身份证号、电子邮箱、银行卡号及家庭住址统一替换为 <code>&lt;PHONE&gt;</code>、<code>&lt;ID_CARD&gt;</code>、<code>&lt;EMAIL&gt;</code> 等占位符，严防大模型发生训练数据记忆泄露。</li>
+<li><strong>MinHash LSH 近似文档去重</strong>：互联网上存在极高比例的转载抄袭文章（例如同一篇通稿被 500 家媒体改动几个标点后重复发布）。第 9 章介绍的 MD5 只能识别一字不差的完全相同文本；而对于海量长文档语料，工业界标准方案是将文档切分为 <span class="arithmatex">\(n\)</span>-gram 词袋（Shingles），计算 <strong>MinHash 签名</strong>并结合 <strong>LSH（局部敏感哈希）</strong>，在 <span class="arithmatex">\(O(N)\)</span> 线性时间内快速找出并剔除 Jaccard 相似度高于 <code>0.8</code> 的近似重复文档。</li>
+</ol>
+<p>下面给出一个完整的端到端实战脚本，涵盖 <strong>PII 个人隐私脱敏</strong>、<strong>Markdown 标题感知语义分块</strong>、<strong>Alpaca SFT 格式生成</strong> 以及 <strong>ChromaDB 向量知识库幂等写入</strong>：</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">hashlib</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="c1"># 预编译 PII 个人敏感信息脱敏正则表达式</span>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="n">PII_PATTERNS</span> <span class="o">=</span> <span class="p">{</span>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>    <span class="s2">"&lt;EMAIL&gt;"</span><span class="p">:</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">"[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+"</span><span class="p">),</span>
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>    <span class="s2">"&lt;PHONE&gt;"</span><span class="p">:</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">"(?&lt;!\d)1[3-9]\d</span><span class="si">{9}</span><span class="s2">(?!\d)"</span><span class="p">),</span>
+</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>    <span class="s2">"&lt;ID_CARD&gt;"</span><span class="p">:</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
+</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>        <span class="sa">r</span><span class="s2">"(?&lt;!\d)[1-9]\d</span><span class="si">{5}</span><span class="s2">(?:19|20)\d</span><span class="si">{2}</span><span class="s2">(?:0[1-9]|1[0-2])(?:0[1-9]|[12]\d|3[01])\d</span><span class="si">{3}</span><span class="s2">[\dXx](?!\d)"</span>
+</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>    <span class="p">),</span>
+</span><span id="__span-3-12"><a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="p">}</span>
+</span><span id="__span-3-13"><a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a>
+</span><span id="__span-3-14"><a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a><span class="k">def</span><span class="w"> </span><span class="nf">scrub_pii_text</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span id="__span-3-15"><a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a><span class="w">    </span><span class="sd">"""擦除语料中的邮箱、11位手机号与18位身份证号，保障大模型训练数据合规"""</span>
+</span><span id="__span-3-16"><a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a>    <span class="n">cleaned</span> <span class="o">=</span> <span class="n">text</span>
+</span><span id="__span-3-17"><a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a>    <span class="k">for</span> <span class="n">placeholder</span><span class="p">,</span> <span class="n">pattern</span> <span class="ow">in</span> <span class="n">PII_PATTERNS</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+</span><span id="__span-3-18"><a id="__codelineno-3-18" name="__codelineno-3-18" href="#__codelineno-3-18"></a>        <span class="n">cleaned</span> <span class="o">=</span> <span class="n">pattern</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">placeholder</span><span class="p">,</span> <span class="n">cleaned</span><span class="p">)</span>
+</span><span id="__span-3-19"><a id="__codelineno-3-19" name="__codelineno-3-19" href="#__codelineno-3-19"></a>    <span class="k">return</span> <span class="n">cleaned</span>
+</span><span id="__span-3-20"><a id="__codelineno-3-20" name="__codelineno-3-20" href="#__codelineno-3-20"></a>
+</span><span id="__span-3-21"><a id="__codelineno-3-21" name="__codelineno-3-21" href="#__codelineno-3-21"></a><span class="k">def</span><span class="w"> </span><span class="nf">markdown_semantic_chunker</span><span class="p">(</span>
+</span><span id="__span-3-22"><a id="__codelineno-3-22" name="__codelineno-3-22" href="#__codelineno-3-22"></a>    <span class="n">markdown_text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+</span><span id="__span-3-23"><a id="__codelineno-3-23" name="__codelineno-3-23" href="#__codelineno-3-23"></a>    <span class="n">source_url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+</span><span id="__span-3-24"><a id="__codelineno-3-24" name="__codelineno-3-24" href="#__codelineno-3-24"></a>    <span class="n">doc_title</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+</span><span id="__span-3-25"><a id="__codelineno-3-25" name="__codelineno-3-25" href="#__codelineno-3-25"></a>    <span class="n">max_chars</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">500</span><span class="p">,</span>
+</span><span id="__span-3-26"><a id="__codelineno-3-26" name="__codelineno-3-26" href="#__codelineno-3-26"></a>    <span class="n">overlap_chars</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">60</span><span class="p">,</span>
+</span><span id="__span-3-27"><a id="__codelineno-3-27" name="__codelineno-3-27" href="#__codelineno-3-27"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+</span><span id="__span-3-28"><a id="__codelineno-3-28" name="__codelineno-3-28" href="#__codelineno-3-28"></a><span class="w">    </span><span class="sd">"""</span>
+</span><span id="__span-3-29"><a id="__codelineno-3-29" name="__codelineno-3-29" href="#__codelineno-3-29"></a><span class="sd">    按 Markdown 标题层级与段落边界进行语义切块，保留完整的章节上下文元数据</span>
+</span><span id="__span-3-30"><a id="__codelineno-3-30" name="__codelineno-3-30" href="#__codelineno-3-30"></a><span class="sd">    """</span>
+</span><span id="__span-3-31"><a id="__codelineno-3-31" name="__codelineno-3-31" href="#__codelineno-3-31"></a>    <span class="n">clean_md</span> <span class="o">=</span> <span class="n">scrub_pii_text</span><span class="p">(</span><span class="n">markdown_text</span><span class="p">)</span>
+</span><span id="__span-3-32"><a id="__codelineno-3-32" name="__codelineno-3-32" href="#__codelineno-3-32"></a>    <span class="c1"># 按二级/三级标题切分逻辑章节</span>
+</span><span id="__span-3-33"><a id="__codelineno-3-33" name="__codelineno-3-33" href="#__codelineno-3-33"></a>    <span class="n">sections</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">r</span><span class="s2">"(?m)^(#{1,3}\s+.+)$"</span><span class="p">,</span> <span class="n">clean_md</span><span class="p">)</span>
+</span><span id="__span-3-34"><a id="__codelineno-3-34" name="__codelineno-3-34" href="#__codelineno-3-34"></a>
+</span><span id="__span-3-35"><a id="__codelineno-3-35" name="__codelineno-3-35" href="#__codelineno-3-35"></a>    <span class="n">chunks</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span id="__span-3-36"><a id="__codelineno-3-36" name="__codelineno-3-36" href="#__codelineno-3-36"></a>    <span class="n">current_heading</span> <span class="o">=</span> <span class="n">doc_title</span>
+</span><span id="__span-3-37"><a id="__codelineno-3-37" name="__codelineno-3-37" href="#__codelineno-3-37"></a>    <span class="n">chunk_idx</span> <span class="o">=</span> <span class="mi">0</span>
+</span><span id="__span-3-38"><a id="__codelineno-3-38" name="__codelineno-3-38" href="#__codelineno-3-38"></a>
+</span><span id="__span-3-39"><a id="__codelineno-3-39" name="__codelineno-3-39" href="#__codelineno-3-39"></a>    <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">sections</span><span class="p">:</span>
+</span><span id="__span-3-40"><a id="__codelineno-3-40" name="__codelineno-3-40" href="#__codelineno-3-40"></a>        <span class="n">part</span> <span class="o">=</span> <span class="n">part</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+</span><span id="__span-3-41"><a id="__codelineno-3-41" name="__codelineno-3-41" href="#__codelineno-3-41"></a>        <span class="k">if</span> <span class="ow">not</span> <span class="n">part</span><span class="p">:</span>
+</span><span id="__span-3-42"><a id="__codelineno-3-42" name="__codelineno-3-42" href="#__codelineno-3-42"></a>            <span class="k">continue</span>
+</span><span id="__span-3-43"><a id="__codelineno-3-43" name="__codelineno-3-43" href="#__codelineno-3-43"></a>        <span class="k">if</span> <span class="n">part</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"#"</span><span class="p">):</span>
+</span><span id="__span-3-44"><a id="__codelineno-3-44" name="__codelineno-3-44" href="#__codelineno-3-44"></a>            <span class="n">current_heading</span> <span class="o">=</span> <span class="n">part</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s2">"#"</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+</span><span id="__span-3-45"><a id="__codelineno-3-45" name="__codelineno-3-45" href="#__codelineno-3-45"></a>            <span class="k">continue</span>
+</span><span id="__span-3-46"><a id="__codelineno-3-46" name="__codelineno-3-46" href="#__codelineno-3-46"></a>
+</span><span id="__span-3-47"><a id="__codelineno-3-47" name="__codelineno-3-47" href="#__codelineno-3-47"></a>        <span class="c1"># 在章节内部按段落聚合，避免切碎代码块或表格</span>
+</span><span id="__span-3-48"><a id="__codelineno-3-48" name="__codelineno-3-48" href="#__codelineno-3-48"></a>        <span class="n">paragraphs</span> <span class="o">=</span> <span class="n">part</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"</span><span class="se">\n\n</span><span class="s2">"</span><span class="p">)</span>
+</span><span id="__span-3-49"><a id="__codelineno-3-49" name="__codelineno-3-49" href="#__codelineno-3-49"></a>        <span class="n">buffer</span> <span class="o">=</span> <span class="s2">""</span>
+</span><span id="__span-3-50"><a id="__codelineno-3-50" name="__codelineno-3-50" href="#__codelineno-3-50"></a>        <span class="k">for</span> <span class="n">para</span> <span class="ow">in</span> <span class="n">paragraphs</span><span class="p">:</span>
+</span><span id="__span-3-51"><a id="__codelineno-3-51" name="__codelineno-3-51" href="#__codelineno-3-51"></a>            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">buffer</span><span class="p">)</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">para</span><span class="p">)</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">&lt;=</span> <span class="n">max_chars</span><span class="p">:</span>
+</span><span id="__span-3-52"><a id="__codelineno-3-52" name="__codelineno-3-52" href="#__codelineno-3-52"></a>                <span class="n">buffer</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">buffer</span><span class="si">}</span><span class="se">\n\n</span><span class="si">{</span><span class="n">para</span><span class="si">}</span><span class="s2">"</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+</span><span id="__span-3-53"><a id="__codelineno-3-53" name="__codelineno-3-53" href="#__codelineno-3-53"></a>            <span class="k">else</span><span class="p">:</span>
+</span><span id="__span-3-54"><a id="__codelineno-3-54" name="__codelineno-3-54" href="#__codelineno-3-54"></a>                <span class="k">if</span> <span class="n">buffer</span><span class="p">:</span>
+</span><span id="__span-3-55"><a id="__codelineno-3-55" name="__codelineno-3-55" href="#__codelineno-3-55"></a>                    <span class="n">chunk_id</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">md5</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">source_url</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">chunk_idx</span><span class="si">}</span><span class="s2">"</span><span class="o">.</span><span class="n">encode</span><span class="p">())</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
+</span><span id="__span-3-56"><a id="__codelineno-3-56" name="__codelineno-3-56" href="#__codelineno-3-56"></a>                    <span class="n">chunks</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+</span><span id="__span-3-57"><a id="__codelineno-3-57" name="__codelineno-3-57" href="#__codelineno-3-57"></a>                        <span class="s2">"id"</span><span class="p">:</span> <span class="n">chunk_id</span><span class="p">,</span>
+</span><span id="__span-3-58"><a id="__codelineno-3-58" name="__codelineno-3-58" href="#__codelineno-3-58"></a>                        <span class="s2">"text"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"【章节：</span><span class="si">{</span><span class="n">current_heading</span><span class="si">}</span><span class="s2">】</span><span class="se">\n</span><span class="si">{</span><span class="n">buffer</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+</span><span id="__span-3-59"><a id="__codelineno-3-59" name="__codelineno-3-59" href="#__codelineno-3-59"></a>                        <span class="s2">"metadata"</span><span class="p">:</span> <span class="p">{</span>
+</span><span id="__span-3-60"><a id="__codelineno-3-60" name="__codelineno-3-60" href="#__codelineno-3-60"></a>                            <span class="s2">"source_url"</span><span class="p">:</span> <span class="n">source_url</span><span class="p">,</span>
+</span><span id="__span-3-61"><a id="__codelineno-3-61" name="__codelineno-3-61" href="#__codelineno-3-61"></a>                            <span class="s2">"title"</span><span class="p">:</span> <span class="n">doc_title</span><span class="p">,</span>
+</span><span id="__span-3-62"><a id="__codelineno-3-62" name="__codelineno-3-62" href="#__codelineno-3-62"></a>                            <span class="s2">"section"</span><span class="p">:</span> <span class="n">current_heading</span><span class="p">,</span>
+</span><span id="__span-3-63"><a id="__codelineno-3-63" name="__codelineno-3-63" href="#__codelineno-3-63"></a>                            <span class="s2">"chunk_index"</span><span class="p">:</span> <span class="n">chunk_idx</span><span class="p">,</span>
+</span><span id="__span-3-64"><a id="__codelineno-3-64" name="__codelineno-3-64" href="#__codelineno-3-64"></a>                        <span class="p">},</span>
+</span><span id="__span-3-65"><a id="__codelineno-3-65" name="__codelineno-3-65" href="#__codelineno-3-65"></a>                    <span class="p">})</span>
+</span><span id="__span-3-66"><a id="__codelineno-3-66" name="__codelineno-3-66" href="#__codelineno-3-66"></a>                    <span class="n">chunk_idx</span> <span class="o">+=</span> <span class="mi">1</span>
+</span><span id="__span-3-67"><a id="__codelineno-3-67" name="__codelineno-3-67" href="#__codelineno-3-67"></a>                    <span class="c1"># 保留尾部重叠窗口以维持跨块语义连贯</span>
+</span><span id="__span-3-68"><a id="__codelineno-3-68" name="__codelineno-3-68" href="#__codelineno-3-68"></a>                    <span class="n">buffer</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">buffer</span><span class="p">[</span><span class="o">-</span><span class="n">overlap_chars</span><span class="p">:]</span><span class="si">}</span><span class="se">\n\n</span><span class="si">{</span><span class="n">para</span><span class="si">}</span><span class="s2">"</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+</span><span id="__span-3-69"><a id="__codelineno-3-69" name="__codelineno-3-69" href="#__codelineno-3-69"></a>                <span class="k">else</span><span class="p">:</span>
+</span><span id="__span-3-70"><a id="__codelineno-3-70" name="__codelineno-3-70" href="#__codelineno-3-70"></a>                    <span class="n">buffer</span> <span class="o">=</span> <span class="n">para</span><span class="p">[:</span><span class="n">max_chars</span><span class="p">]</span>
+</span><span id="__span-3-71"><a id="__codelineno-3-71" name="__codelineno-3-71" href="#__codelineno-3-71"></a>
+</span><span id="__span-3-72"><a id="__codelineno-3-72" name="__codelineno-3-72" href="#__codelineno-3-72"></a>        <span class="k">if</span> <span class="n">buffer</span><span class="p">:</span>
+</span><span id="__span-3-73"><a id="__codelineno-3-73" name="__codelineno-3-73" href="#__codelineno-3-73"></a>            <span class="n">chunk_id</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">md5</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">source_url</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">chunk_idx</span><span class="si">}</span><span class="s2">"</span><span class="o">.</span><span class="n">encode</span><span class="p">())</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
+</span><span id="__span-3-74"><a id="__codelineno-3-74" name="__codelineno-3-74" href="#__codelineno-3-74"></a>            <span class="n">chunks</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+</span><span id="__span-3-75"><a id="__codelineno-3-75" name="__codelineno-3-75" href="#__codelineno-3-75"></a>                <span class="s2">"id"</span><span class="p">:</span> <span class="n">chunk_id</span><span class="p">,</span>
+</span><span id="__span-3-76"><a id="__codelineno-3-76" name="__codelineno-3-76" href="#__codelineno-3-76"></a>                <span class="s2">"text"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"【章节：</span><span class="si">{</span><span class="n">current_heading</span><span class="si">}</span><span class="s2">】</span><span class="se">\n</span><span class="si">{</span><span class="n">buffer</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+</span><span id="__span-3-77"><a id="__codelineno-3-77" name="__codelineno-3-77" href="#__codelineno-3-77"></a>                <span class="s2">"metadata"</span><span class="p">:</span> <span class="p">{</span>
+</span><span id="__span-3-78"><a id="__codelineno-3-78" name="__codelineno-3-78" href="#__codelineno-3-78"></a>                    <span class="s2">"source_url"</span><span class="p">:</span> <span class="n">source_url</span><span class="p">,</span>
+</span><span id="__span-3-79"><a id="__codelineno-3-79" name="__codelineno-3-79" href="#__codelineno-3-79"></a>                    <span class="s2">"title"</span><span class="p">:</span> <span class="n">doc_title</span><span class="p">,</span>
+</span><span id="__span-3-80"><a id="__codelineno-3-80" name="__codelineno-3-80" href="#__codelineno-3-80"></a>                    <span class="s2">"section"</span><span class="p">:</span> <span class="n">current_heading</span><span class="p">,</span>
+</span><span id="__span-3-81"><a id="__codelineno-3-81" name="__codelineno-3-81" href="#__codelineno-3-81"></a>                    <span class="s2">"chunk_index"</span><span class="p">:</span> <span class="n">chunk_idx</span><span class="p">,</span>
+</span><span id="__span-3-82"><a id="__codelineno-3-82" name="__codelineno-3-82" href="#__codelineno-3-82"></a>                <span class="p">},</span>
+</span><span id="__span-3-83"><a id="__codelineno-3-83" name="__codelineno-3-83" href="#__codelineno-3-83"></a>            <span class="p">})</span>
+</span><span id="__span-3-84"><a id="__codelineno-3-84" name="__codelineno-3-84" href="#__codelineno-3-84"></a>            <span class="n">chunk_idx</span> <span class="o">+=</span> <span class="mi">1</span>
+</span><span id="__span-3-85"><a id="__codelineno-3-85" name="__codelineno-3-85" href="#__codelineno-3-85"></a>
+</span><span id="__span-3-86"><a id="__codelineno-3-86" name="__codelineno-3-86" href="#__codelineno-3-86"></a>    <span class="k">return</span> <span class="n">chunks</span>
+</span><span id="__span-3-87"><a id="__codelineno-3-87" name="__codelineno-3-87" href="#__codelineno-3-87"></a>
+</span><span id="__span-3-88"><a id="__codelineno-3-88" name="__codelineno-3-88" href="#__codelineno-3-88"></a>
+</span><span id="__span-3-89"><a id="__codelineno-3-89" name="__codelineno-3-89" href="#__codelineno-3-89"></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
+</span><span id="__span-3-90"><a id="__codelineno-3-90" name="__codelineno-3-90" href="#__codelineno-3-90"></a>    <span class="n">sample_md</span> <span class="o">=</span> <span class="s2">"""</span>
+</span><span id="__span-3-91"><a id="__codelineno-3-91" name="__codelineno-3-91" href="#__codelineno-3-91"></a><span class="s2"># 昇腾算力集群运维手册</span>
+</span><span id="__span-3-92"><a id="__codelineno-3-92" name="__codelineno-3-92" href="#__codelineno-3-92"></a><span class="s2">如有故障请联系值班工程师张工，手机：13812345678，邮箱：zhang@ai-lab.cn。</span>
+</span><span id="__span-3-93"><a id="__codelineno-3-93" name="__codelineno-3-93" href="#__codelineno-3-93"></a>
+</span><span id="__span-3-94"><a id="__codelineno-3-94" name="__codelineno-3-94" href="#__codelineno-3-94"></a><span class="s2">## 1. 容器驱动挂载检查</span>
+</span><span id="__span-3-95"><a id="__codelineno-3-95" name="__codelineno-3-95" href="#__codelineno-3-95"></a><span class="s2">请执行 `npu-smi info` 查看 NPU 芯片健康状态与显存占用率。</span>
+</span><span id="__span-3-96"><a id="__codelineno-3-96" name="__codelineno-3-96" href="#__codelineno-3-96"></a>
+</span><span id="__span-3-97"><a id="__codelineno-3-97" name="__codelineno-3-97" href="#__codelineno-3-97"></a><span class="s2">## 2. 分布式通信参数调优</span>
+</span><span id="__span-3-98"><a id="__codelineno-3-98" name="__codelineno-3-98" href="#__codelineno-3-98"></a><span class="s2">在多机多卡训练时，需配置 HCCL_SOCKET_IFNAME 环境变量指定高速网卡。</span>
+</span><span id="__span-3-99"><a id="__codelineno-3-99" name="__codelineno-3-99" href="#__codelineno-3-99"></a><span class="s2">"""</span>
+</span><span id="__span-3-100"><a id="__codelineno-3-100" name="__codelineno-3-100" href="#__codelineno-3-100"></a>    <span class="n">rag_chunks</span> <span class="o">=</span> <span class="n">markdown_semantic_chunker</span><span class="p">(</span>
+</span><span id="__span-3-101"><a id="__codelineno-3-101" name="__codelineno-3-101" href="#__codelineno-3-101"></a>        <span class="n">sample_md</span><span class="p">,</span>
+</span><span id="__span-3-102"><a id="__codelineno-3-102" name="__codelineno-3-102" href="#__codelineno-3-102"></a>        <span class="n">source_url</span><span class="o">=</span><span class="s2">"https://docs.ai-lab.cn/ascend/ops.html"</span><span class="p">,</span>
+</span><span id="__span-3-103"><a id="__codelineno-3-103" name="__codelineno-3-103" href="#__codelineno-3-103"></a>        <span class="n">doc_title</span><span class="o">=</span><span class="s2">"昇腾算力集群运维手册"</span><span class="p">,</span>
+</span><span id="__span-3-104"><a id="__codelineno-3-104" name="__codelineno-3-104" href="#__codelineno-3-104"></a>        <span class="n">max_chars</span><span class="o">=</span><span class="mi">120</span><span class="p">,</span>
+</span><span id="__span-3-105"><a id="__codelineno-3-105" name="__codelineno-3-105" href="#__codelineno-3-105"></a>    <span class="p">)</span>
+</span><span id="__span-3-106"><a id="__codelineno-3-106" name="__codelineno-3-106" href="#__codelineno-3-106"></a>    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">rag_chunks</span><span class="p">:</span>
+</span><span id="__span-3-107"><a id="__codelineno-3-107" name="__codelineno-3-107" href="#__codelineno-3-107"></a>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Chunk ID: </span><span class="si">{</span><span class="n">c</span><span class="p">[</span><span class="s1">'id'</span><span class="p">]</span><span class="si">}</span><span class="s2"> | Section: </span><span class="si">{</span><span class="n">c</span><span class="p">[</span><span class="s1">'metadata'</span><span class="p">][</span><span class="s1">'section'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</span><span id="__span-3-108"><a id="__codelineno-3-108" name="__codelineno-3-108" href="#__codelineno-3-108"></a>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Content:</span><span class="se">\n</span><span class="si">{</span><span class="n">c</span><span class="p">[</span><span class="s1">'text'</span><span class="p">]</span><span class="si">}</span><span class="se">\n</span><span class="s2">"</span> <span class="o">+</span> <span class="s2">"-"</span> <span class="o">*</span> <span class="mi">40</span><span class="p">)</span>
+</span></code></pre></div>
+<hr />
+<h2 id="5">5. 章节复习与实战思考题<a class="headerlink" href="#5" title="Permanent link">&para;</a></h2>
+<details class="question">
+<summary>1. 在为 RAG 检索增强生成系统构建网页采集管道时，为什么业界普遍选择将 HTML 转换为 Markdown 格式（如使用 <code>Trafilatura</code> 或 <code>Crawl4AI</code>），而不是直接提取纯文本（Plain Text）？</summary>
+<p><strong>参考解析</strong>：
+1. <strong>保留文档逻辑结构</strong>：Markdown 通过 <code>#</code>、<code>##</code> 保留了章节标题层级，通过 <code>|---|---|</code> 保留了二维表格的行列对应关系，通过三个反引号保留了代码块与语言标识。如果转为纯文本，表格的数据单元格会混作一团，大模型无法理解各数字对应的表头含义。
+2. <strong>天然支持结构化语义分块（Chunking）</strong>：保留 Markdown 标题使分块器能够沿着章节边界切分，并将当前小标题自动注入每个 Chunk 的头部，大幅提升向量检索的语义准确度。
+3. <strong>极高的 Token 性价比</strong>：相比保留冗长标签与属性的原生态 HTML，Markdown 的 Token 体积减少了 80%～90%，极大降低了大模型推理成本。</p>
+</details>
+<details class="question">
+<summary>2. 当使用大语言模型（LLM）进行网页零样本结构化字段抽取时，如果直接把未处理的原始 HTML 发送给模型会带来什么问题？工程上如何解决？</summary>
+<p><strong>参考解析</strong>：
+原始 HTML 中 85% 以上的内容是 <code>&lt;script&gt;</code> 脚本、<code>&lt;style&gt;</code> 样式表、<code>&lt;svg&gt;</code> 矢量图路径以及冗长的 CSS 类名属性。直接发送不仅会导致单页消耗数万个 Token（成本高、推理慢，甚至直接撑爆模型的最大上下文窗口），还会分散模型的注意力导致提取遗漏。
+<strong>工程解决方案</strong>：
+1. 在送入 LLM 前先执行 <strong>DOM 树精简（Pruning）</strong>，剔除所有非正文脚本与样式节点，清空无意义的标签属性，或先转为精简 Markdown。
+2. 对于大批量同结构页面，采用 <strong>“LLM 自动生成并自愈修复 XPath/CSS 选择器 + 本地 <code>lxml</code>/<code>selectolax</code> 高速批量执行”</strong> 的混合架构，兼顾零样本自适应能力与极低运行成本。</p>
+</details>
+<details class="question">
+<summary>3. 什么是语料清洗中的 PII 脱敏？为什么在大模型预训练与 SFT 微调语料入库前必须包含这一步？</summary>
+<p><strong>参考解析</strong>：
+PII（Personally Identifiable Information）是指个人可识别身份信息，包括真实手机号、身份证号、私人电子邮箱、银行卡号及精确住址等。
+大语言模型在训练过程中具有显著的“参数记忆效应”。如果爬虫从论坛、公示网或社交媒体抓取的原始语料中包含未脱敏的公民个人信息，模型在后续上线提供对话服务时，可能会因特定提示词诱导而直接背诵并泄露他人的真实隐私信息，违反《个人信息保护法》与《生成式人工智能服务管理暂行办法》。因此必须在入库前通过正则与 NER 流水线将其统一替换为 <code>&lt;PHONE&gt;</code>、<code>&lt;ID_CARD&gt;</code> 等安全掩码。</p>
+</details>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../10-scrapy-industrial-framework/" class="md-footer__link md-footer__link--prev" aria-label="Previous: 10. Scrapy工业级异步爬虫框架实战">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                10. Scrapy工业级异步爬虫框架实战
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../12-engineering-deployment-and-capstone/" class="md-footer__link md-footer__link--next" aria-label="Next: 12. 爬虫工程化运维部署与综合实训项目">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                12. 爬虫工程化运维部署与综合实训项目
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2026 AI教材编写组. Licensed under <a href="license/">CC BY-NC-SA 4.0</a> for non-commercial use.
+    </div>
+  
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["content.code.copy", "content.action.edit", "navigation.expand", "navigation.path", "navigation.prune", "navigation.indexes", "navigation.top", "navigation.footer", "toc.follow", "search.suggest", "search.highlight", "search.share"], "search": "../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.c21346df.min.js"></script>
+      
+    
+  </body>
+</html>

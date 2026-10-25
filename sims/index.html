@@ -1,0 +1,993 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="面向高职专科人工智能技术应用专业的交互式智能教材，系统讲授利用网络爬虫采集、解析与存储AI训练数据的原理与工程方法。">
+      
+      
+        <meta name="author" content="AI教材编写组">
+      
+      
+        <link rel="canonical" href="https://minssnail.github.io/crawbug/sims/">
+      
+      
+        <link rel="prev" href="../learning-graph/taxonomy-distribution/">
+      
+      
+        <link rel="next" href="../glossary/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.0">
+    
+    
+      
+        <title>List of MicroSims - 网络爬虫技术</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.57a0d79d.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.fb2fffe2.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../css/extra.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="orange">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#list-of-microsims" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="网络爬虫技术" class="md-header__button md-logo" aria-label="网络爬虫技术" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            网络爬虫技术
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              List of MicroSims
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/Minssnail/crawbug" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Minssnail/crawbug
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="网络爬虫技术" class="md-nav__button md-logo" aria-label="网络爬虫技术" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    网络爬虫技术
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/Minssnail/crawbug" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Minssnail/crawbug
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../about/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    About
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../course-description/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Course Description
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../chapters/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Chapters
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../learning-graph/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Learning Graph
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+    
+    
+    
+    
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="./" class="md-nav__link md-nav__link--active">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MicroSims
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    MicroSims
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../license/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    License
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contact/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contact
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+                
+
+
+
+  
+
+
+  <nav class="md-path" aria-label="Navigation" >
+    <ol class="md-path__list">
+      
+        
+  
+  
+    <li class="md-path__item">
+      <a href=".." class="md-path__link">
+        
+  <span class="md-ellipsis">
+    Home
+  </span>
+
+      </a>
+    </li>
+  
+
+      
+      
+        
+  
+  
+    
+    
+      <li class="md-path__item">
+        <a href="./" class="md-path__link">
+          
+  <span class="md-ellipsis">
+    MicroSims
+  </span>
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ol>
+  </nav>
+
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+    <a href="https://github.com/Minssnail/crawbug/blob/main/docs/sims/index.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
+    </a>
+  
+  
+
+
+<h1 id="list-of-microsims">交互式微仿真实验目录（List of MicroSims）<a class="headerlink" href="#list-of-microsims" title="Permanent link">&para;</a></h1>
+<p>本页面汇总了《网络爬虫技术》全书 12 章设计的 <strong>25 个交互式微仿真（MicroSim）实验规格</strong>。每个微仿真均严格对齐 2001 修订版布鲁姆教育目标分类学（Bloom's Taxonomy），帮助学生通过可视化交互攻克核心原理与工程重难点。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">所属章节</th>
+<th style="text-align: left;">MicroSim ID (<code>sim-id</code>)</th>
+<th style="text-align: left;">微仿真实验名称</th>
+<th style="text-align: center;">布鲁姆认知层级</th>
+<th style="text-align: center;">推荐实现库</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;"><a href="../chapters/01-intro-and-ethics/">第 1 章</a></td>
+<td style="text-align: left;"><code>standard-crawler-workflow</code></td>
+<td style="text-align: left;">标准网络爬虫四阶段闭环工作流探索器</td>
+<td style="text-align: center;">Understand (理解)</td>
+<td style="text-align: center;"><code>p5.js</code></td>
+</tr>
+<tr>
+<td style="text-align: center;"><a href="../chapters/01-intro-and-ethics/">第 1 章</a></td>
+<td style="text-align: left;"><code>crawler-bfs-dfs-predictor</code></td>
+<td style="text-align: left;">爬虫遍历策略预测器（BFS 广度优先 vs DFS 深度优先）</td>
+<td style="text-align: center;">Apply (应用)</td>
+<td style="text-align: center;"><code>vis-network</code></td>
+</tr>
+<tr>
+<td style="text-align: center;"><a href="../chapters/01-intro-and-ethics/">第 1 章</a></td>
+<td style="text-align: left;"><code>robots-compliance-auditor</code></td>
+<td style="text-align: left;"><code>robots.txt</code> 协议解析与合规风险沙盒</td>
+<td style="text-align: center;">Evaluate (评价)</td>
+<td style="text-align: center;"><code>p5.js</code></td>
+</tr>
+<tr>
+<td style="text-align: center;"><a href="../chapters/02-web-and-http-fundamentals/">第 2 章</a></td>
+<td style="text-align: left;"><code>http-status-header-triage</code></td>
+<td style="text-align: left;">HTTP 状态码与请求/响应头故障诊断台</td>
+<td style="text-align: center;">Analyze (分析)</td>
+<td style="text-align: center;"><code>p5.js</code></td>
+</tr>
+<tr>
+<td style="text-align: center;"><a href="../chapters/02-web-and-http-fundamentals/">第 2 章</a></td>
+<td style="text-align: left;"><code>http-lifecycle-session-inspector</code></td>
+<td style="text-align: left;">HTTP 全链路报文与 Cookie/Token 会话追踪仪</td>
+<td style="text-align: center;">Understand (理解)</td>
+<td style="text-align: center;"><code>p5.js</code></td>
+</tr>
+<tr>
+<td style="text-align: center;"><a href="../chapters/03-python-http-requests/">第 3 章</a></td>
+<td style="text-align: left;"><code>python-http-request-builder</code></td>
+<td style="text-align: left;">Python HTTP 请求参数与载荷组装实验室</td>
+<td style="text-align: center;">Apply (应用)</td>
+<td style="text-align: center;"><code>p5.js</code></td>
+</tr>
+<tr>
+<td style="text-align: center;"><a href="../chapters/03-python-http-requests/">第 3 章</a></td>
+<td style="text-align: left;"><code>session-backoff-simulator</code></td>
+<td style="text-align: left;">TCP 连接复用与指数退避重试模拟器</td>
+<td style="text-align: center;">Evaluate (评价)</td>
+<td style="text-align: center;"><code>Chart.js</code></td>
+</tr>
+<tr>
+<td style="text-align: center;"><a href="../chapters/04-static-html-parsing/">第 4 章</a></td>
+<td style="text-align: left;"><code>ch04-css-xpath-sandbox</code></td>
+<td style="text-align: left;">CSS 选择器与 XPath 双向定位沙盒</td>
+<td style="text-align: center;">Apply (应用)</td>
+<td style="text-align: center;"><code>p5.js</code></td>
+</tr>
+<tr>
+<td style="text-align: center;"><a href="../chapters/04-static-html-parsing/">第 4 章</a></td>
+<td style="text-align: left;"><code>ch04-parser-benchmark-comparator</code></td>
+<td style="text-align: left;">静态网页解析器选型决策与性能基准仪</td>
+<td style="text-align: center;">Evaluate (评价)</td>
+<td style="text-align: center;"><code>Chart.js</code></td>
+</tr>
+<tr>
+<td style="text-align: center;"><a href="../chapters/05-ajax-and-api-scraping/">第 5 章</a></td>
+<td style="text-align: left;"><code>api-pagination-simulator</code></td>
+<td style="text-align: left;">页码偏移 vs 游标（Cursor/MaxID）分页稳定性模拟器</td>
+<td style="text-align: center;">Analyze (分析)</td>
+<td style="text-align: center;"><code>p5.js</code></td>
+</tr>
+<tr>
+<td style="text-align: center;"><a href="../chapters/05-ajax-and-api-scraping/">第 5 章</a></td>
+<td style="text-align: left;"><code>api-vs-dom-decision-matrix</code></td>
+<td style="text-align: left;">异步 API 逆向与静态 DOM 采集工程权衡评估器</td>
+<td style="text-align: center;">Evaluate (评价)</td>
+<td style="text-align: center;"><code>Chart.js</code></td>
+</tr>
+<tr>
+<td style="text-align: center;"><a href="../chapters/06-browser-automation-playwright/">第 6 章</a></td>
+<td style="text-align: left;"><code>ch06-selenium-vs-playwright-arch</code></td>
+<td style="text-align: left;">Selenium 与 Playwright 通信架构及渲染生命周期对比器</td>
+<td style="text-align: center;">Understand (理解)</td>
+<td style="text-align: center;"><code>p5.js</code></td>
+</tr>
+<tr>
+<td style="text-align: center;"><a href="../chapters/06-browser-automation-playwright/">第 6 章</a></td>
+<td style="text-align: left;"><code>ch06-network-route-interceptor</code></td>
+<td style="text-align: left;">Playwright 网络路由拦截与 API 响应截获流水线</td>
+<td style="text-align: center;">Analyze (分析)</td>
+<td style="text-align: center;"><code>p5.js</code></td>
+</tr>
+<tr>
+<td style="text-align: center;"><a href="../chapters/07-anti-scraping-and-countermeasures/">第 7 章</a></td>
+<td style="text-align: left;"><code>ch07-slider-captcha-trajectory-sim</code></td>
+<td style="text-align: left;">滑块验证码生物动力学轨迹与风控评分模拟器</td>
+<td style="text-align: center;">Apply (应用)</td>
+<td style="text-align: center;"><code>p5.js</code></td>
+</tr>
+<tr>
+<td style="text-align: center;"><a href="../chapters/07-anti-scraping-and-countermeasures/">第 7 章</a></td>
+<td style="text-align: left;"><code>ch07-js-signature-reverse-lab</code></td>
+<td style="text-align: left;">DevTools XHR 断点回溯与接口签名逆向沙盒</td>
+<td style="text-align: center;">Analyze (分析)</td>
+<td style="text-align: center;"><code>p5.js</code></td>
+</tr>
+<tr>
+<td style="text-align: center;"><a href="../chapters/08-concurrent-and-async-scraping/">第 8 章</a></td>
+<td style="text-align: left;"><code>concurrency-model-timeline-simulator</code></td>
+<td style="text-align: left;">同步、多线程与 <code>asyncio</code> 协程事件循环时序模拟器</td>
+<td style="text-align: center;">Analyze (分析)</td>
+<td style="text-align: center;"><code>p5.js</code></td>
+</tr>
+<tr>
+<td style="text-align: center;"><a href="../chapters/08-concurrent-and-async-scraping/">第 8 章</a></td>
+<td style="text-align: left;"><code>semaphore-token-bucket-limiter</code></td>
+<td style="text-align: left;"><code>Semaphore</code> 并发阀门与令牌桶（Token Bucket）平滑限流沙盒</td>
+<td style="text-align: center;">Apply (应用)</td>
+<td style="text-align: center;"><code>Chart.js</code></td>
+</tr>
+<tr>
+<td style="text-align: center;"><a href="../chapters/09-data-cleaning-and-storage/">第 9 章</a></td>
+<td style="text-align: left;"><code>etl-simhash-cleaning-workbench</code></td>
+<td style="text-align: left;">脏数据 ETL 清洗流水线与 SimHash 海明距离去重实验台</td>
+<td style="text-align: center;">Apply (应用)</td>
+<td style="text-align: center;"><code>p5.js</code></td>
+</tr>
+<tr>
+<td style="text-align: center;"><a href="../chapters/09-data-cleaning-and-storage/">第 9 章</a></td>
+<td style="text-align: left;"><code>storage-bloom-filter-calculator</code></td>
+<td style="text-align: left;">多源存储选型与布隆过滤器（Bloom Filter）空间误判率计算器</td>
+<td style="text-align: center;">Evaluate (评价)</td>
+<td style="text-align: center;"><code>Chart.js</code></td>
+</tr>
+<tr>
+<td style="text-align: center;"><a href="../chapters/10-scrapy-industrial-framework/">第 10 章</a></td>
+<td style="text-align: left;"><code>scrapy-architecture-dataflow</code></td>
+<td style="text-align: left;">Scrapy 六大核心组件与异步数据流转沙盒</td>
+<td style="text-align: center;">Understand (理解)</td>
+<td style="text-align: center;"><code>p5.js</code></td>
+</tr>
+<tr>
+<td style="text-align: center;"><a href="../chapters/10-scrapy-industrial-framework/">第 10 章</a></td>
+<td style="text-align: left;"><code>scrapy-production-cluster-configurator</code></td>
+<td style="text-align: left;"><code>Scrapy-Redis</code> 分布式集群与 <code>AutoThrottle</code> 调优模拟器</td>
+<td style="text-align: center;">Evaluate (评价)</td>
+<td style="text-align: center;"><code>Chart.js</code></td>
+</tr>
+<tr>
+<td style="text-align: center;"><a href="../chapters/11-ai-powered-scraping-and-datasets/">第 11 章</a></td>
+<td style="text-align: left;"><code>ch11-llm-self-healing-scraper</code></td>
+<td style="text-align: left;">LLM 零样本网页解析与 XPath 选择器自愈修复工作台</td>
+<td style="text-align: center;">Apply (应用)</td>
+<td style="text-align: center;"><code>p5.js</code></td>
+</tr>
+<tr>
+<td style="text-align: center;"><a href="../chapters/11-ai-powered-scraping-and-datasets/">第 11 章</a></td>
+<td style="text-align: left;"><code>ch11-rag-chunking-pipeline-sim</code></td>
+<td style="text-align: left;">面向 RAG 与 SFT 的智能网页语料清洗及分块沙盒</td>
+<td style="text-align: center;">Evaluate (评价)</td>
+<td style="text-align: center;"><code>p5.js</code></td>
+</tr>
+<tr>
+<td style="text-align: center;"><a href="../chapters/12-engineering-deployment-and-capstone/">第 12 章</a></td>
+<td style="text-align: left;"><code>ch12-drift-monitor-and-snr-auditor</code></td>
+<td style="text-align: left;">页面结构漂移巡检与数据集信噪比质量审计仪</td>
+<td style="text-align: center;">Evaluate (评价)</td>
+<td style="text-align: center;"><code>Chart.js</code></td>
+</tr>
+<tr>
+<td style="text-align: center;"><a href="../chapters/12-engineering-deployment-and-capstone/">第 12 章</a></td>
+<td style="text-align: left;"><code>ch12-capstone-architecture-designer</code></td>
+<td style="text-align: left;">企业级爬虫技术栈选型与故障巡检架构沙盒</td>
+<td style="text-align: center;">Create (创造)</td>
+<td style="text-align: center;"><code>p5.js</code></td>
+</tr>
+</tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../learning-graph/taxonomy-distribution/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Taxonomy Distribution">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Taxonomy Distribution
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../glossary/" class="md-footer__link md-footer__link--next" aria-label="Next: Glossary">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                Glossary
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2026 AI教材编写组. Licensed under <a href="license/">CC BY-NC-SA 4.0</a> for non-commercial use.
+    </div>
+  
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["content.code.copy", "content.action.edit", "navigation.expand", "navigation.path", "navigation.prune", "navigation.indexes", "navigation.top", "navigation.footer", "toc.follow", "search.suggest", "search.highlight", "search.share"], "search": "../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.c21346df.min.js"></script>
+      
+    
+  </body>
+</html>

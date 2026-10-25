@@ -1,0 +1,2682 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="系统讲解HTML5语义化结构、DOM树父子兄弟节点拓扑、UTF-8与GBK乱码治理，以及正则表达式re、BeautifulSoup4、CSS选择器、lxml XPath、Parsel与Selectolax四大静态解析方案的工程实战。">
+      
+      
+        <meta name="author" content="AI教材编写组">
+      
+      
+        <link rel="canonical" href="https://minssnail.github.io/crawbug/chapters/04-static-html-parsing/">
+      
+      
+        <link rel="prev" href="../03-python-http-requests/">
+      
+      
+        <link rel="next" href="../05-ajax-and-api-scraping/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.0">
+    
+    
+      
+        <title>静态网页结构化解析与正则提取 - 网络爬虫技术</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.57a0d79d.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.fb2fffe2.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../css/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="orange">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#_1" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="网络爬虫技术" class="md-header__button md-logo" aria-label="网络爬虫技术" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            网络爬虫技术
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              静态网页结构化解析与正则提取
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/Minssnail/crawbug" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Minssnail/crawbug
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="网络爬虫技术" class="md-nav__button md-logo" aria-label="网络爬虫技术" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    网络爬虫技术
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/Minssnail/crawbug" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Minssnail/crawbug
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../about/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    About
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../course-description/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Course Description
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Chapters
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_4" id="__nav_4_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Chapters
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../01-intro-and-ethics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1. 网络爬虫导论与数据合规基石
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../02-web-and-http-fundamentals/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    2. Web前端基石与HTTP通信原理
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../03-python-http-requests/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    3. Python网络请求核心编程
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    4. 静态网页结构化解析与正则提取
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    4. 静态网页结构化解析与正则提取
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#concepts-covered" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Concepts Covered
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-dom" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. 网页数据特征、DOM 树拓扑与乱码治理
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. 网页数据特征、DOM 树拓扑与乱码治理">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 结构化与非结构化网页数据特征
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-html5-dom" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 HTML5 语义化标签与 DOM 树父子兄弟层级关系
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#13-utf-8-gbk" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.3 网页字符集 UTF-8 与 GBK 乱码治理
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-python-re" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. 正则表达式原理与 Python re 模块实战
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. 正则表达式原理与 Python re 模块实战">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 元字符、量词、字符集与分组捕获
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 贪婪匹配与非贪婪匹配模式
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-python-re" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3 Python 内置 re 模块核心函数
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-beautifulsoup4-css" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. BeautifulSoup4 与 CSS 选择器深度解析
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. BeautifulSoup4 与 CSS 选择器深度解析">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-beautifulsoup4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 BeautifulSoup4 库与解析器选型
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-bs4-find_all" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 BS4 节点导航与 find_all 检索
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-css-select" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 CSS 选择器语法规则全解与 select 方法
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-xpath-lxml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. XPath 路径表达式与 lxml 高性能解析
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. XPath 路径表达式与 lxml 高性能解析">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-xpath" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 XPath 路径表达式核心语法、谓语过滤与轴定位
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4.1 XPath 路径表达式核心语法、谓语过滤与轴定位">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#diagram-css-xpath" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagram: CSS 选择器与 XPath 双向定位沙盒
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-lxmletree-html-xpath" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 lxml.etree 高效解析 HTML 与 XPath 执行
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-parselselectolax" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. 新一代解析利器：Parsel、Selectolax 与多源转换
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. 新一代解析利器：Parsel、Selectolax 与多源转换">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-parsel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 Parsel 库链式混合选择器解析
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-selectolax-cython" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 Selectolax 极速 Cython 解析引擎
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#53-html-pandasxmlrss-urljoin" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.3 HTML 表格转 Pandas、XML/RSS 解析与 urljoin 路径拼接
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. 四大静态解析方案性能与场景对比
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. 四大静态解析方案性能与场景对比">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#diagram" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagram: 静态网页解析器选型决策与性能基准仪
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. 章节复习与实战思考题
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../05-ajax-and-api-scraping/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    5. 异步加载与Web接口逆向采集
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../06-browser-automation-playwright/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    6. 动态渲染网页与Playwright浏览器自动化
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../07-anti-scraping-and-countermeasures/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    7. 反爬虫机制原理与工程对抗策略
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../08-concurrent-and-async-scraping/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    8. 高性能并发与异步协程爬虫编程
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../09-data-cleaning-and-storage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    9. 数据清洗流水线与多源持久化存储
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../10-scrapy-industrial-framework/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    10. Scrapy工业级异步爬虫框架实战
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../11-ai-powered-scraping-and-datasets/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    11. 面向大模型与RAG的AI智能爬虫
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../12-engineering-deployment-and-capstone/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    12. 爬虫工程化运维部署与综合实训项目
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../learning-graph/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Learning Graph
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../sims/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MicroSims
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../license/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    License
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contact/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contact
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#concepts-covered" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Concepts Covered
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-dom" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. 网页数据特征、DOM 树拓扑与乱码治理
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. 网页数据特征、DOM 树拓扑与乱码治理">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 结构化与非结构化网页数据特征
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-html5-dom" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 HTML5 语义化标签与 DOM 树父子兄弟层级关系
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#13-utf-8-gbk" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.3 网页字符集 UTF-8 与 GBK 乱码治理
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-python-re" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. 正则表达式原理与 Python re 模块实战
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. 正则表达式原理与 Python re 模块实战">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 元字符、量词、字符集与分组捕获
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 贪婪匹配与非贪婪匹配模式
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-python-re" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3 Python 内置 re 模块核心函数
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-beautifulsoup4-css" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. BeautifulSoup4 与 CSS 选择器深度解析
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. BeautifulSoup4 与 CSS 选择器深度解析">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-beautifulsoup4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 BeautifulSoup4 库与解析器选型
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-bs4-find_all" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 BS4 节点导航与 find_all 检索
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-css-select" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 CSS 选择器语法规则全解与 select 方法
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-xpath-lxml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. XPath 路径表达式与 lxml 高性能解析
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. XPath 路径表达式与 lxml 高性能解析">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-xpath" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 XPath 路径表达式核心语法、谓语过滤与轴定位
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4.1 XPath 路径表达式核心语法、谓语过滤与轴定位">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#diagram-css-xpath" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagram: CSS 选择器与 XPath 双向定位沙盒
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-lxmletree-html-xpath" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 lxml.etree 高效解析 HTML 与 XPath 执行
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-parselselectolax" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. 新一代解析利器：Parsel、Selectolax 与多源转换
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. 新一代解析利器：Parsel、Selectolax 与多源转换">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-parsel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 Parsel 库链式混合选择器解析
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-selectolax-cython" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 Selectolax 极速 Cython 解析引擎
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#53-html-pandasxmlrss-urljoin" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.3 HTML 表格转 Pandas、XML/RSS 解析与 urljoin 路径拼接
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. 四大静态解析方案性能与场景对比
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. 四大静态解析方案性能与场景对比">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#diagram" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagram: 静态网页解析器选型决策与性能基准仪
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. 章节复习与实战思考题
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+                
+
+
+
+  
+
+
+  <nav class="md-path" aria-label="Navigation" >
+    <ol class="md-path__list">
+      
+        
+  
+  
+    <li class="md-path__item">
+      <a href="../.." class="md-path__link">
+        
+  <span class="md-ellipsis">
+    Home
+  </span>
+
+      </a>
+    </li>
+  
+
+      
+      
+        
+  
+  
+    
+    
+      <li class="md-path__item">
+        <a href="../" class="md-path__link">
+          
+  <span class="md-ellipsis">
+    Chapters
+  </span>
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ol>
+  </nav>
+
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+    <a href="https://github.com/Minssnail/crawbug/blob/main/docs/chapters/04-static-html-parsing/index.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
+    </a>
+  
+  
+
+
+<h1 id="_1">静态网页结构化解析与正则提取<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h1>
+<h2 id="summary">Summary<a class="headerlink" href="#summary" title="Permanent link">&para;</a></h2>
+<p>获取网页 HTML 源码只是第一步，如何从繁杂的标签嵌套中精准剥离结构化字段是爬虫开发的核心基本功。本章从 HTML5 语义化标签与 DOM 树父子兄弟节点拓扑讲起，系统攻克 UTF-8/GBK 网页乱码难题，并依次深入正则表达式（<code>re</code>）、<code>BeautifulSoup4</code>、CSS 选择器、<code>lxml.etree</code>（XPath）、<code>parsel</code> 以及 Cython 极速引擎 <code>selectolax</code>。最后通过四大解析方案的基准性能对比与 <code>pandas.read_html</code> 表格提取实战，让学生能够针对不同页面结构做出最优解析选型。</p>
+<h2 id="concepts-covered">Concepts Covered<a class="headerlink" href="#concepts-covered" title="Permanent link">&para;</a></h2>
+<p>This chapter covers the following 24 concepts from the learning graph:</p>
+<table>
+<thead>
+<tr>
+<th>Concept</th>
+<th>Concept Impact Score</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>结构化与非结构化网页数据特征</td>
+<td>3351</td>
+</tr>
+<tr>
+<td>HTML5语义化标签与列表表格</td>
+<td>2965</td>
+</tr>
+<tr>
+<td>DOM文档对象模型树形拓扑</td>
+<td>2507</td>
+</tr>
+<tr>
+<td>DOM节点父子兄弟层级关系</td>
+<td>1263</td>
+</tr>
+<tr>
+<td>网页字符集UTF-8与GBK乱码治理</td>
+<td>76</td>
+</tr>
+<tr>
+<td>正则表达式语法元字符与量词</td>
+<td>111</td>
+</tr>
+<tr>
+<td>正则表达式字符集与分组捕获</td>
+<td>110</td>
+</tr>
+<tr>
+<td>贪婪匹配与非贪婪匹配模式</td>
+<td>109</td>
+</tr>
+<tr>
+<td>Python内置re模块核心函数</td>
+<td>108</td>
+</tr>
+<tr>
+<td>BeautifulSoup4库与解析器选型</td>
+<td>503</td>
+</tr>
+<tr>
+<td>BS4节点导航与find_all检索</td>
+<td>502</td>
+</tr>
+<tr>
+<td>CSS选择器语法规则全解</td>
+<td>417</td>
+</tr>
+<tr>
+<td>BS4中select方法与CSS组合选择</td>
+<td>261</td>
+</tr>
+<tr>
+<td>DOM节点文本剥离与属性提取</td>
+<td>240</td>
+</tr>
+<tr>
+<td>XPath路径表达式核心语法</td>
+<td>296</td>
+</tr>
+<tr>
+<td>XPath谓语条件过滤与模糊匹配</td>
+<td>139</td>
+</tr>
+<tr>
+<td>XPath轴定位与逻辑运算符</td>
+<td>1</td>
+</tr>
+<tr>
+<td>lxml.etree高效解析HTML与XPath执行</td>
+<td>137</td>
+</tr>
+<tr>
+<td>Parsel库链式混合选择器解析</td>
+<td>114</td>
+</tr>
+<tr>
+<td>Selectolax极速Cython解析引擎</td>
+<td>21</td>
+</tr>
+<tr>
+<td>HTML表格直接转Pandas数据框</td>
+<td>22</td>
+</tr>
+<tr>
+<td>XML文档与RSS订阅源解析</td>
+<td>1</td>
+</tr>
+<tr>
+<td>相对URL转绝对路径urljoin拼接</td>
+<td>13</td>
+</tr>
+<tr>
+<td>四大静态解析方案性能与场景对比</td>
+<td>20</td>
+</tr>
+</tbody>
+</table>
+<h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">&para;</a></h2>
+<p>This chapter builds on concepts from:</p>
+<ul>
+<li><a href="../01-intro-and-ethics/">Chapter 1: 网络爬虫导论与数据合规基石</a></li>
+<li><a href="../02-web-and-http-fundamentals/">Chapter 2: Web前端基石与HTTP通信原理</a></li>
+<li><a href="../03-python-http-requests/">Chapter 3: Python网络请求核心编程</a></li>
+</ul>
+<hr />
+<h2 id="1-dom">1. 网页数据特征、DOM 树拓扑与乱码治理<a class="headerlink" href="#1-dom" title="Permanent link">&para;</a></h2>
+<p>在上一章中，我们已经能够通过 <code>requests</code> 或 <code>httpx</code> 拿到服务器返回的原始字节流或字符串。但对于人工智能训练管线或数据分析数据库而言，一整段包含几千个 <code>&lt;div class="..."&gt;</code> 标签的 HTML 文本并不能直接使用。静态网页解析（Static HTML Parsing）的核心任务，就是把混合了排版样式、广告脚本与业务内容的原始网页，转化为字段清晰、类型明确的字典（<code>dict</code>）或表格记录。</p>
+<h3 id="11">1.1 结构化与非结构化网页数据特征<a class="headerlink" href="#11" title="Permanent link">&para;</a></h3>
+<p>在数据工程领域，根据组织规律的严密程度，网页承载的信息通常被划分为三大形态，理解<strong>结构化与非结构化网页数据特征</strong>是选择解析工具的前提：</p>
+<ol>
+<li><strong>结构化数据（Structured Data）</strong>：遵循固定 Schema（模式定义）、行列对齐的数据，最典型的代表是关系型数据库中的二维表，以及网页中使用 <code>&lt;table&gt;</code>、<code>&lt;thead&gt;</code>、<code>&lt;tbody&gt;</code>、<code>&lt;tr&gt;</code>、<code>&lt;td&gt;</code> 标签渲染的财务报表、排行榜与招投标公示表。此类数据字段边界极其明确，甚至无需手写逐行提取逻辑即可直接映射为 DataFrame。</li>
+<li><strong>半结构化数据（Semi-Structured Data）</strong>：不具备严格的二维表约束，但通过自描述标签或键值层级组织信息。整个 HTML 文档树、XML/RSS 订阅源以及内嵌在 <code>&lt;script&gt;</code> 标签中的 JSON 对象均属于半结构化数据。商品列表页中的每一个商品卡片虽然长短不一（有的商品有“满减”标签，有的没有），但它们共享相同的 DOM 树子树结构。</li>
+<li><strong>非结构化数据（Unstructured Data）</strong>：没有预定义结构模型的自由文本或多媒体流，例如新闻正文段落、法律法规条文、用户评论长文、PDF 附件以及网页图片。当网页作者没有使用标准子标签，而是将“发布时间：2026-10-20 来源：新华社 编辑：张三”直接揉进同一个 <code>&lt;p&gt;</code> 段落字符串时，树形选择器只能定位到整个段落，后续的字段切分就必须依赖正则表达式或自然语言处理技术。</li>
+</ol>
+<h3 id="12-html5-dom">1.2 HTML5 语义化标签与 DOM 树父子兄弟层级关系<a class="headerlink" href="#12-html5-dom" title="Permanent link">&para;</a></h3>
+<p>现代主流网站普遍遵循 <strong>HTML5 语义化标签与列表表格</strong>规范来构建页面骨架。相比早期全部使用 <code>&lt;div&gt;</code> 堆砌页面的做法，HTML5 引入了极具语义特征的容器标签：<code>&lt;header&gt;</code>（页眉导航）、<code>&lt;nav&gt;</code>（菜单栏）、<code>&lt;main&gt;</code>（核心内容区）、<code>&lt;article&gt;</code>（独立文章或帖子主体）、<code>&lt;section&gt;</code>（章节区块）、<code>&lt;aside&gt;</code>（侧边栏推荐与广告）以及 <code>&lt;footer&gt;</code>（版权页脚）。在大模型预训练语料采集中，直接定位 <code>&lt;article&gt;</code> 或 <code>&lt;main&gt;</code> 并剔除 <code>&lt;nav&gt;</code>、<code>&lt;aside&gt;</code> 和 <code>&lt;footer&gt;</code>，就能在毫秒级时间内过滤掉 80% 以上的网页噪音。此外，无序列表 <code>&lt;ul&gt;/&lt;ol&gt;</code> 配合列表项 <code>&lt;li&gt;</code> 常用于渲染新闻标题流或商品网格，而描述列表 <code>&lt;dl&gt;/&lt;dt&gt;/&lt;dd&gt;</code> 则广泛用于百科词条与商品规格参数表（<code>&lt;dt&gt;</code> 存放属性名如“芯片型号”，<code>&lt;dd&gt;</code> 存放属性值如“昇腾 910B”）。</p>
+<p>当解析器读取 HTML 源码时，会在内存中将其构建为一棵 <strong>DOM 文档对象模型树形拓扑（Document Object Model Tree）</strong>。在这棵树中，每一个 HTML 标签都是一个元素节点（Element Node），标签内部的文字是文本节点（Text Node），而标签上的 <code>href</code>、<code>src</code>、<code>data-id</code> 则是属性节点（Attribute Node）。为了在树中精准游走，我们必须熟练掌握 <strong>DOM 节点父子兄弟层级关系</strong>：</p>
+<ul>
+<li><strong>父节点（Parent）与子节点（Children）</strong>：直接包裹当前节点的上一级标签称为父节点；被当前节点直接包含的下一级标签称为子节点。</li>
+<li><strong>祖先节点（Ancestors）与后代节点（Descendants）</strong>：从当前节点向上直到根部 <code>&lt;html&gt;</code> 路径上的所有外层容器统称祖先节点；当前节点内部嵌套的所有层级的子孙标签统称后代节点。</li>
+<li><strong>同胞/兄弟节点（Siblings）</strong>：拥有同一个父节点的平级节点互为兄弟节点。按出现先后顺序又分为前序兄弟节点（Preceding Siblings）与后续兄弟节点（Following Siblings）。当目标元素本身没有任何 <code>id</code> 或 <code>class</code> 特征，但它紧挨着一个带有明确文字的 <code>&lt;label&gt;联系电话：&lt;/label&gt;</code> 标签时，通过“先定位特征标签、再横移到下一个兄弟节点”的策略即可稳健破局。</li>
+</ul>
+<pre class="mermaid"><code>flowchart TD
+    Root["article.post-card (祖先/父节点 Parent)"] --&gt; H2["h2.title (前序兄弟节点 Preceding Sibling)"]
+    Root --&gt; Meta["div.meta (当前基准节点 Self)"]
+    Root --&gt; P["p.summary (后续兄弟节点 Following Sibling)"]
+    H2 --&gt; A["a[href='...']"]
+    A --&gt; T1["文本节点: '深度学习导论'"]
+    Meta --&gt; S1["span: '2026-10-25'"]
+    Meta --&gt; S2["span: '阅读: 1.2w'"]
+    P --&gt; T2["文本节点: '摘要正文文本...'"]</code></pre>
+<h3 id="13-utf-8-gbk">1.3 网页字符集 UTF-8 与 GBK 乱码治理<a class="headerlink" href="#13-utf-8-gbk" title="Permanent link">&para;</a></h3>
+<p>在解析国内传统政务网、高校教务系统或早期行业论坛时，初学者最常遭遇的问题是提取出的中文变成了 <code>æ\x95°æ\x8d®</code> 或 `` 乱码。要彻底实施<strong>网页字符集 UTF-8 与 GBK 乱码治理</strong>，首先需要区分两类乱码成因：</p>
+<ol>
+<li><strong>UTF-8 字节流被误用 Latin-1 (ISO-8859-1) 解码</strong>：当 HTTP 响应头 <code>Content-Type</code> 中未显式声明 <code>charset=utf-8</code> 时，<code>requests</code> 库遵循 RFC 2616 规范默认将文本按 <code>ISO-8859-1</code> 单字节编码解析，从而产生形如 <code>Ã¤Â¸Â­</code> 的乱码。</li>
+<li><strong>GB2312 / GBK / GB18030 网页被强行按 UTF-8 解码</strong>：国内大量历史遗留站点采用双字节/四字节国标编码（其中 <code>GB18030</code> 向下完全兼容 <code>GBK</code> 与 <code>GB2312</code>）。若直接用 UTF-8 解码，遇到非法字节序列就会抛出 <code>UnicodeDecodeError</code> 或被替换为 ``（U+FFFD 替换字符）。</li>
+</ol>
+<p>在工业级爬虫中，决不能依赖速度慢且容易误判的 <code>response.apparent_encoding</code>，而应遵循“<strong>HTTP 响应头优先 → HTML <code>&lt;meta&gt;</code> 标签正则嗅探 → <code>charset_normalizer</code> 兜底 → 统一使用 <code>gb18030</code> 兼容解码</strong>”的四级解码标准：</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">charset_normalizer</span><span class="w"> </span><span class="kn">import</span> <span class="n">from_bytes</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="k">def</span><span class="w"> </span><span class="nf">decode_html_bytes</span><span class="p">(</span><span class="n">raw_bytes</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">content_type_header</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">    </span><span class="sd">"""</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="sd">    工业级 HTML 字节流智能解码函数，彻底解决 UTF-8 与 GBK/GB2312 乱码</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="sd">    """</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>    <span class="c1"># 1. 优先从 HTTP 响应头 Content-Type 提取编码</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>    <span class="n">header_match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s2">"charset=([\w-]+)"</span><span class="p">,</span> <span class="n">content_type_header</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">I</span><span class="p">)</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>    <span class="k">if</span> <span class="n">header_match</span><span class="p">:</span>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>        <span class="n">enc</span> <span class="o">=</span> <span class="n">header_match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>        <span class="c1"># 凡是 gb2312 或 gbk 统一升级为超集 gb18030，防止生僻字解码失败</span>
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>        <span class="n">enc</span> <span class="o">=</span> <span class="s2">"gb18030"</span> <span class="k">if</span> <span class="n">enc</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"gb2312"</span><span class="p">,</span> <span class="s2">"gbk"</span><span class="p">)</span> <span class="k">else</span> <span class="n">enc</span>
+</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>        <span class="k">try</span><span class="p">:</span>
+</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>            <span class="k">return</span> <span class="n">raw_bytes</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">enc</span><span class="p">)</span>
+</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>        <span class="k">except</span> <span class="p">(</span><span class="ne">LookupError</span><span class="p">,</span> <span class="ne">UnicodeDecodeError</span><span class="p">):</span>
+</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>            <span class="k">pass</span>
+</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>
+</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>    <span class="c1"># 2. 扫描 HTML 前 2048 字节中的 &lt;meta charset="..."&gt; 标签</span>
+</span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>    <span class="n">head_ascii</span> <span class="o">=</span> <span class="n">raw_bytes</span><span class="p">[:</span><span class="mi">2048</span><span class="p">]</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">"ascii"</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s2">"ignore"</span><span class="p">)</span>
+</span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>    <span class="n">meta_match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s1">'&lt;meta[^&gt;]+charset=["</span><span class="se">\'</span><span class="s1">]?([\w-]+)'</span><span class="p">,</span> <span class="n">head_ascii</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">I</span><span class="p">)</span>
+</span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a>    <span class="k">if</span> <span class="n">meta_match</span><span class="p">:</span>
+</span><span id="__span-0-23"><a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a>        <span class="n">enc</span> <span class="o">=</span> <span class="n">meta_match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+</span><span id="__span-0-24"><a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a>        <span class="n">enc</span> <span class="o">=</span> <span class="s2">"gb18030"</span> <span class="k">if</span> <span class="n">enc</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"gb2312"</span><span class="p">,</span> <span class="s2">"gbk"</span><span class="p">)</span> <span class="k">else</span> <span class="n">enc</span>
+</span><span id="__span-0-25"><a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a>        <span class="k">try</span><span class="p">:</span>
+</span><span id="__span-0-26"><a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a>            <span class="k">return</span> <span class="n">raw_bytes</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">enc</span><span class="p">)</span>
+</span><span id="__span-0-27"><a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a>        <span class="k">except</span> <span class="p">(</span><span class="ne">LookupError</span><span class="p">,</span> <span class="ne">UnicodeDecodeError</span><span class="p">):</span>
+</span><span id="__span-0-28"><a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a>            <span class="k">pass</span>
+</span><span id="__span-0-29"><a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a>
+</span><span id="__span-0-30"><a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a>    <span class="c1"># 3. 尝试标准 UTF-8 与国标超集 GB18030</span>
+</span><span id="__span-0-31"><a id="__codelineno-0-31" name="__codelineno-0-31" href="#__codelineno-0-31"></a>    <span class="k">for</span> <span class="n">fallback_enc</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"utf-8"</span><span class="p">,</span> <span class="s2">"gb18030"</span><span class="p">):</span>
+</span><span id="__span-0-32"><a id="__codelineno-0-32" name="__codelineno-0-32" href="#__codelineno-0-32"></a>        <span class="k">try</span><span class="p">:</span>
+</span><span id="__span-0-33"><a id="__codelineno-0-33" name="__codelineno-0-33" href="#__codelineno-0-33"></a>            <span class="k">return</span> <span class="n">raw_bytes</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">fallback_enc</span><span class="p">)</span>
+</span><span id="__span-0-34"><a id="__codelineno-0-34" name="__codelineno-0-34" href="#__codelineno-0-34"></a>        <span class="k">except</span> <span class="ne">UnicodeDecodeError</span><span class="p">:</span>
+</span><span id="__span-0-35"><a id="__codelineno-0-35" name="__codelineno-0-35" href="#__codelineno-0-35"></a>            <span class="k">continue</span>
+</span><span id="__span-0-36"><a id="__codelineno-0-36" name="__codelineno-0-36" href="#__codelineno-0-36"></a>
+</span><span id="__span-0-37"><a id="__codelineno-0-37" name="__codelineno-0-37" href="#__codelineno-0-37"></a>    <span class="c1"># 4. 使用 charset_normalizer 统计推断并开启 errors='replace' 保底</span>
+</span><span id="__span-0-38"><a id="__codelineno-0-38" name="__codelineno-0-38" href="#__codelineno-0-38"></a>    <span class="n">best_guess</span> <span class="o">=</span> <span class="n">from_bytes</span><span class="p">(</span><span class="n">raw_bytes</span><span class="p">)</span><span class="o">.</span><span class="n">best</span><span class="p">()</span>
+</span><span id="__span-0-39"><a id="__codelineno-0-39" name="__codelineno-0-39" href="#__codelineno-0-39"></a>    <span class="k">if</span> <span class="n">best_guess</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-0-40"><a id="__codelineno-0-40" name="__codelineno-0-40" href="#__codelineno-0-40"></a>        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">best_guess</span><span class="p">)</span>
+</span><span id="__span-0-41"><a id="__codelineno-0-41" name="__codelineno-0-41" href="#__codelineno-0-41"></a>    <span class="k">return</span> <span class="n">raw_bytes</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">"utf-8"</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s2">"replace"</span><span class="p">)</span>
+</span><span id="__span-0-42"><a id="__codelineno-0-42" name="__codelineno-0-42" href="#__codelineno-0-42"></a>
+</span><span id="__span-0-43"><a id="__codelineno-0-43" name="__codelineno-0-43" href="#__codelineno-0-43"></a>
+</span><span id="__span-0-44"><a id="__codelineno-0-44" name="__codelineno-0-44" href="#__codelineno-0-44"></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
+</span><span id="__span-0-45"><a id="__codelineno-0-45" name="__codelineno-0-45" href="#__codelineno-0-45"></a>    <span class="c1"># 模拟一个采用 GBK 编码且未提供 HTTP 头的老旧政务网页字节流</span>
+</span><span id="__span-0-46"><a id="__codelineno-0-46" name="__codelineno-0-46" href="#__codelineno-0-46"></a>    <span class="n">sample_gbk_bytes</span> <span class="o">=</span> <span class="p">(</span>
+</span><span id="__span-0-47"><a id="__codelineno-0-47" name="__codelineno-0-47" href="#__codelineno-0-47"></a>        <span class="s1">'&lt;html&gt;&lt;head&gt;&lt;meta http-equiv="Content-Type" content="text/html; charset=gb2312"&gt;&lt;/head&gt;'</span>
+</span><span id="__span-0-48"><a id="__codelineno-0-48" name="__codelineno-0-48" href="#__codelineno-0-48"></a>        <span class="s1">'&lt;body&gt;&lt;h1&gt;关于开展人工智能产业专项补贴申报的通知&lt;/h1&gt;&lt;/body&gt;&lt;/html&gt;'</span>
+</span><span id="__span-0-49"><a id="__codelineno-0-49" name="__codelineno-0-49" href="#__codelineno-0-49"></a>    <span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">"gbk"</span><span class="p">)</span>
+</span><span id="__span-0-50"><a id="__codelineno-0-50" name="__codelineno-0-50" href="#__codelineno-0-50"></a>
+</span><span id="__span-0-51"><a id="__codelineno-0-51" name="__codelineno-0-51" href="#__codelineno-0-51"></a>    <span class="n">clean_html</span> <span class="o">=</span> <span class="n">decode_html_bytes</span><span class="p">(</span><span class="n">sample_gbk_bytes</span><span class="p">)</span>
+</span><span id="__span-0-52"><a id="__codelineno-0-52" name="__codelineno-0-52" href="#__codelineno-0-52"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"解码结果:"</span><span class="p">,</span> <span class="n">clean_html</span><span class="p">)</span>
+</span></code></pre></div>
+<hr />
+<h2 id="2-python-re">2. 正则表达式原理与 Python <code>re</code> 模块实战<a class="headerlink" href="#2-python-re" title="Permanent link">&para;</a></h2>
+<p>当目标数据隐藏在非结构化纯文本段落中，或者内嵌在 <code>&lt;script&gt;window.__INITIAL_STATE__ = {...};&lt;/script&gt;</code> 脚本代码块里时，DOM 树解析器无法深入字符串内部切分字段。此时，<strong>正则表达式（Regular Expression, Regex）</strong>就是最锋利的文本手术刀。</p>
+<h3 id="21">2.1 元字符、量词、字符集与分组捕获<a class="headerlink" href="#21" title="Permanent link">&para;</a></h3>
+<p>正则表达式是由普通字符与特殊功能字符组成的文本模式匹配公式。掌握<strong>正则表达式语法元字符与量词</strong>以及<strong>正则表达式字符集与分组捕获</strong>，需要重点熟记以下核心语法表：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">语法类别</th>
+<th style="text-align: left;">符号表示</th>
+<th style="text-align: left;">匹配规则说明</th>
+<th style="text-align: left;">爬虫典型应用场景</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>常用元字符</strong></td>
+<td style="text-align: left;"><code>.</code></td>
+<td style="text-align: left;">匹配除换行符 <code>\n</code> 以外的任意单个字符（开启 <code>re.S</code> 后包含换行符）</td>
+<td style="text-align: left;">跨标签任意字符过渡</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>常用元字符</strong></td>
+<td style="text-align: left;"><code>\d</code> / <code>\D</code></td>
+<td style="text-align: left;">匹配任意数字 <code>[0-9]</code> / 匹配任意非数字字符</td>
+<td style="text-align: left;">提取商品价格、阅读量、邮政编码</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>常用元字符</strong></td>
+<td style="text-align: left;"><code>\w</code> / <code>\W</code></td>
+<td style="text-align: left;">匹配字母、数字、下划线及中文字符 / 匹配非单词字符</td>
+<td style="text-align: left;">提取用户名、Token 标识符</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>常用元字符</strong></td>
+<td style="text-align: left;"><code>\s</code> / <code>\S</code></td>
+<td style="text-align: left;">匹配任意空白符（空格、制表符 <code>\t</code>、换行符 <code>\n</code>） / 非空白符</td>
+<td style="text-align: left;">过滤 HTML 源码中的缩进与空白</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>边界锚点</strong></td>
+<td style="text-align: left;"><code>^</code> / <code>$</code></td>
+<td style="text-align: left;">匹配字符串开头（<code>re.M</code> 多行模式下匹配行首） / 匹配字符串结尾</td>
+<td style="text-align: left;">校验完整 URL 或手机号格式</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>重复量词</strong></td>
+<td style="text-align: left;"><code>*</code> / <code>+</code> / <code>?</code></td>
+<td style="text-align: left;">匹配前一个字符 0 次或多次 / 1 次或多次 / 0 次或 1 次</td>
+<td style="text-align: left;">处理可选的小数点或可选标签属性</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>精确量词</strong></td>
+<td style="text-align: left;"><code>{n}</code> / <code>{n,m}</code></td>
+<td style="text-align: left;">精确匹配 <code>n</code> 次 / 匹配最少 <code>n</code> 次、最多 <code>m</code> 次</td>
+<td style="text-align: left;">匹配 11 位手机号 <code>\d{11}</code> 或 18 位身份证</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>字符集</strong></td>
+<td style="text-align: left;"><code>[abc]</code> / <code>[^abc]</code></td>
+<td style="text-align: left;">匹配方括号内的任意一个字符 / 排除方括号内的任意字符</td>
+<td style="text-align: left;"><code>[^"']+</code> 匹配双引号或单引号内的属性值</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>分组捕获</strong></td>
+<td style="text-align: left;"><code>(...)</code></td>
+<td style="text-align: left;">捕获括号内匹配的子串，按左括号顺序编号为 Group 1, 2...</td>
+<td style="text-align: left;">从外层 HTML 标签中仅剥离核心数据值</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>命名分组</strong></td>
+<td style="text-align: left;"><code>(?P&lt;name&gt;...)</code></td>
+<td style="text-align: left;">将捕获的子串命名为 <code>name</code>，可通过 <code>.group('name')</code> 或 <code>.groupdict()</code> 提取</td>
+<td style="text-align: left;">直接将正则匹配结果映射为字典键值对</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>非捕获分组</strong></td>
+<td style="text-align: left;"><code>(?:...)</code></td>
+<td style="text-align: left;">仅将多个字符组合以应用量词或 <code>|</code> 分支，不分配捕获组编号</td>
+<td style="text-align: left;"><code>(?:https?://)</code> 匹配协议头但不单独提取它</td>
+</tr>
+</tbody>
+</table>
+<h3 id="22">2.2 贪婪匹配与非贪婪匹配模式<a class="headerlink" href="#22" title="Permanent link">&para;</a></h3>
+<p>在编写网页提取正则时，90% 的初学者错误都源于混淆了<strong>贪婪匹配与非贪婪匹配模式</strong>。</p>
+<ul>
+<li><strong>贪婪模式（Greedy Matching，默认行为）</strong>：量词 <code>*</code>、<code>+</code> 在满足整体表达式匹配成功的前提下，会尽可能<strong>多</strong>地吞噬字符，一直匹配到字符串中<strong>最后一个</strong>符合闭合条件的位置才停下。</li>
+<li><strong>非贪婪/懒惰模式（Non-Greedy / Lazy Matching）</strong>：在量词后紧跟一个问号（即 <code>.*?</code>、<code>+?</code>），通知正则引擎一旦遇到<strong>第一个</strong>满足后续闭合条件的位置就立即停止扩展并交出匹配结果。</li>
+</ul>
+<p>例如面对字符串 <code>&lt;div&gt;&lt;span&gt;人工智能&lt;/span&gt;&lt;span&gt;网络爬虫&lt;/span&gt;&lt;/div&gt;</code>，如果使用贪婪表达式 <code>&lt;span&gt;(.*)&lt;/span&gt;</code>，中间的 <code>.*</code> 会一口气吞掉 <code>人工智能&lt;/span&gt;&lt;span&gt;网络爬虫</code>；只有改为非贪婪表达式 <code>&lt;span&gt;(.*?)&lt;/span&gt;</code>，才能分别精准捕获出 <code>人工智能</code> 和 <code>网络爬虫</code> 两个独立词条。</p>
+<div class="admonition tip">
+<p class="admonition-title">性能进阶：用否定字符集 <code>[^&lt;]+</code> 替代 <code>.*?</code></p>
+<p>在超大 HTML 文本中使用 <code>.*?</code> 配合 <code>re.S</code> 时，如果闭合标签缺失，正则引擎会产生海量回溯（Catastrophic Backtracking），导致 CPU 瞬间飙升至 100%。如果已知目标文本中不包含尖括号 <code>&lt;</code> 或双引号 <code>"</code>，使用 <code>&lt;span&gt;([^&lt;]+)&lt;/span&gt;</code> 或 <code>href="([^"]+)"</code> 既能天然实现非贪婪截断，又能彻底消除回溯开销，执行速度比 <code>.*?</code> 快 5～10 倍。</p>
+</div>
+<h3 id="23-python-re">2.3 Python 内置 <code>re</code> 模块核心函数<a class="headerlink" href="#23-python-re" title="Permanent link">&para;</a></h3>
+<p>在掌握语法后，我们通过 <strong>Python 内置 <code>re</code> 模块核心函数</strong> 将正则表达式落地到采集代码中：</p>
+<ol>
+<li><code>re.search(pattern, string, flags=0)</code>：扫描整个字符串，返回<strong>第一个</strong>成功的匹配对象（<code>Match</code> 对象），若未找到则返回 <code>None</code>。适合提取详情页唯一字段（如文章标题、发布时间、内嵌 JSON 变量）。</li>
+<li><code>re.findall(pattern, string, flags=0)</code>：以列表形式返回全部非重叠匹配结果。注意：如果正则中没有 <code>()</code> 捕获组，返回完整匹配字符串列表；如果包含 1 个 <code>()</code> 捕获组，则直接返回捕获组内部的子串列表；若包含多个捕获组，则返回元组列表 <code>List[Tuple[str, ...]]</code>。</li>
+<li><code>re.finditer(pattern, string, flags=0)</code>：返回 <code>Match</code> 对象的迭代器，结合命名分组 <code>(?P&lt;name&gt;...)</code> 与 <code>match.groupdict()</code>，是提取列表页多字段记录的最佳范式。</li>
+<li><code>re.sub(pattern, repl, string)</code>：正则替换函数，常用于在数据清洗阶段批量抹除残余 HTML 标签或脱敏手机号。</li>
+<li><code>re.compile(pattern, flags=0)</code>：预编译正则表达式对象。在循环解析成千上万个网页时，在循环外部预编译一次正则可省去重复解析语法树的开销。</li>
+</ol>
+<p>修正修饰符（Flags）方面，爬虫最常用的是 <code>re.S</code>（即 <code>re.DOTALL</code>，让 <code>.</code> 能够跨越多行匹配包含 <code>\n</code> 在内的所有字符）与 <code>re.I</code>（即 <code>re.IGNORECASE</code>，忽略大小写）。下面展示一个利用命名分组与 <code>re.finditer</code> 从非结构化公告文本及内嵌脚本中提取数据的完整示例：</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="c1"># 预编译正则表达式（模块加载时仅编译一次）</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="n">META_INFO_PATTERN</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>    <span class="sa">r</span><span class="s2">"发布日期[:：]\s*(?P&lt;pub_date&gt;\d</span><span class="si">{4}</span><span class="s2">-\d</span><span class="si">{2}</span><span class="s2">-\d</span><span class="si">{2}</span><span class="s2">)\s*"</span>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>    <span class="sa">r</span><span class="s2">"来源[:：]\s*(?P&lt;source&gt;[^\s&lt;]+)\s*"</span>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>    <span class="sa">r</span><span class="s2">"发文字号[:：]\s*(?P&lt;doc_code&gt;[^\s&lt;]+)"</span><span class="p">,</span>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>    <span class="n">re</span><span class="o">.</span><span class="n">S</span><span class="p">,</span>
+</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="p">)</span>
+</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>
+</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="n">INITIAL_STATE_PATTERN</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
+</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>    <span class="sa">r</span><span class="s2">"window\.__INITIAL_STATE__\s*=\s*(\{.*?\});\s*&lt;/script&gt;"</span><span class="p">,</span>
+</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>    <span class="n">re</span><span class="o">.</span><span class="n">S</span><span class="p">,</span>
+</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a><span class="p">)</span>
+</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>
+</span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a><span class="k">def</span><span class="w"> </span><span class="nf">parse_unstructured_notice</span><span class="p">(</span><span class="n">html_text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+</span><span id="__span-1-19"><a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a><span class="w">    </span><span class="sd">"""使用预编译正则从混合段落与内嵌脚本中提取结构化字典"""</span>
+</span><span id="__span-1-20"><a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a>    <span class="n">result</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+</span><span id="__span-1-21"><a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a>
+</span><span id="__span-1-22"><a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a>    <span class="c1"># 1. 使用命名分组直接生成字典</span>
+</span><span id="__span-1-23"><a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a>    <span class="n">meta_match</span> <span class="o">=</span> <span class="n">META_INFO_PATTERN</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">html_text</span><span class="p">)</span>
+</span><span id="__span-1-24"><a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a>    <span class="k">if</span> <span class="n">meta_match</span><span class="p">:</span>
+</span><span id="__span-1-25"><a id="__codelineno-1-25" name="__codelineno-1-25" href="#__codelineno-1-25"></a>        <span class="n">result</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">meta_match</span><span class="o">.</span><span class="n">groupdict</span><span class="p">())</span>
+</span><span id="__span-1-26"><a id="__codelineno-1-26" name="__codelineno-1-26" href="#__codelineno-1-26"></a>
+</span><span id="__span-1-27"><a id="__codelineno-1-27" name="__codelineno-1-27" href="#__codelineno-1-27"></a>    <span class="c1"># 2. 使用非贪婪捕获提取 &lt;script&gt; 内的 JSON 字符串并反序列化</span>
+</span><span id="__span-1-28"><a id="__codelineno-1-28" name="__codelineno-1-28" href="#__codelineno-1-28"></a>    <span class="n">script_match</span> <span class="o">=</span> <span class="n">INITIAL_STATE_PATTERN</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">html_text</span><span class="p">)</span>
+</span><span id="__span-1-29"><a id="__codelineno-1-29" name="__codelineno-1-29" href="#__codelineno-1-29"></a>    <span class="k">if</span> <span class="n">script_match</span><span class="p">:</span>
+</span><span id="__span-1-30"><a id="__codelineno-1-30" name="__codelineno-1-30" href="#__codelineno-1-30"></a>        <span class="n">raw_json</span> <span class="o">=</span> <span class="n">script_match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</span><span id="__span-1-31"><a id="__codelineno-1-31" name="__codelineno-1-31" href="#__codelineno-1-31"></a>        <span class="n">result</span><span class="p">[</span><span class="s2">"state_data"</span><span class="p">]</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">raw_json</span><span class="p">)</span>
+</span><span id="__span-1-32"><a id="__codelineno-1-32" name="__codelineno-1-32" href="#__codelineno-1-32"></a>
+</span><span id="__span-1-33"><a id="__codelineno-1-33" name="__codelineno-1-33" href="#__codelineno-1-33"></a>    <span class="c1"># 3. 使用 re.sub 剔除所有 HTML 标签获取纯文本</span>
+</span><span id="__span-1-34"><a id="__codelineno-1-34" name="__codelineno-1-34" href="#__codelineno-1-34"></a>    <span class="n">clean_body</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">"&lt;[^&gt;]+&gt;"</span><span class="p">,</span> <span class="s2">""</span><span class="p">,</span> <span class="n">html_text</span><span class="p">)</span>
+</span><span id="__span-1-35"><a id="__codelineno-1-35" name="__codelineno-1-35" href="#__codelineno-1-35"></a>    <span class="n">result</span><span class="p">[</span><span class="s2">"clean_text"</span><span class="p">]</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">"\s+"</span><span class="p">,</span> <span class="s2">" "</span><span class="p">,</span> <span class="n">clean_body</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+</span><span id="__span-1-36"><a id="__codelineno-1-36" name="__codelineno-1-36" href="#__codelineno-1-36"></a>    <span class="k">return</span> <span class="n">result</span>
+</span><span id="__span-1-37"><a id="__codelineno-1-37" name="__codelineno-1-37" href="#__codelineno-1-37"></a>
+</span><span id="__span-1-38"><a id="__codelineno-1-38" name="__codelineno-1-38" href="#__codelineno-1-38"></a>
+</span><span id="__span-1-39"><a id="__codelineno-1-39" name="__codelineno-1-39" href="#__codelineno-1-39"></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
+</span><span id="__span-1-40"><a id="__codelineno-1-40" name="__codelineno-1-40" href="#__codelineno-1-40"></a>    <span class="n">sample_html</span> <span class="o">=</span> <span class="s2">"""</span>
+</span><span id="__span-1-41"><a id="__codelineno-1-41" name="__codelineno-1-41" href="#__codelineno-1-41"></a><span class="s2">    &lt;div class="info-bar"&gt;</span>
+</span><span id="__span-1-42"><a id="__codelineno-1-42" name="__codelineno-1-42" href="#__codelineno-1-42"></a><span class="s2">        发布日期：2026-10-25   来源：工信部科技司   发文字号：工信厅科〔2026〕42号</span>
+</span><span id="__span-1-43"><a id="__codelineno-1-43" name="__codelineno-1-43" href="#__codelineno-1-43"></a><span class="s2">    &lt;/div&gt;</span>
+</span><span id="__span-1-44"><a id="__codelineno-1-44" name="__codelineno-1-44" href="#__codelineno-1-44"></a><span class="s2">    &lt;script&gt;window.__INITIAL_STATE__ = {"viewCount": 9527, "attachmentId": "A8831"};&lt;/script&gt;</span>
+</span><span id="__span-1-45"><a id="__codelineno-1-45" name="__codelineno-1-45" href="#__codelineno-1-45"></a><span class="s2">    """</span>
+</span><span id="__span-1-46"><a id="__codelineno-1-46" name="__codelineno-1-46" href="#__codelineno-1-46"></a>    <span class="n">extracted</span> <span class="o">=</span> <span class="n">parse_unstructured_notice</span><span class="p">(</span><span class="n">sample_html</span><span class="p">)</span>
+</span><span id="__span-1-47"><a id="__codelineno-1-47" name="__codelineno-1-47" href="#__codelineno-1-47"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">extracted</span><span class="p">,</span> <span class="n">ensure_ascii</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+</span></code></pre></div>
+<hr />
+<h2 id="3-beautifulsoup4-css">3. BeautifulSoup4 与 CSS 选择器深度解析<a class="headerlink" href="#3-beautifulsoup4-css" title="Permanent link">&para;</a></h2>
+<p>虽然正则表达式灵活强大，但如果用它直接解析多层嵌套的 HTML 标签（例如嵌套了三层的 <code>&lt;div class="item"&gt;</code>），一旦网页排版多出一个换行或属性顺序发生调换，正则表达式就会瞬间失效。面对半结构化 HTML 文档，我们应当将其还原为 DOM 树并按节点定位。</p>
+<h3 id="31-beautifulsoup4">3.1 BeautifulSoup4 库与解析器选型<a class="headerlink" href="#31-beautifulsoup4" title="Permanent link">&para;</a></h3>
+<p><code>BeautifulSoup4</code>（简称 <code>bs4</code>）是 Python 生态中历史最悠久、容错率极高的 HTML/XML 解析库。它本身并不是一个底层的词法解析器，而是一个封装在底层解析器之上的<strong>面向对象的 DOM 树导航接口层</strong>。在进行 <strong>BeautifulSoup4 库与解析器选型</strong>时，<code>BeautifulSoup(markup, features)</code> 构造函数支持四种底层驱动引擎，其特性对比如下：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">底层解析器标识</th>
+<th style="text-align: left;">依赖库要求</th>
+<th style="text-align: left;">解析速度</th>
+<th style="text-align: left;">残缺 HTML 容错能力</th>
+<th style="text-align: left;">典型适用场景</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>"lxml"</code></td>
+<td style="text-align: left;"><code>pip install lxml</code></td>
+<td style="text-align: left;"><strong>极快（C 语言底层）</strong></td>
+<td style="text-align: left;">强（自动闭合未闭合标签）</td>
+<td style="text-align: left;"><strong>生产环境首选默认解析器</strong>，兼顾高性能与高容错</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>"html.parser"</code></td>
+<td style="text-align: left;">Python 标准库内置</td>
+<td style="text-align: left;">中等</td>
+<td style="text-align: left;">较好</td>
+<td style="text-align: left;">无法安装 C 扩展的受限环境或轻量级教学脚本</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>"html5lib"</code></td>
+<td style="text-align: left;"><code>pip install html5lib</code></td>
+<td style="text-align: left;">极慢（纯 Python）</td>
+<td style="text-align: left;"><strong>最强（完全等同浏览器方式修补）</strong></td>
+<td style="text-align: left;">标签极度混乱、闭合严重错位的早年手写网页</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>"xml"</code></td>
+<td style="text-align: left;"><code>pip install lxml</code></td>
+<td style="text-align: left;">极快（C 语言底层）</td>
+<td style="text-align: left;">严格遵循 XML 规范（区分大小写）</td>
+<td style="text-align: left;">解析标准 RSS 订阅源、Sitemap.xml 或 SVG 矢量图</td>
+</tr>
+</tbody>
+</table>
+<h3 id="32-bs4-find_all">3.2 BS4 节点导航与 <code>find_all</code> 检索<a class="headerlink" href="#32-bs4-find_all" title="Permanent link">&para;</a></h3>
+<p>将 HTML 转化为 <code>BeautifulSoup</code> 对象后，第一种提取范式是利用 Python 方法调用进行 <strong>BS4 节点导航与 <code>find_all</code> 检索</strong>：</p>
+<ul>
+<li><code>soup.find(name, attrs, string, ...)</code>：返回满足条件的<strong>第一个</strong> <code>Tag</code> 节点对象，若未找到则返回 <code>None</code>。</li>
+<li><code>soup.find_all(name, attrs, recursive=True, limit=None, ...)</code>：返回所有匹配节点的列表 <code>ResultSet</code>。</li>
+<li><strong>注意关键字冲突</strong>：由于 <code>class</code> 是 Python 语言保留关键字，按类名筛选时必须写成下划线形式 <code>class_="card-item"</code>，或者传入属性字典 <code>attrs={"class": "card-item", "data-type": "ai"}</code>。</li>
+<li><strong>DOM 树关系属性导航</strong>：拿到某个基准节点 <code>tag</code> 后，可以通过 <code>tag.parent</code> 访问父节点，<code>tag.children</code> 遍历直接子节点，或者通过 <code>tag.find_next_sibling()</code> / <code>tag.find_previous_sibling()</code> 定位相邻的兄弟标签。</li>
+</ul>
+<h3 id="33-css-select">3.3 CSS 选择器语法规则全解与 <code>select</code> 方法<a class="headerlink" href="#33-css-select" title="Permanent link">&para;</a></h3>
+<p>相比冗长的 <code>find_all("div", class_="a").find("ul").find_all("li")</code> 链式调用，直接复用前端工程师编写样式表时使用的 <strong>CSS 选择器语法规则全解</strong> 更加紧凑直观。在 <code>BeautifulSoup</code>（以及后续的 <code>parsel</code>、<code>selectolax</code>、<code>Playwright</code>）中，掌握以下核心 CSS 选择器即可覆盖 95% 的定位需求：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">选择器类型</th>
+<th style="text-align: left;">CSS 表达式示例</th>
+<th style="text-align: left;">语法含义说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>标签选择器</strong></td>
+<td style="text-align: left;"><code>article</code>、<code>h2</code>、<code>a</code></td>
+<td style="text-align: left;">选中所有指定标签名的元素</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>类选择器（Class）</strong></td>
+<td style="text-align: left;"><code>.course-card</code>、<code>.price.hot</code></td>
+<td style="text-align: left;"><code>.</code> 代表 <code>class</code> 属性；连续写 <code>.a.b</code> 表示同时包含 <code>a</code> 和 <code>b</code> 两个类名</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>ID 选择器</strong></td>
+<td style="text-align: left;"><code>#main-list</code></td>
+<td style="text-align: left;"><code>#</code> 代表页面中唯一的 <code>id</code> 属性（即 <code>id="main-list"</code>）</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>后代组合器（空格）</strong></td>
+<td style="text-align: left;"><code>.course-card .title a</code></td>
+<td style="text-align: left;">选中 <code>.course-card</code> 内部任意嵌套层级的 <code>.title</code> 下的 <code>a</code> 标签</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>直接子元素组合器（<code>&gt;</code>）</strong></td>
+<td style="text-align: left;"><code>ul.menu &gt; li</code></td>
+<td style="text-align: left;">仅选中 <code>ul.menu</code> 的<strong>第一级直接子元素</strong> <code>li</code>，不包含孙子级 <code>li</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>相邻/通用兄弟组合器</strong></td>
+<td style="text-align: left;"><code>label + span</code>、<code>h2 ~ p</code></td>
+<td style="text-align: left;"><code>+</code> 选中紧邻的下一个同级元素；<code>~</code> 选中后续所有同级元素</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>属性精确/模糊匹配</strong></td>
+<td style="text-align: left;"><code>a[href^="https://"]</code>、<code>img[src$=".png"]</code>、<code>div[data-id*="item"]</code></td>
+<td style="text-align: left;"><code>^=</code> 以某前缀开头；<code>$=</code> 以某后缀结尾；<code>*=</code> 包含某子串</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>结构伪类选择器</strong></td>
+<td style="text-align: left;"><code>tr:nth-of-type(2)</code>、<code>li:first-child</code>、<code>li:not(.ad-banner)</code></td>
+<td style="text-align: left;">按同类型序号定位、定位首元素，或使用 <code>:not()</code> 排除穿插的广告项</td>
+</tr>
+</tbody>
+</table>
+<p>在 <strong>BS4 中 <code>select</code> 方法与 CSS 组合选择</strong> 配合 <strong>DOM 节点文本剥离与属性提取</strong> 时，遵循统一的三步法：
+1. 使用 <code>soup.select("CSS表达式")</code> 获取节点列表，并用 <code>soup.select_one("CSS表达式")</code> 提取每个卡片内的单个子字段（找不到时自动返回 <code>None</code> 而不报错）。
+2. 提取文本时，优先使用 <code>node.get_text(strip=True)</code>（或 <code>|</code>.join(node.stripped_strings)），它能自动递归拼接内部所有子标签文字并剥离首尾空白符。
+3. 提取标签属性时，切勿直接使用 <code>node["href"]</code>（若属性缺失会抛出 <code>KeyError</code> 中断爬虫），而应统一使用字典安全方法 <code>node.get("href", "")</code>。</p>
+<hr />
+<h2 id="4-xpath-lxml">4. XPath 路径表达式与 <code>lxml</code> 高性能解析<a class="headerlink" href="#4-xpath-lxml" title="Permanent link">&para;</a></h2>
+<p>尽管 CSS 选择器简洁优雅，但它本质上是为“从上往下给网页渲染样式”设计的，因此存在两个天然短板：<strong>第一，CSS 选择器无法直接根据标签内的文本内容（如“包含‘下一页’三个字的按钮”）进行条件过滤；第二，CSS 选择器无法从子节点向上反查父节点或祖先节点</strong>。为了彻底突破这两大限制，工业级爬虫广泛采用 <strong>XPath（XML Path Language）</strong>。</p>
+<h3 id="41-xpath">4.1 XPath 路径表达式核心语法、谓语过滤与轴定位<a class="headerlink" href="#41-xpath" title="Permanent link">&para;</a></h3>
+<p><strong>XPath 路径表达式核心语法</strong>将整棵 DOM 树视为类似 Linux 文件系统的目录树，通过路径斜杠与内建函数实现全方向寻址：</p>
+<ul>
+<li><code>/</code> 与 <code>//</code>：单斜杠 <code>/</code> 表示从根节点出发或选取<strong>直接子节点</strong>；双斜杠 <code>//</code> 是爬虫最常用的通配符，表示不限层级地在当前上下文下检索所有<strong>后代节点</strong>。</li>
+<li><code>.</code> 与 <code>..</code>：单点 <code>.</code> 代表当前节点自身（在循环遍历子卡片时，子 XPath 必须以 <code>.//</code> 开头，否则 <code>//</code> 会重新从整篇 HTML 根部开始全局搜索！）；双点 <code>..</code> 代表<strong>当前节点的父节点</strong>。</li>
+<li><code>@attr</code> 与 <code>text()</code>：<code>/@href</code> 用于提取节点的 <code>href</code> 属性值；<code>/text()</code> 提取当前节点的直接文本子节点，<code>string(.)</code> 或 <code>//text()</code> 则提取包含所有子孙标签在内的全部文本。</li>
+</ul>
+<p>在路径之后加上方括号 <code>[...]</code> 即构成 <strong>XPath 谓语条件过滤与模糊匹配（Predicates）</strong>。结合 <strong>XPath 轴定位与逻辑运算符（Axes &amp; Logical Operators）</strong>，我们可以写出极其精准的定位规则：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">XPath 高级特性</th>
+<th style="text-align: left;">表达式范例</th>
+<th style="text-align: left;">工程作用解析</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>序号索引（注意从 1 开始！）</strong></td>
+<td style="text-align: left;"><code>//ul[@ class="list"]/li[1]</code>、<code>//li[last()]</code></td>
+<td style="text-align: left;">XPath 下标是 <strong>1-based</strong>（第一个元素是 <code>[1]</code> 而非 <code>[0]</code>），<code>last()</code> 代表末尾元素</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>模糊包含匹配 <code>contains()</code></strong></td>
+<td style="text-align: left;"><code>//div[contains(@class, "product-item")]</code></td>
+<td style="text-align: left;">应对多 class 类名（如 <code>class="card product-item v2"</code>）最稳健的写法</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>文本内容过滤</strong></td>
+<td style="text-align: left;"><code>//a[contains(text(), "下一页")]/@href</code></td>
+<td style="text-align: left;">直接寻找文字中含有“下一页”的超链接并提取其跳转地址，无惧 class 改版</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>前缀匹配 <code>starts-with()</code></strong></td>
+<td style="text-align: left;"><code>//a[starts-with(@href, "/detail/")]</code></td>
+<td style="text-align: left;">筛选所有指向详情页路由的超链接</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>多条件逻辑运算 <code>and</code> / <code>or</code> / <code>not()</code></strong></td>
+<td style="text-align: left;"><code>//li[@data-id and not(contains(@class, "ad"))]</code></td>
+<td style="text-align: left;">选取具有 <code>data-id</code> 属性且类名中不含 <code>ad</code> 广告标记的真实列表项</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>向上轴定位 <code>parent::</code> / <code>ancestor::</code></strong></td>
+<td style="text-align: left;"><code>//span[text()="官方自营"]/ancestor::div[@class="card"]</code></td>
+<td style="text-align: left;">先找到写着“官方自营”的角标，再逆向向上召回它所属的整张商品卡片容器</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>横向兄弟轴 <code>following-sibling::</code></strong></td>
+<td style="text-align: left;"><code>//td[text()="统一社会信用代码"]/following-sibling::td[1]/text()</code></td>
+<td style="text-align: left;">在无 class 的工商信息表格中，根据左侧表头文字直接定位右侧紧邻的单元格内容</td>
+</tr>
+</tbody>
+</table>
+<h4 id="diagram-css-xpath">Diagram: CSS 选择器与 XPath 双向定位沙盒<a class="headerlink" href="#diagram-css-xpath" title="Permanent link">&para;</a></h4>
+<pre class="mermaid"><code>flowchart TD
+    Root["div.course-list (列表根容器)"] --&gt; Card1["div.course-card (真实课程卡片 1)"]
+    Root --&gt; CardAd["div.course-card.ad-item (穿插广告卡片 - 用 not 过滤)"]
+    Root --&gt; Card2["div.course-card (真实课程卡片 2)"]
+    Card1 --&gt; H3["h3.title &gt; a 提取标题与链接"]
+    Card1 --&gt; Info["div.info"]
+    Info --&gt; SpanLabel["span: 主讲教师 (基准节点)"]
+    SpanLabel -.-&gt;|"following-sibling 横向兄弟轴"| SpanVal["span: 林工 (目标兄弟节点)"]</code></pre>
+<details>
+<summary>Interactive MicroSim: CSS 选择器与 XPath 双向定位沙盒</summary>
+<p>Type: microsim</p>
+<p><strong>sim-id:</strong> ch04-css-xpath-sandbox<br/>
+<strong>Library:</strong> p5.js<br/>
+<strong>Status:</strong> Specified<br/>
+<strong>Bloom Level:</strong> Apply<br/>
+<strong>Bloom Verb:</strong> Execute<br/>
+<strong>Learning Objective:</strong> The learner will execute and compare CSS selector and XPath expressions against a realistic multi-level DOM tree to isolate target elements, attributes, and sibling nodes accurately.</p>
+<p><strong>Prerequisites:</strong> DOM文档对象模型树形拓扑, CSS选择器语法规则全解, XPath路径表达式核心语法, XPath谓语条件过滤与模糊匹配</p>
+<p><strong>Evidence of Mastery:</strong>
+- 能够正确区分 XPath 中 <code>//</code>（全局搜索）与 <code>.//</code>（当前节点相对搜索）的作用域差异
+- 能够使用 <code>contains(@class, ...)</code> 和 <code>following-sibling::</code> 定位无固定 class 的表格字段
+- 能够识别 XPath 索引从 <code>1</code> 开始而 Python 列表索引从 <code>0</code> 开始的差异</p>
+<p><strong>Misconceptions:</strong>
+- 误以为 <code>@class="item"</code> 可以匹配 <code>class="item active"</code>（实际上精确匹配会失败，必须用 <code>contains(@class, "item")</code> 或 CSS 的 <code>.item</code>）
+- 在遍历卡片节点 <code>card</code> 时使用 <code>card.xpath('//h2/text()')</code>，导致每次循环都把全页所有标题提取出来</p>
+<p><strong>Instructional Rationale:</strong>
+DOM 树寻址具有高度的空间拓扑性。通过左侧展示带缩进的 HTML 源码树、中间展示可视化节点拓扑图、右侧提供实时表达式输入框与匹配高亮反馈，学习者可以直观看到每一段路径谓语是如何逐层剪枝并锁定目标节点的。</p>
+<p><strong>Content:</strong>
+- 内置一段包含 3 个商品卡片（其中一个穿插了 <code>.ad-sponsor</code> 广告卡片）及一段工商信息 <code>&lt;table class="info"&gt;</code> 的真实感 HTML 片段
+- 提供 6 个预设高频挑战任务（如“提取非广告商品标题”、“提取自营商品的价格”、“通过横向兄弟轴提取法定代表人姓名”、“验证 <code>.//</code> 与 <code>//</code> 的区别”）
+- 实时对比栏：同步显示等价的 CSS 选择器与 XPath 表达式（当切换至父节点反查或文本模糊匹配任务时，直观展示 CSS 选择器的局限提示）</p>
+<p><strong>Provenance:</strong> 依据本章第 3 节与第 4 节解析规则设计。</p>
+<p><strong>Rules:</strong>
+- 当用户输入合法的 CSS 或 XPath 表达式时，画布中的对应 DOM 节点以高亮翡翠绿闪烁，并在底部输出提取到的 <code>List[str]</code> 结果
+- 若用户在卡片局部上下文模式中输入了不带 <code>.</code> 的 <code>//title</code>，系统用红色虚线标出其越界搜索到了根节点，并弹出纠错提示</p>
+<p><strong>Learner Activity:</strong>
+1. 选择预设场景或自由输入模式，切换“CSS Selector”或“XPath”引擎。
+2. 编写定位表达式并通过高亮反馈观察命中的 DOM 节点集合。
+3. 完成全部 4 道通关挑战题，对比两种语法的表达力边界。</p>
+<p><strong>Feedback:</strong>
+- 实时显示命中节点数量、节点路径深度以及提取出的文本/属性值列表。
+- 针对常见语法错误（如下标写 <code>[0]</code>、多类名直接用 <code>=</code> 匹配）给出精准的中文诊断建议。</p>
+<p><strong>Starting State:</strong>
+默认加载“商品列表与广告过滤”场景，输入框预填 <code>//div[contains(@class, "item") and not(contains(@class, "ad"))]//h3/text()</code>，对应第 1、3 个商品标题节点处于高亮激活态。</p>
+<p><strong>Chapter Anchors:</strong> 3.3 CSS 选择器语法规则全解与 select 方法, 4.1 XPath 路径表达式核心语法、谓语过滤与轴定位</p>
+</details>
+<h3 id="42-lxmletree-html-xpath">4.2 <code>lxml.etree</code> 高效解析 HTML 与 XPath 执行<a class="headerlink" href="#42-lxmletree-html-xpath" title="Permanent link">&para;</a></h3>
+<p>在 Python 中直接驱动 XPath 的核心引擎是 <strong><code>lxml.etree</code> 高效解析 HTML 与 XPath 执行</strong>。<code>lxml</code> 底层基于 C 语言库 <code>libxml2</code> 和 <code>libxslt</code> 构建，其解析与寻址速度比纯 Python 库高出一个数量级。</p>
+<p>在使用 <code>lxml.etree.HTML(text)</code> 构建元素树并调用 <code>.xpath()</code> 时，务必注意：<strong><code>.xpath()</code> 方法的返回值永远是一个列表（<code>list</code>）</strong>（除非使用了 <code>string()</code> 或 <code>count()</code> 函数）。如果列表为空，直接取 <code>[0]</code> 会引发 <code>IndexError: list index out of range</code>。因此，在工程代码中推荐封装一个带默认值的辅助函数或配合列表推导式使用：</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">lxml</span><span class="w"> </span><span class="kn">import</span> <span class="n">etree</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="k">def</span><span class="w"> </span><span class="nf">parse_courses_with_lxml</span><span class="p">(</span><span class="n">html_source</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">    </span><span class="sd">"""</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="sd">    使用 lxml.etree 与 XPath 谓语、兄弟轴提取课程列表与详情表格</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="sd">    """</span>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>    <span class="n">tree</span> <span class="o">=</span> <span class="n">etree</span><span class="o">.</span><span class="n">HTML</span><span class="p">(</span><span class="n">html_source</span><span class="p">)</span>
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>    <span class="n">courses</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>
+</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>    <span class="c1"># 1. 过滤掉包含 ad-item 的推广卡片，仅定位真实课程卡片</span>
+</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>    <span class="n">card_nodes</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">xpath</span><span class="p">(</span>
+</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>        <span class="s1">'//div[contains(@class, "course-card") and not(contains(@class, "ad-item"))]'</span>
+</span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>    <span class="p">)</span>
+</span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a>
+</span><span id="__span-2-16"><a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a>    <span class="k">for</span> <span class="n">card</span> <span class="ow">in</span> <span class="n">card_nodes</span><span class="p">:</span>
+</span><span id="__span-2-17"><a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a>        <span class="c1"># 注意：局部节点下必须以 .// 开头！</span>
+</span><span id="__span-2-18"><a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a>        <span class="n">title_list</span> <span class="o">=</span> <span class="n">card</span><span class="o">.</span><span class="n">xpath</span><span class="p">(</span><span class="s1">'.//h3[@class="title"]/a/text()'</span><span class="p">)</span>
+</span><span id="__span-2-19"><a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a>        <span class="n">href_list</span> <span class="o">=</span> <span class="n">card</span><span class="o">.</span><span class="n">xpath</span><span class="p">(</span><span class="s1">'.//h3[@class="title"]/a/@href'</span><span class="p">)</span>
+</span><span id="__span-2-20"><a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a>        <span class="c1"># 利用 following-sibling 兄弟轴：定位“主讲教师：”标签后面的紧邻 span</span>
+</span><span id="__span-2-21"><a id="__codelineno-2-21" name="__codelineno-2-21" href="#__codelineno-2-21"></a>        <span class="n">teacher_list</span> <span class="o">=</span> <span class="n">card</span><span class="o">.</span><span class="n">xpath</span><span class="p">(</span>
+</span><span id="__span-2-22"><a id="__codelineno-2-22" name="__codelineno-2-22" href="#__codelineno-2-22"></a>            <span class="s1">'.//span[contains(text(), "主讲教师")]/following-sibling::span[1]/text()'</span>
+</span><span id="__span-2-23"><a id="__codelineno-2-23" name="__codelineno-2-23" href="#__codelineno-2-23"></a>        <span class="p">)</span>
+</span><span id="__span-2-24"><a id="__codelineno-2-24" name="__codelineno-2-24" href="#__codelineno-2-24"></a>        <span class="c1"># 使用 string(.) 聚合价格区域内分散在多个子标签中的货币符号与数字</span>
+</span><span id="__span-2-25"><a id="__codelineno-2-25" name="__codelineno-2-25" href="#__codelineno-2-25"></a>        <span class="n">raw_price</span> <span class="o">=</span> <span class="n">card</span><span class="o">.</span><span class="n">xpath</span><span class="p">(</span><span class="s1">'string(.//div[@class="price-box"])'</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+</span><span id="__span-2-26"><a id="__codelineno-2-26" name="__codelineno-2-26" href="#__codelineno-2-26"></a>
+</span><span id="__span-2-27"><a id="__codelineno-2-27" name="__codelineno-2-27" href="#__codelineno-2-27"></a>        <span class="n">courses</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+</span><span id="__span-2-28"><a id="__codelineno-2-28" name="__codelineno-2-28" href="#__codelineno-2-28"></a>            <span class="s2">"title"</span><span class="p">:</span> <span class="n">title_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">if</span> <span class="n">title_list</span> <span class="k">else</span> <span class="s2">"未知课程"</span><span class="p">,</span>
+</span><span id="__span-2-29"><a id="__codelineno-2-29" name="__codelineno-2-29" href="#__codelineno-2-29"></a>            <span class="s2">"url"</span><span class="p">:</span> <span class="n">href_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">if</span> <span class="n">href_list</span> <span class="k">else</span> <span class="s2">""</span><span class="p">,</span>
+</span><span id="__span-2-30"><a id="__codelineno-2-30" name="__codelineno-2-30" href="#__codelineno-2-30"></a>            <span class="s2">"teacher"</span><span class="p">:</span> <span class="n">teacher_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">if</span> <span class="n">teacher_list</span> <span class="k">else</span> <span class="s2">"匿名讲师"</span><span class="p">,</span>
+</span><span id="__span-2-31"><a id="__codelineno-2-31" name="__codelineno-2-31" href="#__codelineno-2-31"></a>            <span class="s2">"price"</span><span class="p">:</span> <span class="s2">" "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">raw_price</span><span class="o">.</span><span class="n">split</span><span class="p">()),</span>
+</span><span id="__span-2-32"><a id="__codelineno-2-32" name="__codelineno-2-32" href="#__codelineno-2-32"></a>        <span class="p">})</span>
+</span><span id="__span-2-33"><a id="__codelineno-2-33" name="__codelineno-2-33" href="#__codelineno-2-33"></a>
+</span><span id="__span-2-34"><a id="__codelineno-2-34" name="__codelineno-2-34" href="#__codelineno-2-34"></a>    <span class="k">return</span> <span class="n">courses</span>
+</span><span id="__span-2-35"><a id="__codelineno-2-35" name="__codelineno-2-35" href="#__codelineno-2-35"></a>
+</span><span id="__span-2-36"><a id="__codelineno-2-36" name="__codelineno-2-36" href="#__codelineno-2-36"></a>
+</span><span id="__span-2-37"><a id="__codelineno-2-37" name="__codelineno-2-37" href="#__codelineno-2-37"></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
+</span><span id="__span-2-38"><a id="__codelineno-2-38" name="__codelineno-2-38" href="#__codelineno-2-38"></a>    <span class="n">sample_html</span> <span class="o">=</span> <span class="s2">"""</span>
+</span><span id="__span-2-39"><a id="__codelineno-2-39" name="__codelineno-2-39" href="#__codelineno-2-39"></a><span class="s2">    &lt;div class="course-list"&gt;</span>
+</span><span id="__span-2-40"><a id="__codelineno-2-40" name="__codelineno-2-40" href="#__codelineno-2-40"></a><span class="s2">        &lt;div class="course-card"&gt;</span>
+</span><span id="__span-2-41"><a id="__codelineno-2-41" name="__codelineno-2-41" href="#__codelineno-2-41"></a><span class="s2">            &lt;h3 class="title"&gt;&lt;a href="/course/101.html"&gt;Python 网络爬虫工程实战&lt;/a&gt;&lt;/h3&gt;</span>
+</span><span id="__span-2-42"><a id="__codelineno-2-42" name="__codelineno-2-42" href="#__codelineno-2-42"></a><span class="s2">            &lt;div class="info"&gt;&lt;span&gt;主讲教师：&lt;/span&gt;&lt;span&gt;林工&lt;/span&gt;&lt;/div&gt;</span>
+</span><span id="__span-2-43"><a id="__codelineno-2-43" name="__codelineno-2-43" href="#__codelineno-2-43"></a><span class="s2">            &lt;div class="price-box"&gt;&lt;span&gt;¥&lt;/span&gt;&lt;strong&gt;199.00&lt;/strong&gt;&lt;/div&gt;</span>
+</span><span id="__span-2-44"><a id="__codelineno-2-44" name="__codelineno-2-44" href="#__codelineno-2-44"></a><span class="s2">        &lt;/div&gt;</span>
+</span><span id="__span-2-45"><a id="__codelineno-2-45" name="__codelineno-2-45" href="#__codelineno-2-45"></a><span class="s2">        &lt;div class="course-card ad-item"&gt;</span>
+</span><span id="__span-2-46"><a id="__codelineno-2-46" name="__codelineno-2-46" href="#__codelineno-2-46"></a><span class="s2">            &lt;h3 class="title"&gt;&lt;a href="/ad/999.html"&gt;某品牌云服务器特惠广告&lt;/a&gt;&lt;/h3&gt;</span>
+</span><span id="__span-2-47"><a id="__codelineno-2-47" name="__codelineno-2-47" href="#__codelineno-2-47"></a><span class="s2">        &lt;/div&gt;</span>
+</span><span id="__span-2-48"><a id="__codelineno-2-48" name="__codelineno-2-48" href="#__codelineno-2-48"></a><span class="s2">        &lt;div class="course-card"&gt;</span>
+</span><span id="__span-2-49"><a id="__codelineno-2-49" name="__codelineno-2-49" href="#__codelineno-2-49"></a><span class="s2">            &lt;h3 class="title"&gt;&lt;a href="/course/102.html"&gt;大模型 RAG 数据工程进阶&lt;/a&gt;&lt;/h3&gt;</span>
+</span><span id="__span-2-50"><a id="__codelineno-2-50" name="__codelineno-2-50" href="#__codelineno-2-50"></a><span class="s2">            &lt;div class="info"&gt;&lt;span&gt;主讲教师：&lt;/span&gt;&lt;span&gt;陈博士&lt;/span&gt;&lt;/div&gt;</span>
+</span><span id="__span-2-51"><a id="__codelineno-2-51" name="__codelineno-2-51" href="#__codelineno-2-51"></a><span class="s2">            &lt;div class="price-box"&gt;&lt;span&gt;免费&lt;/span&gt;&lt;/div&gt;</span>
+</span><span id="__span-2-52"><a id="__codelineno-2-52" name="__codelineno-2-52" href="#__codelineno-2-52"></a><span class="s2">        &lt;/div&gt;</span>
+</span><span id="__span-2-53"><a id="__codelineno-2-53" name="__codelineno-2-53" href="#__codelineno-2-53"></a><span class="s2">    &lt;/div&gt;</span>
+</span><span id="__span-2-54"><a id="__codelineno-2-54" name="__codelineno-2-54" href="#__codelineno-2-54"></a><span class="s2">    """</span>
+</span><span id="__span-2-55"><a id="__codelineno-2-55" name="__codelineno-2-55" href="#__codelineno-2-55"></a>    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">parse_courses_with_lxml</span><span class="p">(</span><span class="n">sample_html</span><span class="p">):</span>
+</span><span id="__span-2-56"><a id="__codelineno-2-56" name="__codelineno-2-56" href="#__codelineno-2-56"></a>        <span class="nb">print</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+</span></code></pre></div>
+<hr />
+<h2 id="5-parselselectolax">5. 新一代解析利器：Parsel、Selectolax 与多源转换<a class="headerlink" href="#5-parselselectolax" title="Permanent link">&para;</a></h2>
+<p>随着 Python 爬虫工程的演进，社区在 <code>BeautifulSoup4</code> 和原生 <code>lxml</code> 的基础上，进一步演化出了兼具高开发效率与极致吞吐量的新一代解析工具集。</p>
+<h3 id="51-parsel">5.1 <code>Parsel</code> 库链式混合选择器解析<a class="headerlink" href="#51-parsel" title="Permanent link">&para;</a></h3>
+<p>如果你既喜欢 CSS 选择器的简短，又离不开 XPath 的向上反查与文本过滤，同时还想顺手用正则表达式切分出里面的数字，那么 <strong><code>Parsel</code> 库链式混合选择器解析</strong> 就是你的最佳选择。<code>Parsel</code> 是工业级爬虫框架 Scrapy 官方抽离出来的独立解析组件（底层同样基于 <code>lxml</code>），它最大的亮点在于：</p>
+<ol>
+<li><strong>CSS、XPath 与正则无缝链式混用</strong>：你可以先用 <code>.css('.card')</code> 定位卡片，接着链式调用 <code>.xpath('./following-sibling::div')</code>，最后直接调用 <code>.re_first(r'\d+\.\d+')</code> 提取浮点数。</li>
+<li><strong>告别 <code>IndexError</code> 的 <code>.get()</code> 与 <code>.getall()</code></strong>：在 <code>Parsel</code> 中，调用 <code>.get(default="")</code> 会安全地返回第一个匹配项的字符串，若未匹配到则直接返回 <code>default</code> 默认值，再也不用写繁琐的三元判断 <code>res[0] if res else ""</code>；而 <code>.getall()</code> 则返回全部匹配字符串列表。</li>
+</ol>
+<h3 id="52-selectolax-cython">5.2 <code>Selectolax</code> 极速 Cython 解析引擎<a class="headerlink" href="#52-selectolax-cython" title="Permanent link">&para;</a></h3>
+<p>在大规模预训练语料清洗（例如需要在单机上每天解析数百万个 Common Crawl 网页）的场景下，即便是 <code>lxml</code> 也会成为 CPU 瓶颈。此时应当引入 <strong><code>Selectolax</code> 极速 Cython 解析引擎</strong>。<code>Selectolax</code> 使用 Cython 封装了极其现代的 C 语言纯 HTML5 渲染级解析器 <strong>Modest</strong> 与 <strong>Lexbor</strong>（其中 Lexbor 后端速度最快）。在基准测试中，<code>Selectolax</code> 的 DOM 树构建与 CSS 查询速度通常是 <code>BeautifulSoup4</code> 的 <strong>15～30 倍</strong>，是 <code>lxml</code> 的 <strong>3～5 倍</strong>，且内存占用极低。</p>
+<h3 id="53-html-pandasxmlrss-urljoin">5.3 HTML 表格转 Pandas、XML/RSS 解析与 <code>urljoin</code> 路径拼接<a class="headerlink" href="#53-html-pandasxmlrss-urljoin" title="Permanent link">&para;</a></h3>
+<p>除了常规的网页 DOM 提取，实战中还有三项高频专项技能必须掌握：</p>
+<ol>
+<li><strong>HTML 表格直接转 Pandas 数据框</strong>：面对财政部公示表、A 股财务报表或排行榜页面中规整的 <code>&lt;table&gt;</code> 标签，无需手写循环遍历 <code>&lt;tr&gt;</code> 和 <code>&lt;td&gt;</code>。直接调用 <code>pandas.read_html(html_str)</code>，Pandas 会自动识别表头 <code>&lt;thead&gt;</code>、处理跨行跨列合并单元格（<code>rowspan</code> / <code>colspan</code>），并将页面中所有的表格一键返回为 <code>list[pd.DataFrame]</code> 列表，随后一行 <code>df.to_csv()</code> 或 <code>df.to_excel()</code> 即可完成导出。</li>
+<li><strong>XML 文档与 RSS 订阅源解析</strong>：许多科技博客、学术期刊（如 arXiv）及新闻媒体提供标准 RSS/Atom 订阅源或 <code>sitemap.xml</code> 站点地图。解析此类文档时，应使用 <code>Selector(text=xml_str, type="xml")</code> 并调用 <code>.remove_namespaces()</code> 剥离烦人的 XML 命名空间前缀，从而直接提取 <code>&lt;item&gt;</code>、<code>&lt;title&gt;</code>、<code>&lt;link&gt;</code> 和 <code>&lt;pubDate&gt;</code>。</li>
+<li><strong>相对 URL 转绝对路径 <code>urljoin</code> 拼接</strong>：网页源码中的超链接和图片地址往往是省略了域名甚至上级目录的相对路径（如 <code>href="/news/2026/101.html"</code>、<code>"../img/logo.png"</code> 或协议相对路径 <code>"//cdn.example.com/a.jpg"</code>）。新手常犯的错误是用字符串加法 <code>base_url + href</code> 硬拼，导致出现双斜杠或路径层级错乱。工程上<strong>必须统一使用标准库 <code>urllib.parse.urljoin(base_url, relative_url)</code></strong>，它严格遵循 RFC 3986 规范，能自动根据当前页面的完整 URL 计算并拼接出正确的绝对地址。</li>
+</ol>
+<p>下面通过一段综合代码，演示 <code>Parsel</code>、<code>Selectolax</code>、<code>urljoin</code> 与 <code>pandas.read_html</code> 的协同用法：</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">io</span><span class="w"> </span><span class="kn">import</span> <span class="n">StringIO</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">urllib.parse</span><span class="w"> </span><span class="kn">import</span> <span class="n">urljoin</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="kn">from</span><span class="w"> </span><span class="nn">parsel</span><span class="w"> </span><span class="kn">import</span> <span class="n">Selector</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="kn">from</span><span class="w"> </span><span class="nn">selectolax.lexbor</span><span class="w"> </span><span class="kn">import</span> <span class="n">LexborHTMLParser</span>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="k">def</span><span class="w"> </span><span class="nf">demo_modern_parsers</span><span class="p">(</span><span class="n">base_url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">html_doc</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="w">    </span><span class="sd">"""演示 Parsel 链式调用、Selectolax 极速解析、urljoin 与 Pandas 表格提取"""</span>
+</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>
+</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>    <span class="c1"># 1. Parsel: CSS + XPath + 正则表达式链式混用，安全调用 .get()</span>
+</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>    <span class="n">sel</span> <span class="o">=</span> <span class="n">Selector</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">html_doc</span><span class="p">)</span>
+</span><span id="__span-3-12"><a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a>    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">sel</span><span class="o">.</span><span class="n">css</span><span class="p">(</span><span class="s2">"ul.paper-list &gt; li"</span><span class="p">):</span>
+</span><span id="__span-3-13"><a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a>        <span class="n">title</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">css</span><span class="p">(</span><span class="s2">"a.paper-link::text"</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="s2">"无标题"</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+</span><span id="__span-3-14"><a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a>        <span class="n">raw_href</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">css</span><span class="p">(</span><span class="s2">"a.paper-link::attr(href)"</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="s2">""</span><span class="p">)</span>
+</span><span id="__span-3-15"><a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a>        <span class="c1"># 使用 urljoin 将相对路径安全转换为绝对 URL</span>
+</span><span id="__span-3-16"><a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a>        <span class="n">full_url</span> <span class="o">=</span> <span class="n">urljoin</span><span class="p">(</span><span class="n">base_url</span><span class="p">,</span> <span class="n">raw_href</span><span class="p">)</span>
+</span><span id="__span-3-17"><a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a>        <span class="c1"># 直接在选择器结果上调用 re_first 提取引用次数数字</span>
+</span><span id="__span-3-18"><a id="__codelineno-3-18" name="__codelineno-3-18" href="#__codelineno-3-18"></a>        <span class="n">citations</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">xpath</span><span class="p">(</span><span class="s1">'.//span[@class="cite"]/text()'</span><span class="p">)</span><span class="o">.</span><span class="n">re_first</span><span class="p">(</span><span class="sa">r</span><span class="s2">"\d+"</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">"0"</span><span class="p">)</span>
+</span><span id="__span-3-19"><a id="__codelineno-3-19" name="__codelineno-3-19" href="#__codelineno-3-19"></a>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"[Parsel] 论文: </span><span class="si">{</span><span class="n">title</span><span class="si">}</span><span class="s2"> | 链接: </span><span class="si">{</span><span class="n">full_url</span><span class="si">}</span><span class="s2"> | 引用数: </span><span class="si">{</span><span class="n">citations</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</span><span id="__span-3-20"><a id="__codelineno-3-20" name="__codelineno-3-20" href="#__codelineno-3-20"></a>
+</span><span id="__span-3-21"><a id="__codelineno-3-21" name="__codelineno-3-21" href="#__codelineno-3-21"></a>    <span class="c1"># 2. Selectolax (Lexbor 引擎): 面向百万级 HTML 语料的高吞吐解析</span>
+</span><span id="__span-3-22"><a id="__codelineno-3-22" name="__codelineno-3-22" href="#__codelineno-3-22"></a>    <span class="n">parser</span> <span class="o">=</span> <span class="n">LexborHTMLParser</span><span class="p">(</span><span class="n">html_doc</span><span class="p">)</span>
+</span><span id="__span-3-23"><a id="__codelineno-3-23" name="__codelineno-3-23" href="#__codelineno-3-23"></a>    <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">parser</span><span class="o">.</span><span class="n">css</span><span class="p">(</span><span class="s2">"ul.paper-list &gt; li"</span><span class="p">):</span>
+</span><span id="__span-3-24"><a id="__codelineno-3-24" name="__codelineno-3-24" href="#__codelineno-3-24"></a>        <span class="n">link_node</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">css_first</span><span class="p">(</span><span class="s2">"a.paper-link"</span><span class="p">)</span>
+</span><span id="__span-3-25"><a id="__codelineno-3-25" name="__codelineno-3-25" href="#__codelineno-3-25"></a>        <span class="k">if</span> <span class="n">link_node</span><span class="p">:</span>
+</span><span id="__span-3-26"><a id="__codelineno-3-26" name="__codelineno-3-26" href="#__codelineno-3-26"></a>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"[Selectolax] 极速提取标题: </span><span class="si">{</span><span class="n">link_node</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">strip</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</span><span id="__span-3-27"><a id="__codelineno-3-27" name="__codelineno-3-27" href="#__codelineno-3-27"></a>
+</span><span id="__span-3-28"><a id="__codelineno-3-28" name="__codelineno-3-28" href="#__codelineno-3-28"></a>    <span class="c1"># 3. Pandas read_html: 一键将 HTML &lt;table&gt; 转为结构化 DataFrame</span>
+</span><span id="__span-3-29"><a id="__codelineno-3-29" name="__codelineno-3-29" href="#__codelineno-3-29"></a>    <span class="n">dfs</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_html</span><span class="p">(</span><span class="n">StringIO</span><span class="p">(</span><span class="n">html_doc</span><span class="p">))</span>
+</span><span id="__span-3-30"><a id="__codelineno-3-30" name="__codelineno-3-30" href="#__codelineno-3-30"></a>    <span class="k">if</span> <span class="n">dfs</span><span class="p">:</span>
+</span><span id="__span-3-31"><a id="__codelineno-3-31" name="__codelineno-3-31" href="#__codelineno-3-31"></a>        <span class="n">benchmark_df</span> <span class="o">=</span> <span class="n">dfs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</span><span id="__span-3-32"><a id="__codelineno-3-32" name="__codelineno-3-32" href="#__codelineno-3-32"></a>        <span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">[Pandas 提取的基准数据表]:"</span><span class="p">)</span>
+</span><span id="__span-3-33"><a id="__codelineno-3-33" name="__codelineno-3-33" href="#__codelineno-3-33"></a>        <span class="nb">print</span><span class="p">(</span><span class="n">benchmark_df</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s2">"records"</span><span class="p">))</span>
+</span><span id="__span-3-34"><a id="__codelineno-3-34" name="__codelineno-3-34" href="#__codelineno-3-34"></a>
+</span><span id="__span-3-35"><a id="__codelineno-3-35" name="__codelineno-3-35" href="#__codelineno-3-35"></a>
+</span><span id="__span-3-36"><a id="__codelineno-3-36" name="__codelineno-3-36" href="#__codelineno-3-36"></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
+</span><span id="__span-3-37"><a id="__codelineno-3-37" name="__codelineno-3-37" href="#__codelineno-3-37"></a>    <span class="n">page_url</span> <span class="o">=</span> <span class="s2">"https://ai-institute.example.edu.cn/publications/2026/index.html"</span>
+</span><span id="__span-3-38"><a id="__codelineno-3-38" name="__codelineno-3-38" href="#__codelineno-3-38"></a>    <span class="n">sample_page</span> <span class="o">=</span> <span class="s2">"""</span>
+</span><span id="__span-3-39"><a id="__codelineno-3-39" name="__codelineno-3-39" href="#__codelineno-3-39"></a><span class="s2">    &lt;html&gt;&lt;body&gt;</span>
+</span><span id="__span-3-40"><a id="__codelineno-3-40" name="__codelineno-3-40" href="#__codelineno-3-40"></a><span class="s2">      &lt;ul class="paper-list"&gt;</span>
+</span><span id="__span-3-41"><a id="__codelineno-3-41" name="__codelineno-3-41" href="#__codelineno-3-41"></a><span class="s2">        &lt;li&gt;</span>
+</span><span id="__span-3-42"><a id="__codelineno-3-42" name="__codelineno-3-42" href="#__codelineno-3-42"></a><span class="s2">          &lt;a class="paper-link" href="../papers/rag-survey.pdf"&gt;检索增强生成综述&lt;/a&gt;</span>
+</span><span id="__span-3-43"><a id="__codelineno-3-43" name="__codelineno-3-43" href="#__codelineno-3-43"></a><span class="s2">          &lt;span class="cite"&gt;被引用：128 次&lt;/span&gt;</span>
+</span><span id="__span-3-44"><a id="__codelineno-3-44" name="__codelineno-3-44" href="#__codelineno-3-44"></a><span class="s2">        &lt;/li&gt;</span>
+</span><span id="__span-3-45"><a id="__codelineno-3-45" name="__codelineno-3-45" href="#__codelineno-3-45"></a><span class="s2">      &lt;/ul&gt;</span>
+</span><span id="__span-3-46"><a id="__codelineno-3-46" name="__codelineno-3-46" href="#__codelineno-3-46"></a><span class="s2">      &lt;table&gt;</span>
+</span><span id="__span-3-47"><a id="__codelineno-3-47" name="__codelineno-3-47" href="#__codelineno-3-47"></a><span class="s2">        &lt;thead&gt;&lt;tr&gt;&lt;th&gt;模型名称&lt;/th&gt;&lt;th&gt;MMLU得分&lt;/th&gt;&lt;th&gt;开源协议&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;</span>
+</span><span id="__span-3-48"><a id="__codelineno-3-48" name="__codelineno-3-48" href="#__codelineno-3-48"></a><span class="s2">        &lt;tbody&gt;</span>
+</span><span id="__span-3-49"><a id="__codelineno-3-49" name="__codelineno-3-49" href="#__codelineno-3-49"></a><span class="s2">          &lt;tr&gt;&lt;td&gt;Qwen2.5-72B&lt;/td&gt;&lt;td&gt;86.1&lt;/td&gt;&lt;td&gt;Apache-2.0&lt;/td&gt;&lt;/tr&gt;</span>
+</span><span id="__span-3-50"><a id="__codelineno-3-50" name="__codelineno-3-50" href="#__codelineno-3-50"></a><span class="s2">          &lt;tr&gt;&lt;td&gt;DeepSeek-V3&lt;/td&gt;&lt;td&gt;88.5&lt;/td&gt;&lt;td&gt;MIT&lt;/td&gt;&lt;/tr&gt;</span>
+</span><span id="__span-3-51"><a id="__codelineno-3-51" name="__codelineno-3-51" href="#__codelineno-3-51"></a><span class="s2">        &lt;/tbody&gt;</span>
+</span><span id="__span-3-52"><a id="__codelineno-3-52" name="__codelineno-3-52" href="#__codelineno-3-52"></a><span class="s2">      &lt;/table&gt;</span>
+</span><span id="__span-3-53"><a id="__codelineno-3-53" name="__codelineno-3-53" href="#__codelineno-3-53"></a><span class="s2">    &lt;/body&gt;&lt;/html&gt;</span>
+</span><span id="__span-3-54"><a id="__codelineno-3-54" name="__codelineno-3-54" href="#__codelineno-3-54"></a><span class="s2">    """</span>
+</span><span id="__span-3-55"><a id="__codelineno-3-55" name="__codelineno-3-55" href="#__codelineno-3-55"></a>    <span class="n">demo_modern_parsers</span><span class="p">(</span><span class="n">page_url</span><span class="p">,</span> <span class="n">sample_page</span><span class="p">)</span>
+</span></code></pre></div>
+<hr />
+<h2 id="6">6. 四大静态解析方案性能与场景对比<a class="headerlink" href="#6" title="Permanent link">&para;</a></h2>
+<p>至此，我们已经完整学习了 Python 爬虫生态中的四大主流解析流派。在实际工程立项时，如何围绕<strong>四大静态解析方案性能与场景对比</strong>做出技术选型？下面给出在单核 CPU 上对 1,000 个中等复杂度网页（每个网页约 120 KB，含 1,500 个 DOM 节点）进行列表字段提取的实测对比基准：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">解析技术方案</th>
+<th style="text-align: left;">代表库 / 引擎</th>
+<th style="text-align: left;">1000 页解析耗时</th>
+<th style="text-align: left;">语法学习曲线</th>
+<th style="text-align: left;">抗页面微调韧性</th>
+<th style="text-align: left;">核心优势与最佳工程定位</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>正则表达式</strong></td>
+<td style="text-align: left;">Python 内置 <code>re</code></td>
+<td style="text-align: left;"><strong>~0.18 秒</strong>（仅局部匹配）</td>
+<td style="text-align: left;">较陡峭</td>
+<td style="text-align: left;">弱（对标签属性顺序敏感）</td>
+<td style="text-align: left;">提取非结构化文本段落、抽取 <code>&lt;script&gt;</code> 内嵌 JSON、格式清洗校验</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>BeautifulSoup4</strong></td>
+<td style="text-align: left;"><code>bs4</code> (配 <code>lxml</code> 驱动)</td>
+<td style="text-align: left;">~3.45 秒</td>
+<td style="text-align: left;">平缓易懂</td>
+<td style="text-align: left;">强</td>
+<td style="text-align: left;">快速原型验证、中小型采集脚本、结构极其残缺混乱的老旧网页</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>XPath / 混合选择器</strong></td>
+<td style="text-align: left;"><code>lxml.etree</code> / <code>parsel</code></td>
+<td style="text-align: left;"><strong>~0.52 秒</strong></td>
+<td style="text-align: left;">中等</td>
+<td style="text-align: left;"><strong>极强（支持文本与父轴定位）</strong></td>
+<td style="text-align: left;"><strong>企业级爬虫主力标配</strong>，与 Scrapy 框架原生一体，适合复杂多变的 DOM 寻址</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Cython 极速引擎</strong></td>
+<td style="text-align: left;"><code>selectolax</code> (Lexbor)</td>
+<td style="text-align: left;"><strong>~0.14 秒</strong></td>
+<td style="text-align: left;">平缓（标准 CSS）</td>
+<td style="text-align: left;">强</td>
+<td style="text-align: left;"><strong>大模型海量语料清洗</strong>、高并发异步爬虫（配合 <code>aiohttp</code>/<code>httpx</code>）避免阻塞事件循环</td>
+</tr>
+</tbody>
+</table>
+<h4 id="diagram">Diagram: 静态网页解析器选型决策与性能基准仪<a class="headerlink" href="#diagram" title="Permanent link">&para;</a></h4>
+<pre class="mermaid"><code>flowchart TD
+    Task["待解析静态网页任务"] --&gt; Q1{"数据位于何处?"}
+    Q1 --&gt;|内嵌于 script 变量的 JSON 或纯文本段落| Re["选用 Python re (预编译正则表达式)&lt;br/&gt;耗时: ~0.18s / 1000页"]
+    Q1 --&gt;|规整的 HTML table 二维数据表| Pd["选用 pandas.read_html()&lt;br/&gt;一行代码直接转 DataFrame"]
+    Q1 --&gt;|常规 HTML DOM 树节点| Q2{"采集规模与定位复杂度?"}
+    Q2 --&gt;|百万级预训练语料 / 极致高吞吐| Sel["选用 Selectolax (Lexbor Cython 引擎)&lt;br/&gt;耗时: ~0.14s / 1000页"]
+    Q2 --&gt;|需按文本模糊匹配或向上反查父/兄弟节点| Lxml["选用 lxml.etree / Parsel (XPath + CSS 链式)&lt;br/&gt;耗时: ~0.52s / 1000页"]
+    Q2 --&gt;|快速教学原型或极度残缺老旧网页| BS4["选用 BeautifulSoup4 (配 lxml 解析器)&lt;br/&gt;耗时: ~3.45s / 1000页"]</code></pre>
+<details>
+<summary>Interactive MicroSim: 静态网页解析器选型决策与性能基准仪</summary>
+<p>Type: microsim</p>
+<p><strong>sim-id:</strong> ch04-parser-benchmark-comparator<br/>
+<strong>Library:</strong> Chart.js<br/>
+<strong>Status:</strong> Specified<br/>
+<strong>Bloom Level:</strong> Evaluate<br/>
+<strong>Bloom Verb:</strong> Judge<br/>
+<strong>Learning Objective:</strong> The learner will judge and select the optimal static parsing library (<code>re</code>, <code>BeautifulSoup4</code>, <code>lxml</code>/<code>parsel</code>, or <code>selectolax</code>) by evaluating throughput latency, memory footprint, and DOM structural complexity trade-offs.</p>
+<p><strong>Prerequisites:</strong> Python内置re模块核心函数, BeautifulSoup4库与解析器选型, lxml.etree高效解析HTML与XPath执行, Parsel库链式混合选择器解析, Selectolax极速Cython解析引擎</p>
+<p><strong>Evidence of Mastery:</strong>
+- 能够根据网页规模（千级 vs 千万级）与数据形态（内嵌 <code>&lt;script&gt;</code> JSON vs 复杂兄弟节点表格 vs 标准 CSS 列表）选出最优解析方案
+- 能够解释为什么在 <code>asyncio</code> 高并发协程爬虫中应避免使用纯 Python 解析器阻塞单线程事件循环</p>
+<p><strong>Misconceptions:</strong>
+- 认为“正则表达式在任何情况下都比 DOM 解析器快且好用”（忽视了多行贪婪回溯灾难与 HTML 嵌套结构维护成本）
+- 认为 <code>BeautifulSoup(html, 'html.parser')</code> 和 <code>BeautifulSoup(html, 'lxml')</code> 速度相差无几</p>
+<p><strong>Instructional Rationale:</strong>
+通过可调节的“待解析网页规模（100～100,000 页）”、“单页 DOM 节点数（200～10,000 个）”与“定位特征类型”三组滑块，动态渲染各解析器的总耗时柱状图与内存占用雷达图，将抽象的性能差异转化为直观的工程时间成本。</p>
+<p><strong>Content:</strong>
+- 对比对象：<code>re (Compiled)</code>、<code>bs4 (html.parser)</code>、<code>bs4 (lxml)</code>、<code>lxml.etree / parsel</code>、<code>selectolax (Lexbor)</code>、<code>pandas.read_html</code>
+- 交互控制滑块：页面数量、单页体积 KB、是否需要向上反查父节点、是否提取 <code>&lt;script&gt;</code> 变量
+- 架构师推荐面板：根据当前滑块组合实时给出首选方案与代码模板预览</p>
+<p><strong>Provenance:</strong> 基于本章第 6 节四大静态解析方案基准测试数据构建。</p>
+<p><strong>Rules:</strong>
+- 当勾选“需要通过子文本反查父容器”时，<code>selectolax</code> 与纯 CSS 方案自动标记“需额外编写 Python 父节点回溯代码”，<code>lxml/parsel</code> 标记为“原生支持（推荐）”
+- 当页面规模拉升至 100,000 页时，高亮展示 <code>bs4 (html.parser)</code> 与 <code>selectolax</code> 在总耗时上的分钟级 vs 秒级差距</p>
+<p><strong>Learner Activity:</strong>
+1. 拖动网页规模与 DOM 复杂度滑块，观察 5 种解析方案的耗时与吞吐量（Pages/sec）变化曲线。
+2. 切换“政务网混合表格”、“新闻内嵌 JSON”、“千万级 CommonCrawl 网页清洗”三种真实工程场景，完成选型判断。</p>
+<p><strong>Feedback:</strong>
+- 给出当前选型在 CPU 利用率、代码可维护性与运行耗时三个维度的综合评分（0～100 分）。</p>
+<p><strong>Starting State:</strong>
+默认选中“10,000 页中等复杂度列表采集”场景，柱状图直观呈现 <code>selectolax</code>（1.4s）、<code>lxml/parsel</code>（5.2s）、<code>bs4+lxml</code>（34.5s）与 <code>bs4+html.parser</code>（78.0s）的阶梯差异。</p>
+<p><strong>Chapter Anchors:</strong> 6. 四大静态解析方案性能与场景对比</p>
+</details>
+<hr />
+<h2 id="7">7. 章节复习与实战思考题<a class="headerlink" href="#7" title="Permanent link">&para;</a></h2>
+<details class="question">
+<summary>1. 在使用 XPath 解析列表页时，如果先通过 <code>cards = tree.xpath('//div[@class=\"card\"]')</code> 获取了所有卡片节点，接着在 <code>for card in cards:</code> 循环中写 <code>card.xpath('//h2/text()')</code>，会发生什么严重 Bug？应当如何修正？</summary>
+<p><strong>参考解析</strong>：
+在 XPath 中，以双斜杠 <code>//</code> 开头的表达式代表<strong>从整棵 HTML 文档的根节点（Root）重新开始全局搜索</strong>，而不会受限于当前的 <code>card</code> 局部节点。因此，循环中每次执行 <code>card.xpath('//h2/text()')</code> 都会把整个网页上所有卡片的标题全部提取出来。
+<strong>正确修正方法</strong>：在局部节点下执行相对路径检索时，必须在最前面加上代表“当前节点自身”的圆点 <code>.</code>，即改写为 <code>card.xpath('.//h2/text()')</code>。</p>
+</details>
+<details class="question">
+<summary>2. 为什么面对 <code>&lt;div class=\"item hot-sale featured\"&gt;</code> 这样的多类名标签时，CSS 选择器直接写 <code>.item</code> 就能匹配成功，而 XPath 写 <code>//div[@class=\"item\"]</code> 却匹配不到任何结果？在 XPath 中应如何正确处理？</summary>
+<p><strong>参考解析</strong>：
+CSS 选择器中的 <code>.item</code> 在浏览器规范中天然被定义为“检查元素的 <code>class</code> 属性分词列表中是否包含 <code>item</code> 这个词”。而在 XPath 中，<code>@class="item"</code> 执行的是<strong>整个属性字符串的完全相等比较</strong>——因为 <code>"item hot-sale featured" != "item"</code>，所以匹配失败。
+在 XPath 中，应当使用模糊包含函数 <code>contains(@class, "item")</code>（或更严谨地使用 <code>contains(concat(" ", normalize-space(@class), " "), " item ")</code> 防止前缀误匹配）来进行筛选。</p>
+</details>
+<details class="question">
+<summary>3. 某采购招标网的详情页表格完全没有设置 <code>id</code> 和 <code>class</code> 属性，结构形如 <code>&lt;tr&gt;&lt;td&gt;中标金额&lt;/td&gt;&lt;td&gt;580.5万元&lt;/td&gt;&lt;/tr&gt;</code>。请写出一条能够精准提取出 <code>580.5万元</code> 的 XPath 表达式。</summary>
+<p><strong>参考解析</strong>：
+对于这种无样式特征但表头文字固定的键值对表格，应当采用“文本定位 + 横向兄弟轴（<code>following-sibling</code>）”策略：
+<div class="language-text highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>//td[contains(text(), "中标金额")]/following-sibling::td[1]/text()
+</span></code></pre></div>
+如果想要一步到位只提取其中的浮点数 <code>580.5</code>，还可以配合 <code>Parsel</code> 链式调用：
+<div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">amount</span> <span class="o">=</span> <span class="n">sel</span><span class="o">.</span><span class="n">xpath</span><span class="p">(</span><span class="s1">'//td[contains(text(), "中标金额")]/following-sibling::td[1]/text()'</span><span class="p">)</span><span class="o">.</span><span class="n">re_first</span><span class="p">(</span><span class="sa">r</span><span class="s2">"\d+(?:\.\d+)?"</span><span class="p">)</span>
+</span></code></pre></div></p>
+</details>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../03-python-http-requests/" class="md-footer__link md-footer__link--prev" aria-label="Previous: 3. Python网络请求核心编程">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                3. Python网络请求核心编程
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../05-ajax-and-api-scraping/" class="md-footer__link md-footer__link--next" aria-label="Next: 5. 异步加载与Web接口逆向采集">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                5. 异步加载与Web接口逆向采集
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2026 AI教材编写组. Licensed under <a href="license/">CC BY-NC-SA 4.0</a> for non-commercial use.
+    </div>
+  
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["content.code.copy", "content.action.edit", "navigation.expand", "navigation.path", "navigation.prune", "navigation.indexes", "navigation.top", "navigation.footer", "toc.follow", "search.suggest", "search.highlight", "search.share"], "search": "../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.c21346df.min.js"></script>
+      
+    
+  </body>
+</html>

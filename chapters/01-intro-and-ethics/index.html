@@ -1,0 +1,2745 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="本章系统介绍网络爬虫的基本概念、分类体系、标准工作流、BFS/DFS抓取策略，以及面向人工智能数据采集的Robots协议与法律法规红线。">
+      
+      
+        <meta name="author" content="AI教材编写组">
+      
+      
+        <link rel="canonical" href="https://minssnail.github.io/crawbug/chapters/01-intro-and-ethics/">
+      
+      
+        <link rel="prev" href="../">
+      
+      
+        <link rel="next" href="../02-web-and-http-fundamentals/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.0">
+    
+    
+      
+        <title>网络爬虫导论与数据合规基石 - 网络爬虫技术</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.57a0d79d.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.fb2fffe2.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../css/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="orange">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#_1" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="网络爬虫技术" class="md-header__button md-logo" aria-label="网络爬虫技术" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            网络爬虫技术
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              网络爬虫导论与数据合规基石
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/Minssnail/crawbug" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Minssnail/crawbug
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="网络爬虫技术" class="md-nav__button md-logo" aria-label="网络爬虫技术" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    网络爬虫技术
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/Minssnail/crawbug" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Minssnail/crawbug
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../about/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    About
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../course-description/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Course Description
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Chapters
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_4" id="__nav_4_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Chapters
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1. 网络爬虫导论与数据合规基石
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1. 网络爬虫导论与数据合规基石
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#concepts-covered" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Concepts Covered
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. 人工智能时代的数据燃料与先修技术基石
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. 人工智能时代的数据燃料与先修技术基石">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 计算机网络基础与万维网超文本传输
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-webhtml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 Web浏览器基础与HTML文档结构基础
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#13-pythonio" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.3 Python编程基础、数据结构与文件IO
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. 网络爬虫定义、核心价值与分类体系
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. 网络爬虫定义、核心价值与分类体系">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 网络爬虫定义与核心价值
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 网络爬虫的三大核心分类
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3 表层网页与深层网页、暗网数据概念
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. 网络爬虫标准工作流与图遍历策略
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. 网络爬虫标准工作流与图遍历策略">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 网络爬虫标准工作流
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3.1 网络爬虫标准工作流">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#diagram-standard-web-crawler-workflow-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagram: Standard Web Crawler Workflow Architecture
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-urlbfsdfs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 URL种子队列、广度优先（BFS）与深度优先（DFS）策略
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3.2 URL种子队列、广度优先（BFS）与深度优先（DFS）策略">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#diagram-web-crawler-bfs-and-dfs-traversal-predictor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagram: Web Crawler BFS and DFS Traversal Predictor
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-robotssitemap" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. 数据合规基石：Robots协议、Sitemap与法律法规红线
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. 数据合规基石：Robots协议、Sitemap与法律法规红线">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 数据合规与伦理意识
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-robots" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 Robots协议与语法规范
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#43-sitemap" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3 Sitemap网站地图解析
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#44" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.4 数据安全法与个人信息保护
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4.4 数据安全法与个人信息保护">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#diagram-robotstxt-and-ai-data-compliance-auditor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagram: Robots.txt and AI Data Compliance Auditor
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. 本章小结与思考练习
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. 本章小结与思考练习">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 核心要点回顾
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 思考与自测练习
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../02-web-and-http-fundamentals/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    2. Web前端基石与HTTP通信原理
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../03-python-http-requests/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    3. Python网络请求核心编程
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-static-html-parsing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    4. 静态网页结构化解析与正则提取
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../05-ajax-and-api-scraping/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    5. 异步加载与Web接口逆向采集
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../06-browser-automation-playwright/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    6. 动态渲染网页与Playwright浏览器自动化
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../07-anti-scraping-and-countermeasures/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    7. 反爬虫机制原理与工程对抗策略
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../08-concurrent-and-async-scraping/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    8. 高性能并发与异步协程爬虫编程
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../09-data-cleaning-and-storage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    9. 数据清洗流水线与多源持久化存储
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../10-scrapy-industrial-framework/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    10. Scrapy工业级异步爬虫框架实战
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../11-ai-powered-scraping-and-datasets/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    11. 面向大模型与RAG的AI智能爬虫
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../12-engineering-deployment-and-capstone/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    12. 爬虫工程化运维部署与综合实训项目
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../learning-graph/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Learning Graph
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../sims/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MicroSims
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../license/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    License
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contact/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contact
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#concepts-covered" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Concepts Covered
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. 人工智能时代的数据燃料与先修技术基石
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. 人工智能时代的数据燃料与先修技术基石">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 计算机网络基础与万维网超文本传输
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-webhtml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 Web浏览器基础与HTML文档结构基础
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#13-pythonio" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.3 Python编程基础、数据结构与文件IO
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. 网络爬虫定义、核心价值与分类体系
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. 网络爬虫定义、核心价值与分类体系">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 网络爬虫定义与核心价值
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 网络爬虫的三大核心分类
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3 表层网页与深层网页、暗网数据概念
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. 网络爬虫标准工作流与图遍历策略
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. 网络爬虫标准工作流与图遍历策略">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 网络爬虫标准工作流
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3.1 网络爬虫标准工作流">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#diagram-standard-web-crawler-workflow-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagram: Standard Web Crawler Workflow Architecture
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-urlbfsdfs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 URL种子队列、广度优先（BFS）与深度优先（DFS）策略
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3.2 URL种子队列、广度优先（BFS）与深度优先（DFS）策略">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#diagram-web-crawler-bfs-and-dfs-traversal-predictor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagram: Web Crawler BFS and DFS Traversal Predictor
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-robotssitemap" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. 数据合规基石：Robots协议、Sitemap与法律法规红线
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. 数据合规基石：Robots协议、Sitemap与法律法规红线">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 数据合规与伦理意识
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-robots" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 Robots协议与语法规范
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#43-sitemap" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3 Sitemap网站地图解析
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#44" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.4 数据安全法与个人信息保护
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4.4 数据安全法与个人信息保护">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#diagram-robotstxt-and-ai-data-compliance-auditor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagram: Robots.txt and AI Data Compliance Auditor
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. 本章小结与思考练习
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. 本章小结与思考练习">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 核心要点回顾
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 思考与自测练习
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+                
+
+
+
+  
+
+
+  <nav class="md-path" aria-label="Navigation" >
+    <ol class="md-path__list">
+      
+        
+  
+  
+    <li class="md-path__item">
+      <a href="../.." class="md-path__link">
+        
+  <span class="md-ellipsis">
+    Home
+  </span>
+
+      </a>
+    </li>
+  
+
+      
+      
+        
+  
+  
+    
+    
+      <li class="md-path__item">
+        <a href="../" class="md-path__link">
+          
+  <span class="md-ellipsis">
+    Chapters
+  </span>
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ol>
+  </nav>
+
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+    <a href="https://github.com/Minssnail/crawbug/blob/main/docs/chapters/01-intro-and-ethics/index.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
+    </a>
+  
+  
+
+
+<h1 id="_1">网络爬虫导论与数据合规基石<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h1>
+<h2 id="summary">Summary<a class="headerlink" href="#summary" title="Permanent link">&para;</a></h2>
+<p>本章作为全书的导入篇，首先从人工智能与大模型对高质量训练语料的迫切需求切入，系统阐述网络爬虫的定义、核心分类（通用爬虫、聚焦爬虫、增量爬虫）与标准工程流水线。随后重点剖析 URL 种子队列管理、广度优先（BFS）与深度优先（DFS）遍历策略，并深入解读 <code>robots.txt</code> 君子协议、<code>Sitemap</code> 网站地图以及《数据安全法》《个人信息保护法》等合规边界。学完本章后，学生将建立起清晰的爬虫工程全局观与合法合规采集意识。</p>
+<h2 id="concepts-covered">Concepts Covered<a class="headerlink" href="#concepts-covered" title="Permanent link">&para;</a></h2>
+<p>This chapter covers the following 20 concepts from the learning graph:</p>
+<table>
+<thead>
+<tr>
+<th>Concept</th>
+<th>Concept Impact Score</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Python编程基础</td>
+<td>10664</td>
+</tr>
+<tr>
+<td>计算机网络基础</td>
+<td>21624</td>
+</tr>
+<tr>
+<td>Web浏览器基础</td>
+<td>12017</td>
+</tr>
+<tr>
+<td>HTML文档结构基础</td>
+<td>8902</td>
+</tr>
+<tr>
+<td>数据结构与集合基础</td>
+<td>2641</td>
+</tr>
+<tr>
+<td>文件系统与IO基础</td>
+<td>53</td>
+</tr>
+<tr>
+<td>数据合规与伦理意识</td>
+<td>195</td>
+</tr>
+<tr>
+<td>万维网与超文本传输</td>
+<td>10924</td>
+</tr>
+<tr>
+<td>网络爬虫定义与核心价值</td>
+<td>3599</td>
+</tr>
+<tr>
+<td>通用搜索引擎爬虫</td>
+<td>1</td>
+</tr>
+<tr>
+<td>聚焦主题网络爬虫</td>
+<td>10</td>
+</tr>
+<tr>
+<td>增量式更新爬虫</td>
+<td>8</td>
+</tr>
+<tr>
+<td>深层网页与暗网数据概念</td>
+<td>1</td>
+</tr>
+<tr>
+<td>网络爬虫标准工作流</td>
+<td>3551</td>
+</tr>
+<tr>
+<td>URL种子队列与待抓取池</td>
+<td>22</td>
+</tr>
+<tr>
+<td>网页抓取广度优先策略</td>
+<td>4</td>
+</tr>
+<tr>
+<td>网页抓取深度优先策略</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Robots协议与语法规范</td>
+<td>163</td>
+</tr>
+<tr>
+<td>Sitemap网站地图解析</td>
+<td>1</td>
+</tr>
+<tr>
+<td>数据安全法与个人信息保护</td>
+<td>31</td>
+</tr>
+</tbody>
+</table>
+<h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">&para;</a></h2>
+<p>This chapter assumes only the prerequisites listed in the <a href="../../course-description/">course description</a>.</p>
+<hr />
+<h2 id="1">1. 人工智能时代的数据燃料与先修技术基石<a class="headerlink" href="#1" title="Permanent link">&para;</a></h2>
+<p>在生成式人工智能（Generative AI）与大语言模型（Large Language Models, LLM）席卷全球的今天，算法模型、算力集群与高质量数据构成了推动人工智能发展的三大核心支柱。对于人工智能技术应用专业的学习者而言，无论是训练一个垂直领域的图像分类器、微调一个面向医疗或法律问答的行业大模型，还是构建一个能够实时回答企业最新政策的检索增强生成（RAG, Retrieval-Augmented Generation）知识库，第一步永远是<strong>获取真实、丰富、干净的领域数据</strong>。然而，互联网上超过 90% 的高价值信息并非以现成的 <code>.csv</code> 或数据库压缩包形式提供下载，而是分散在数十亿个动态变化的网页之中。如何自动化、规模化、合规化地将这些网页转化为结构化的 AI 数据集，正是《网络爬虫技术》所要解决的核心工程命题。</p>
+<p>在正式编写第一个爬虫程序之前，我们需要先梳理并对齐本课程赖以建立的六项先修技术基石。这些基石概念贯穿全书所有章节，决定了我们如何用代码模拟人类访问网页并存储结果。</p>
+<h3 id="11">1.1 计算机网络基础与万维网超文本传输<a class="headerlink" href="#11" title="Permanent link">&para;</a></h3>
+<p><strong>计算机网络基础</strong>是理解一切远程数据采集的物理与逻辑前提。互联网上的每一台服务器和客户端计算机都通过 <strong>IP 地址（Internet Protocol Address）</strong> 进行唯一寻址（例如 <code>93.184.216.34</code>），并通过 <strong>域名系统（DNS, Domain Name System）</strong> 将人类易记的域名（如 <code>example.com</code>）翻译为机器可路由的 IP 地址。当两台主机建立通信时，数据并非瞬间整体送达，而是通过 <strong>TCP/IP 协议栈</strong>拆分为一个个数据包，经过端口号（Port，如 HTTP 默认使用 <code>80</code> 端口，HTTPS 默认使用 <code>443</code> 端口）准确交付给目标服务器上的 Web 服务进程。如果把目标网站比作一座藏书丰富的图书馆，那么 IP 地址与端口就是这座图书馆的精确经纬度坐标与大门编号，而 TCP 连接则是修通在你与图书馆之间的专用双向公路。</p>
+<p>建立在计算机网络之上的最成功应用便是<strong>万维网与超文本传输（World Wide Web &amp; Hypertext Transfer）</strong>。万维网由蒂姆·伯纳斯-李（Tim Berners-Lee）提出，其核心思想是通过 <strong>超链接（Hyperlink）</strong> 将全球各地的文档连接成一张巨大的信息网。在这张网中，每一个资源都拥有一个全局唯一的地址标识符——<strong>统一资源定位符（URL, Uniform Resource Locator）</strong>；客户端与服务器之间则遵循 <strong>超文本传输协议（HTTP/HTTPS）</strong>，采用“一问一答（Request-Response）”的同步模式交换超文本文档。网络爬虫之所以被称为“蜘蛛（Spider）”，正是因为它顺着万维网页面中纵横交错的 URL 超链接，从一个网页爬向另一个网页。</p>
+<h3 id="12-webhtml">1.2 Web浏览器基础与HTML文档结构基础<a class="headerlink" href="#12-webhtml" title="Permanent link">&para;</a></h3>
+<p>在日常使用互联网时，人类用户通过 Chrome、Edge 或 Firefox 等浏览器访问网页。掌握<strong>Web浏览器基础</strong>对于爬虫工程师至关重要，因为浏览器本质上就是一个可视化的 HTTP 客户端兼代码渲染引擎。当你向浏览器地址栏输入一个网址并按下回车键时，浏览器依次完成三件核心工作：</p>
+<ol>
+<li><strong>网络请求发送</strong>：根据 URL 向远端服务器发起 HTTP 请求报文，携带当前浏览器身份标识（<code>User-Agent</code>）与本地状态凭证（<code>Cookie</code>）。</li>
+<li><strong>源码接收与解析</strong>：接收服务器返回的 HTML、CSS、JavaScript 及 JSON 数据流，并将纯文本的 HTML 解析为内存中的树状对象模型。</li>
+<li><strong>视图渲染与交互</strong>：执行 JavaScript 脚本，计算页面布局样式，最终将五彩斑斓的图文界面绘制在屏幕像素上。</li>
+</ol>
+<p>网络爬虫的核心哲学就是<strong>“在代码中扮演浏览器”</strong>——在绝大多数静态数据采集场景下，爬虫只需要执行第 1 步和第 2 步，直接从源码中提取文字，从而省去了耗费大量内存与算力的第 3 步像素绘制过程，使采集速度比人工点击快上千倍。</p>
+<p>为了从服务器返回的源码中提取目标字段，我们必须扎实掌握<strong>HTML文档结构基础</strong>。<strong>超文本标记语言（HTML, HyperText Markup Language）</strong> 使用成对的尖括号标签（Tags）来赋予文本语义和层级结构。一个标准的 HTML 元素由开始标签、属性（Attributes）、文本内容（Text Content）和结束标签组成。例如，在 <code>&lt;a href="https://ai.example.edu/news/101.html" class="news-link"&gt;人工智能专业实训基地揭牌&lt;/a&gt;</code> 这段代码中，<code>&lt;a&gt;</code> 是标签名，<code>href</code> 和 <code>class</code> 是属性名，双引号内的网址和类名是属性值，而夹在中间的中文标题则是元素文本。多个标签层层嵌套，构成了树状的 <strong>文档对象模型（DOM, Document Object Model）</strong>：</p>
+<ul>
+<li><code>&lt;html&gt;</code> 是整棵树的根节点；</li>
+<li><code>&lt;head&gt;</code> 包含网页标题 <code>&lt;title&gt;</code>、字符编码 <code>&lt;meta charset="utf-8"&gt;</code> 等元数据；</li>
+<li><code>&lt;body&gt;</code> 承载所有可见正文，如标题 <code>&lt;h1&gt;</code>~<code>&lt;h6&gt;</code>、段落 <code>&lt;p&gt;</code>、区块容器 <code>&lt;div&gt;</code>、列表 <code>&lt;ul&gt;/&lt;li&gt;</code> 以及数据表格 <code>&lt;table&gt;/&lt;tr&gt;/&lt;td&gt;</code>。</li>
+</ul>
+<p>爬虫的“解析（Parsing）”过程，本质上就是利用 <code>class</code>、<code>id</code> 等属性作为路标，在 DOM 树中精准定位到包含目标数据的标签节点。</p>
+<h3 id="13-pythonio">1.3 Python编程基础、数据结构与文件IO<a class="headerlink" href="#13-pythonio" title="Permanent link">&para;</a></h3>
+<p>为什么 Python 能够成为全球网络爬虫与人工智能数据工程的绝对统治语言？这源于其极简的语法表达力与极其繁荣的第三方生态。在本教材中，我们依托<strong>Python编程基础</strong>构建所有采集逻辑。一段健壮的爬虫代码离不开四大核心语法特性的支撑：</p>
+<ul>
+<li><strong>字符串处理与切片</strong>：对采集到的原始文本执行 <code>.strip()</code> 去除首尾空白、<code>.replace()</code> 替换噪点字符、<code>.split()</code> 按分隔符切分字段。</li>
+<li><strong>函数与模块化封装</strong>：将请求发送、页面解析、数据清洗拆分为职责单一的函数（如 <code>fetch_html(url)</code>、<code>parse_items(html)</code>），提高代码复用率。</li>
+<li><strong>面向对象编程（OOP）</strong>：理解类（Class）与实例（Instance）的概念，这是后续使用 Scrapy 框架编写自定义 <code>Spider</code> 子类的语法基础。</li>
+<li><strong>异常捕获机制（<code>try...except...finally</code>）</strong>：网络环境充满不确定性（断网、超时、目标网页改版缺失某个标签），使用异常处理可以确保单条数据解析失败时爬虫不会整体崩溃退出。</li>
+</ul>
+<p>在爬虫运行过程中，内存中的 URL 列表、待去重的网址以及提取出的结构化记录都需要依托<strong>数据结构与集合基础</strong>进行高效管理。Python 内置的四大容器在爬虫中各司其职：</p>
+<ol>
+<li><strong>列表（<code>list</code>）与双端队列（<code>collections.deque</code>）</strong>：按顺序存放待抓取的 URL 队列或同一页面提取出的多条商品记录，支持高效的头部弹出与尾部追加。</li>
+<li><strong>字典（<code>dict</code>）</strong>：以键值对（Key-Value）形式天然映射 HTTP 请求头（Headers）、URL 查询参数以及单条结构化数据（例如 <code>{"title": "Python爬虫", "price": 59.0}</code>），并且可以直接无缝转换为工业界标准的 JSON 格式。</li>
+<li><strong>集合（<code>set</code>）</strong>：底层基于哈希表（Hash Table）实现，支持 <span class="arithmatex">\(O(1)\)</span> 时间复杂度的极速查找与天然去重，是单机爬虫用来记录“已访问 URL 指纹（Visited URLs）”、防止死循环重复抓取的首选结构。</li>
+<li><strong>元组（<code>tuple</code>）</strong>：具备不可变性（Immutable），常用于固定配置项或数据库批量写入的参数行绑定。</li>
+</ol>
+<p>最后，采集并清洗干净的数据不能只停留在内存里（程序结束即丢失），必须通过<strong>文件系统与IO基础</strong>持久化落地到磁盘中。在 Python 中，我们使用 <code>with open(filepath, mode, encoding="utf-8") as f:</code> 上下文管理器来安全地读写文件，它能保证即便写入中途发生异常，文件句柄也能被自动关闭。在编写爬虫文件 IO 时，必须严格区分两种模式：</p>
+<ul>
+<li><strong>文本模式（<code>"w"</code> 覆盖写 / <code>"a"</code> 追加写）</strong>：用于保存 HTML 源码、CSV 表格或 JSON Lines（<code>.jsonl</code>）语料文件，<strong>必须显式指定 <code>encoding="utf-8"</code></strong>（或在生成 Excel 兼容 CSV 时使用 <code>"utf-8-sig"</code>），否则在 Windows 系统下默认使用 GBK 编码极易引发 <code>UnicodeEncodeError</code> 报错或中文乱码。</li>
+<li><strong>二进制模式（<code>"wb"</code>）</strong>：用于保存图片（<code>.jpg</code>/<code>.png</code>）、音频（<code>.mp3</code>）、视频（<code>.mp4</code>）或 PDF 文档等非文本字节流（<code>bytes</code>）。</li>
+</ul>
+<p>在进入下一节之前，我们先通过一段综合了上述先修概念的纯正 Python 基础示例，演示如何在本地模拟“从一段原始 HTML 字符串中解析课程信息、利用集合去重并持久化保存为 JSON Lines 语料文件”的完整微缩闭环。在下面的代码中，<code>raw_pages</code> 模拟了采集到的两段网页源码，<code>seen_codes</code> 是一个用于过滤重复课程编号的 <code>set</code> 集合，最终结果通过 UTF-8 编码写入磁盘文件：</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">deque</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="c1"># 1. 使用双端队列 deque 管理待处理的模拟网页源码 (数据结构基础)</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="n">raw_pages</span> <span class="o">=</span> <span class="n">deque</span><span class="p">([</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="s1">'&lt;div class="course" data-id="AI101"&gt;&lt;h3&gt;网络爬虫技术&lt;/h3&gt;&lt;span class="credit"&gt;4.0&lt;/span&gt;&lt;/div&gt;'</span><span class="p">,</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>    <span class="s1">'&lt;div class="course" data-id="AI102"&gt;&lt;h3&gt;深度学习应用&lt;/h3&gt;&lt;span class="credit"&gt;3.5&lt;/span&gt;&lt;/div&gt;'</span><span class="p">,</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>    <span class="s1">'&lt;div class="course" data-id="AI101"&gt;&lt;h3&gt;网络爬虫技术(重复页)&lt;/h3&gt;&lt;span class="credit"&gt;4.0&lt;/span&gt;&lt;/div&gt;'</span><span class="p">,</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="p">])</span>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="c1"># 2. 使用集合 set 存储已处理的课程代码，实现 O(1) 复杂度去重</span>
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="n">seen_codes</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="n">cleaned_records</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>
+</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="k">while</span> <span class="n">raw_pages</span><span class="p">:</span>
+</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>    <span class="n">html_snippet</span> <span class="o">=</span> <span class="n">raw_pages</span><span class="o">.</span><span class="n">popleft</span><span class="p">()</span>
+</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>    <span class="k">try</span><span class="p">:</span>
+</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>        <span class="c1"># 3. 提取 HTML 属性与标签文本 (HTML文档结构基础 + Python字符串正则)</span>
+</span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>        <span class="n">code_match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s1">'data-id="([^"]+)"'</span><span class="p">,</span> <span class="n">html_snippet</span><span class="p">)</span>
+</span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>        <span class="n">title_match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s2">"&lt;h3&gt;([^&lt;]+)&lt;/h3&gt;"</span><span class="p">,</span> <span class="n">html_snippet</span><span class="p">)</span>
+</span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a>        <span class="n">credit_match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s1">'&lt;span class="credit"&gt;([^&lt;]+)&lt;/span&gt;'</span><span class="p">,</span> <span class="n">html_snippet</span><span class="p">)</span>
+</span><span id="__span-0-23"><a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a>
+</span><span id="__span-0-24"><a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a>        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">code_match</span> <span class="ow">and</span> <span class="n">title_match</span> <span class="ow">and</span> <span class="n">credit_match</span><span class="p">):</span>
+</span><span id="__span-0-25"><a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a>            <span class="k">continue</span>
+</span><span id="__span-0-26"><a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a>
+</span><span id="__span-0-27"><a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a>        <span class="n">course_code</span> <span class="o">=</span> <span class="n">code_match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+</span><span id="__span-0-28"><a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a>        <span class="c1"># 判断是否已采集过该课程</span>
+</span><span id="__span-0-29"><a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a>        <span class="k">if</span> <span class="n">course_code</span> <span class="ow">in</span> <span class="n">seen_codes</span><span class="p">:</span>
+</span><span id="__span-0-30"><a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"[跳过重复] 课程编号 </span><span class="si">{</span><span class="n">course_code</span><span class="si">}</span><span class="s2"> 已存在于去重集合中"</span><span class="p">)</span>
+</span><span id="__span-0-31"><a id="__codelineno-0-31" name="__codelineno-0-31" href="#__codelineno-0-31"></a>            <span class="k">continue</span>
+</span><span id="__span-0-32"><a id="__codelineno-0-32" name="__codelineno-0-32" href="#__codelineno-0-32"></a>
+</span><span id="__span-0-33"><a id="__codelineno-0-33" name="__codelineno-0-33" href="#__codelineno-0-33"></a>        <span class="n">seen_codes</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">course_code</span><span class="p">)</span>
+</span><span id="__span-0-34"><a id="__codelineno-0-34" name="__codelineno-0-34" href="#__codelineno-0-34"></a>        <span class="n">record</span> <span class="o">=</span> <span class="p">{</span>
+</span><span id="__span-0-35"><a id="__codelineno-0-35" name="__codelineno-0-35" href="#__codelineno-0-35"></a>            <span class="s2">"course_code"</span><span class="p">:</span> <span class="n">course_code</span><span class="p">,</span>
+</span><span id="__span-0-36"><a id="__codelineno-0-36" name="__codelineno-0-36" href="#__codelineno-0-36"></a>            <span class="s2">"title"</span><span class="p">:</span> <span class="n">title_match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span>
+</span><span id="__span-0-37"><a id="__codelineno-0-37" name="__codelineno-0-37" href="#__codelineno-0-37"></a>            <span class="s2">"credit"</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">credit_match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)),</span>
+</span><span id="__span-0-38"><a id="__codelineno-0-38" name="__codelineno-0-38" href="#__codelineno-0-38"></a>        <span class="p">}</span>
+</span><span id="__span-0-39"><a id="__codelineno-0-39" name="__codelineno-0-39" href="#__codelineno-0-39"></a>        <span class="n">cleaned_records</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">record</span><span class="p">)</span>
+</span><span id="__span-0-40"><a id="__codelineno-0-40" name="__codelineno-0-40" href="#__codelineno-0-40"></a>    <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+</span><span id="__span-0-41"><a id="__codelineno-0-41" name="__codelineno-0-41" href="#__codelineno-0-41"></a>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"[数据转换异常] </span><span class="si">{</span><span class="n">err</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</span><span id="__span-0-42"><a id="__codelineno-0-42" name="__codelineno-0-42" href="#__codelineno-0-42"></a>
+</span><span id="__span-0-43"><a id="__codelineno-0-43" name="__codelineno-0-43" href="#__codelineno-0-43"></a><span class="c1"># 4. 使用上下文管理器将结果持久化为大模型标准 JSONL 格式 (文件系统与IO基础)</span>
+</span><span id="__span-0-44"><a id="__codelineno-0-44" name="__codelineno-0-44" href="#__codelineno-0-44"></a><span class="n">output_path</span> <span class="o">=</span> <span class="s2">"ai_courses_dataset.jsonl"</span>
+</span><span id="__span-0-45"><a id="__codelineno-0-45" name="__codelineno-0-45" href="#__codelineno-0-45"></a><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">output_path</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">"w"</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+</span><span id="__span-0-46"><a id="__codelineno-0-46" name="__codelineno-0-46" href="#__codelineno-0-46"></a>    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">cleaned_records</span><span class="p">:</span>
+</span><span id="__span-0-47"><a id="__codelineno-0-47" name="__codelineno-0-47" href="#__codelineno-0-47"></a>        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">ensure_ascii</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">+</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="p">)</span>
+</span><span id="__span-0-48"><a id="__codelineno-0-48" name="__codelineno-0-48" href="#__codelineno-0-48"></a>
+</span><span id="__span-0-49"><a id="__codelineno-0-49" name="__codelineno-0-49" href="#__codelineno-0-49"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"✅ 成功清洗并写入 </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">cleaned_records</span><span class="p">)</span><span class="si">}</span><span class="s2"> 条唯一样本至 </span><span class="si">{</span><span class="n">output_path</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</span></code></pre></div>
+<p>下表总结了这六大先修基石概念在网络爬虫工程中的具体映射关系：</p>
+<table>
+<thead>
+<tr>
+<th>先修基石概念</th>
+<th>核心技术要素</th>
+<th>在网络爬虫工程中的直接作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>计算机网络基础</strong></td>
+<td>IP 地址、DNS 域名解析、端口、TCP/IP 协议栈</td>
+<td>定位目标 Web 服务器并建立可靠的底层字节流传输通道</td>
+</tr>
+<tr>
+<td><strong>万维网与超文本传输</strong></td>
+<td>URL 统一资源定位符、HTTP/HTTPS 请求-响应模型、超链接</td>
+<td>定义待采集资源的唯一地址与客户端-服务器标准通信契约</td>
+</tr>
+<tr>
+<td><strong>Web浏览器基础</strong></td>
+<td>网络请求发送、DOM 树构建、JS 引擎执行、DevTools</td>
+<td>作为爬虫模拟的标杆参照物，并提供抓包与页面结构逆向调试工具</td>
+</tr>
+<tr>
+<td><strong>HTML文档结构基础</strong></td>
+<td>标签（Tags）、属性（<code>id</code>/<code>class</code>/<code>href</code>）、DOM 树嵌套</td>
+<td>提供静态网页数据的结构化载体，是 CSS 选择器与 XPath 解析的对象</td>
+</tr>
+<tr>
+<td><strong>Python编程基础</strong></td>
+<td>字符串处理、函数封装、面向对象类继承、<code>try...except</code></td>
+<td>编写高可读性、模块化、具备容错恢复能力的采集与解析控制逻辑</td>
+</tr>
+<tr>
+<td><strong>数据结构与集合基础</strong></td>
+<td><code>deque</code> 队列、<code>dict</code> 字典、<code>set</code> 哈希集合、<code>tuple</code> 元组</td>
+<td>高效调度待抓取 URL 队列、封装 JSON 数据载荷并实现 <span class="arithmatex">\(O(1)\)</span> 内存去重</td>
+</tr>
+<tr>
+<td><strong>文件系统与IO基础</strong></td>
+<td><code>with open()</code> 上下文、UTF-8 编码控制、文本与二进制流模式</td>
+<td>将内存中的采集成果无乱码地落盘保存为 CSV、JSONL 或多媒体文件</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="2">2. 网络爬虫定义、核心价值与分类体系<a class="headerlink" href="#2" title="Permanent link">&para;</a></h2>
+<h3 id="21">2.1 网络爬虫定义与核心价值<a class="headerlink" href="#21" title="Permanent link">&para;</a></h3>
+<p><strong>网络爬虫定义与核心价值</strong>可以概括为：<strong>网络爬虫（Web Crawler / Web Scraper / Web Spider）是一种按照预设的工程规则与算法逻辑，模拟客户端自动向万维网服务器发起网络请求、获取响应数据、解析并提取目标信息，同时根据需要自动发现新 URL 链接以持续扩展采集范围的计算机程序。</strong> 这里需要区分两个在工业界经常混用但侧重点略有差异的术语：</p>
+<ul>
+<li><strong>Web Crawler（网络爬行器/蜘蛛）</strong>：侧重于“广度遍历与链接发现”，强调顺着页面上的 <code>&lt;a&gt;</code> 标签超链接在全网或站内不断巡游（如百度、Google 的搜索引擎蜘蛛）。</li>
+<li><strong>Web Scraper（网页抓取器/数据提取器）</strong>：侧重于“精准结构化提取”，强调从特定目标网页或 API 接口中把商品价格、新闻正文、学术论文摘要或问答对剥离出来，清洗为干净的数据表。</li>
+</ul>
+<p>在人工智能技术应用专业领域，网络爬虫的核心价值体现在以下四个核心场景：</p>
+<ol>
+<li><strong>大语言模型预训练语料库构建（Pre-training Corpus）</strong>：如开源界的 Common Crawl 项目，通过大规模爬虫采集数百亿个网页，经过清洗去重后形成数万亿 Token 的文本语料，支撑起 DeepSeek、Qwen、Llama 等底座大模型的语言理解与常识能力。</li>
+<li><strong>垂直领域指令微调数据集采集（SFT Dataset）</strong>：通用大模型往往缺乏细分行业（如农业病虫害防治、工业设备故障排查、地方税务法规）的专业知识。通过编写聚焦爬虫采集专业技术论坛、政务公开问答库与行业百科，可以高效构造形如 <code>{"instruction": "...", "input": "...", "output": "..."}</code> 的微调训练集。</li>
+<li><strong>检索增强生成（RAG）实时外部知识库同步</strong>：大模型的参数知识具有静态截止日期。通过部署定时增量爬虫，持续采集企业内部文档站、行业招投标公告或最新技术文档并转化为向量数据库切片，能够让 AI 助手实时回答最新发生的事态并消除“模型幻觉（Hallucination）”。</li>
+<li><strong>多模态训练数据集与商业智能监测（Multimodal &amp; BI）</strong>：自动化采集图文配对样本（Image-Alt Pairs）用于训练视觉-语言模型（如 CLIP、Stable Diffusion），或持续监测电商平台价格波动、社交媒体與情情感倾向。</li>
+</ol>
+<h3 id="22">2.2 网络爬虫的三大核心分类<a class="headerlink" href="#22" title="Permanent link">&para;</a></h3>
+<p>根据采集目标范围、遍历策略与时间调度机制的不同，工程界将网络爬虫划分为三大基本类型：<strong>通用搜索引擎爬虫</strong>、<strong>聚焦主题网络爬虫</strong>与<strong>增量式更新爬虫</strong>。</p>
+<ol>
+<li><strong>通用搜索引擎爬虫（General-Purpose Web Crawler）</strong><br />
+   通用爬虫服务于 Google、Bing、百度等全网搜索引擎。它的目标是尽可能把整个互联网上所有公开可访问的网页全部下载回来，建立全网倒排索引。通用爬虫从一批门户网站种子 URL 出发，无差别地提取页面中的所有外链，对服务器带宽、分布式存储（PB 级）和 URL 去重算法要求极高，但对单个页面内部的具体业务字段（如哪个数字是价格、哪个数字是库存）不做深度结构化拆分。</li>
+<li><strong>聚焦主题网络爬虫（Focused / Topical Web Crawler）</strong><br />
+   聚焦爬虫是我们日常在人工智能数据工程中编写得最多的一类爬虫。它不再漫无目的地抓取全网，而是围绕<strong>特定主题、特定网站或特定业务字段</strong>进行定向采集（例如：专门采集某开源社区中带有 <code>Python</code> 标签的技术问答，或者专门采集某医药数据库的药品说明书）。聚焦爬虫包含两个关键特征：一是在提取链接时通过 URL 正则规则或页面文本相关性过滤掉无关链接（如广告链接、关于我们页面）；二是针对目标页面编写精细的 XPath 或 CSS 选择器解析规则，直接产出结构化字典。</li>
+<li><strong>增量式更新爬虫（Incremental Web Crawler）</strong><br />
+   无论是新闻资讯站、政策发布网还是社区论坛，网站内容都在随时间不断新增或修改。如果每天都把目标网站的历史十万篇文章重新抓取一遍，不仅浪费自身高达 99% 的网络带宽与算力，还会给目标网站服务器造成毫无必要的负载冲击。<strong>增量式更新爬虫</strong>专门解决这一痛点：它通过比对 URL 历史去重集合（如 Redis 指纹库）、检查文章列表页的发布时间戳（<code>publish_time</code>）、或者读取 HTTP 响应头中的 <code>Last-Modified</code> 与 <code>ETag</code> 标识，<strong>只抓取上次采集之后新发布的网页或发生内容变更的网页</strong>。在构建实时更新的 AI 资讯监控与 RAG 动态知识库时，增量爬虫是工程落地的标准形态。</li>
+</ol>
+<h3 id="23">2.3 表层网页与深层网页、暗网数据概念<a class="headerlink" href="#23" title="Permanent link">&para;</a></h3>
+<p>在规划爬虫采集范围时，还必须理解互联网信息冰山模型的分层结构，即表层网页（Surface Web）与<strong>深层网页与暗网数据概念（Deep Web &amp; Dark Web）</strong>：</p>
+<ul>
+<li><strong>表层网页（Surface Web）</strong>：指能够被传统搜索引擎通过超链接直接爬行并建立索引的公开静态页面，仅占互联网数据总量的约 4%~10%。</li>
+<li><strong>深层网页（Deep Web）</strong>：指无法通过简单的静态超链接直接访问，必须通过<strong>表单查询提交、登录身份认证、动态异步 API 调用或付费授权</strong>才能显现的海量数据库内容（例如：中国知网的学术文献库、12306 的实时余票查询结果、需要登录后才能查看的个人订单页、通过滚动异步加载的社交媒体评论）。深层网页占据了互联网 90% 以上的数据量，且数据质量极高，是我们学习第 5 章（API 逆向）和第 6 章（Playwright 动态自动化）的核心攻关对象。</li>
+<li><strong>暗网（Dark Web）</strong>：指需要特殊加密代理软件（如 Tor 洋葱路由、I2P）和特殊协议才能访问的匿名网络空间。<strong>需要严正声明的是：暗网充斥着大量违法犯罪交易与恶意木马，本教材讨论的数据采集技术严格限定在合法公开的表层网页与经授权合规的深层网页（Deep Web）范畴内，绝不涉及任何暗网非法采集。</strong></li>
+</ul>
+<p>下表对比了三类核心网络爬虫与不同网页层级的工程特征：</p>
+<table>
+<thead>
+<tr>
+<th>爬虫类型</th>
+<th>采集范围与目标</th>
+<th>核心技术难点</th>
+<th>典型 AI 应用场景</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>通用搜索引擎爬虫</strong></td>
+<td>全网公开表层网页，追求最大覆盖率</td>
+<td>亿级 URL 去重、极高并发带宽控制、网页权重排序（PageRank）</td>
+<td>底座大模型（LLM）通用预训练语料（如 Common Crawl）</td>
+</tr>
+<tr>
+<td><strong>聚焦主题网络爬虫</strong></td>
+<td>特定垂直领域或指定站点，追求高准召率与结构化提取</td>
+<td>页面 DOM 结构精准解析、主题相关性过滤、异构字段对齐</td>
+<td>垂直行业大模型微调（SFT）数据集、特定多模态图文集</td>
+</tr>
+<tr>
+<td><strong>增量式更新爬虫</strong></td>
+<td>监控目标站点的最新新增或变更内容，追求低延迟与低冗余</td>
+<td>增量边界判定（时间戳/指纹/状态头）、定时调度与断点续爬</td>
+<td>企业级 RAG 检索增强知识库实时同步、实时财经/舆情监测</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="3">3. 网络爬虫标准工作流与图遍历策略<a class="headerlink" href="#3" title="Permanent link">&para;</a></h2>
+<h3 id="31">3.1 网络爬虫标准工作流<a class="headerlink" href="#31" title="Permanent link">&para;</a></h3>
+<p>无论是一个只有 30 行代码的简单 Python 脚本，还是一个运行在数十台服务器上的 Scrapy 分布式集群，其内部执行逻辑都严格遵循同一套<strong>网络爬虫标准工作流（Standard Web Scraping Workflow）</strong>。理解这一标准闭环，能帮助你在遇到任何复杂采集需求时迅速拆解模块。标准工作流由五个核心阶段构成闭环：</p>
+<ol>
+<li><strong>阶段一：URL 种子调度与去重（URL Seeding &amp; Scheduling）</strong><br />
+   爬虫从预设的一个或多个起始网址——即<strong>种子 URL（Seed URLs）</strong>（例如某新闻网站的列表首页 <code>https://news.example.com/ai/page/1</code>）开始运行。调度器（Scheduler）从<strong>待抓取队列（Frontier Queue）</strong>中取出一个 URL，首先查询<strong>已抓取指纹集合（Visited Set）</strong>；如果该 URL 已经被处理过，则直接丢弃以避免死循环；如果是全新的 URL，则将其标记并移交下载器。</li>
+<li><strong>阶段二：网络请求与网页下载（HTTP Request &amp; Downloading）</strong><br />
+   下载器（Downloader）根据 URL 构造标准的 HTTP 请求报文（附加伪装的 <code>User-Agent</code>、必要的 <code>Cookie</code> 或代理 IP），通过网络发送给目标 Web 服务器，并接收服务器返回的响应报文（HTML 源码、JSON 字符串或二进制媒体流）。如果遇到临时网络波动或 <code>429/503</code> 状态码，下载器会按策略执行延迟退避重试。</li>
+<li><strong>阶段三：内容解析与双路提取（Parsing &amp; Dual Extraction）</strong><br />
+   解析器（Parser）接收下载好的网页内容，通过 CSS 选择器、XPath 或 JSON 解析器执行<strong>双路提取</strong>：</li>
+<li><strong>第一路（提取业务数据 Items）</strong>：剥离出我们真正关心的结构化目标字段（如文章标题、正文、发布时间、作者）。</li>
+<li><strong>第二路（提取后续链接 New URLs）</strong>：提取页面中的“下一页”按钮链接或文章详情页链接，经过作用域与格式过滤后，回传给阶段一的<strong>待抓取队列</strong>，从而驱动爬虫持续自动运转。</li>
+<li><strong>阶段四：数据清洗与结构化校验（Data Cleaning &amp; Validation）</strong><br />
+   刚从网页上剥离下来的原始字段往往夹杂着 HTML 残留标签、多余的换行符 <code>\n\t</code>、全角空格或格式不一的日期字符串。数据管道（Pipeline）负责剔除这些噪声、统一单位格式，并校验必填字段是否完整。</li>
+<li><strong>阶段五：持久化存储（Persistent Storage）</strong><br />
+   清洗合格的结构化数据被最终写入本地文件（CSV、JSONL、Parquet）或数据库（SQLite、MySQL、MongoDB、向量数据库），完成整个采集生命周期。</li>
+</ol>
+<p>在查看下方的交互式流程图之前，请先牢记上述五个阶段的组件名称（<code>Seed URLs</code>、<code>Scheduler &amp; Visited Set</code>、<code>Downloader</code>、<code>Parser</code>、<code>Pipeline &amp; Storage</code>）以及“解析器既产出业务数据又回流新链接”这一核心双路分支机制。</p>
+<h4 id="diagram-standard-web-crawler-workflow-architecture">Diagram: Standard Web Crawler Workflow Architecture<a class="headerlink" href="#diagram-standard-web-crawler-workflow-architecture" title="Permanent link">&para;</a></h4>
+<pre class="mermaid"><code>flowchart LR
+    N1["1. 种子URL池 (Seed URLs)"] --&gt;|注入初始种子网址| N2["2. 调度器与去重集合 (Scheduler &amp; Visited Set)"]
+    N2 --&gt;|分发未访问URL| N3["3. 下载器 (HTTP Downloader)"]
+    N3 --&gt;|交付HTML/JSON响应源码| N4["4. 解析器 (HTML/JSON Parser)"]
+    N4 --&gt;|分支A: 回流新发现链接URL| N2
+    N4 --&gt;|分支B: 推送业务数据字典Item| N5["5. 清洗与校验管道 (Cleaning Pipeline)"]
+    N5 --&gt;|写入校验合格数据| N6["6. 持久化存储 (Persistent Storage)"]</code></pre>
+<details>
+<summary>Standard Web Crawler Workflow Architecture</summary>
+<p>Type: workflow
+<strong>sim-id:</strong> standard-crawler-workflow<br/>
+<strong>Library:</strong> Mermaid<br/>
+<strong>Status:</strong> Specified<br/>
+<strong>Bloom Level:</strong> Understand<br/>
+<strong>Bloom Verb:</strong> explain<br/>
+<strong>Learning Objective:</strong> The learner will explain the role of each of the six stages in the standard web crawler workflow and trace how newly discovered URLs cycle back to the scheduler.</p>
+<p><strong>Prerequisites:</strong> URL, HTTP request, HTML DOM parsing, Visited Set deduplication, persistent storage (all defined in Section 1 and Section 3.1 above).</p>
+<p><strong>Evidence of Mastery:</strong> After clicking each of the six workflow nodes to inspect its input, output, and failure mode, the learner answers two diagnostic questions by clicking the responsible component node: (1) "Which component prevents the crawler from entering an infinite loop when two pages link to each other?" and (2) "Which component splits the raw HTML response into structured data items and newly discovered URLs?" Mastery is answering both questions correctly on the first attempt.</p>
+<p><strong>Misconceptions:</strong> (1) A crawler finishes after downloading a single URL without feeding discovered links back to the queue. (2) Deduplication happens only after data is written to the database rather than at the URL scheduler before downloading.</p>
+<p><strong>Instructional Rationale:</strong> A clickable workflow diagram where each stage reveals concrete input/output data payloads allows learners to trace the closed feedback loop of URL discovery before answering diagnostic questions about component responsibilities.</p>
+<p><strong>Content:</strong></p>
+<p>Workflow nodes and the exact details revealed when clicked:</p>
+<table>
+<thead>
+<tr>
+<th>Node ID</th>
+<th>Node Label</th>
+<th>Input Payload</th>
+<th>Output Payload</th>
+<th>Core Responsibility &amp; Failure Mode (revealed on click)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>N1</code></td>
+<td><code>1. 种子URL池 (Seed URLs)</code></td>
+<td>人工配置的起始网址列表 <code>["https://site.edu/list?p=1"]</code></td>
+<td>初始待抓取 URL 流</td>
+<td>作为整个爬虫工程的启动入口；若种子 URL 失效或拼写错误，爬虫将无法启动。</td>
+</tr>
+<tr>
+<td><code>N2</code></td>
+<td><code>2. 调度器与去重集合 (Scheduler &amp; Visited Set)</code></td>
+<td>种子 URL 或解析器回流的新 URL</td>
+<td>确认未抓取过的唯一待抓 URL</td>
+<td>维护先进先出队列（Queue）与哈希去重集合（Visited Set）；拦截重复 URL 防止无限循环。</td>
+</tr>
+<tr>
+<td><code>N3</code></td>
+<td><code>3. 下载器 (HTTP Downloader)</code></td>
+<td>唯一待抓 URL 与 Headers/Proxy 配置</td>
+<td><code>Response</code> 对象（状态码 <code>200</code> + HTML/JSON 字节流）</td>
+<td>发起真实 HTTP/HTTPS 网络请求；处理连接超时、403/429 状态码与指数退避重试。</td>
+</tr>
+<tr>
+<td><code>N4</code></td>
+<td><code>4. 解析器 (HTML/JSON Parser)</code></td>
+<td>原始 HTML 文档或 JSON 响应文本</td>
+<td>分支 A：新发现的 URL 列表；分支 B：原始业务数据字典 <code>Item</code></td>
+<td>构建 DOM 树并执行 XPath/CSS 选择器，同时承担“发现新链接”与“提取目标字段”双重职责。</td>
+</tr>
+<tr>
+<td><code>N5</code></td>
+<td><code>5. 清洗与校验管道 (Cleaning Pipeline)</code></td>
+<td>原始业务数据字典 <code>Raw Item</code></td>
+<td>标准化、去噪后的合规 <code>Cleaned Item</code></td>
+<td>剥离残留 HTML 标签、归一化空白字符與日期格式、执行 Pydantic 字段类型强校验。</td>
+</tr>
+<tr>
+<td><code>N6</code></td>
+<td><code>6. 持久化存储 (Persistent Storage)</code></td>
+<td>清洗合格的结构化 <code>Cleaned Item</code></td>
+<td>磁盘文件（<code>.jsonl</code>/<code>.csv</code>）或数据库记录（MySQL/MongoDB）</td>
+<td>将内存数据安全落盘并执行唯一索引幂等更新（UPSERT），供下游 AI 训练读取。</td>
+</tr>
+</tbody>
+</table>
+<p>Directed connections between nodes:
+- <code>N1</code> -&gt; <code>N2</code> (label: <code>注入初始种子网址</code>)
+- <code>N2</code> -&gt; <code>N3</code> (label: <code>分发未访问URL</code>)
+- <code>N3</code> -&gt; <code>N4</code> (label: <code>交付HTML/JSON响应源码</code>)
+- <code>N4</code> -&gt; <code>N2</code> (label: <code>分支A：回流新发现的链接URL</code>)
+- <code>N4</code> -&gt; <code>N5</code> (label: <code>分支B：推送提取的业务字段Item</code>)
+- <code>N5</code> -&gt; <code>N6</code> (label: <code>写入校验合格的干净数据</code>)</p>
+<p>Diagnostic Questions:
+- Question 1: "当页面 A 包含指向页面 B 的链接，而页面 B 又包含指向页面 A 的链接时，哪个组件负责阻止爬虫陷入无限死循环抓取？" -&gt; Correct Node: <code>N2</code> (<code>2. 调度器与去重集合 (Scheduler &amp; Visited Set)</code>). Why: 调度器中的 Visited Set 会在发起网络下载前检查 URL 是否已存在，从而直接拦截已访问过的页面。
+- Question 2: "哪个组件负责将下载器返回的原始 HTML 源码一分为二，同时产生『待继续跟进的新链接』和『结构化业务字段字典』？" -&gt; Correct Node: <code>N4</code> (<code>4. 解析器 (HTML/JSON Parser)</code>). Why: 解析器通过 DOM 选择器分别提取导航链接（送回调度器）与正文业务数据（送往清洗管道）。</p>
+<p><strong>Provenance:</strong> From Chapter 1 Section 3.1 ("网络爬虫标准工作流").</p>
+<p><strong>Rules:</strong> Every node must be clicked at least once in exploration mode before the two diagnostic questions unlock, or the learner may switch directly to quiz mode. In quiz mode, clicking a node submits it as the answer to the active question.</p>
+<p><strong>Learner Activity:</strong></p>
+<ol>
+<li>The learner clicks each of the six workflow nodes (<code>N1</code> through <code>N6</code>) to inspect its input payload, output payload, and core responsibility in the detail panel.</li>
+<li>The learner traces the feedback arrow from <code>N4</code> (<code>解析器</code>) back to <code>N2</code> (<code>调度器与去重集合</code>) and observes how pagination and detail links re-enter the queue.</li>
+<li>The learner answers Question 1 and Question 2 by clicking the corresponding workflow node on the diagram.</li>
+</ol>
+<p><strong>Feedback:</strong> Two diagnostic questions in fixed order, two attempts per question. Correct: "正确！该组件正是负责此项核心职责。" Incorrect: displays the "Why" explanation from the Content table above and highlights the data flow between <code>N4</code>, <code>N2</code>, and <code>N5</code>. After the second incorrect attempt, the correct node is highlighted and its explanation is shown. Score shown as "已掌握诊断题：n / 2".</p>
+<p><strong>Starting State:</strong> All six workflow nodes are displayed with their directional labels, <code>N1</code> (<code>1. 种子URL池</code>) is selected by default showing its input/output panel, and the prompt reads: "点击流程图中的各个组件查看其输入输出数据流，然后完成下方两道架构诊断题。"</p>
+<p><strong>Chapter Anchors:</strong> Section 3.1 defines the five conceptual stages mapped across these six component nodes, explicitly highlighting the dual extraction branches of the Parser (<code>N4</code> -&gt; <code>N2</code> and <code>N4</code> -&gt; <code>N5</code>).</p>
+</details>
+<h3 id="32-urlbfsdfs">3.2 URL种子队列、广度优先（BFS）与深度优先（DFS）策略<a class="headerlink" href="#32-urlbfsdfs" title="Permanent link">&para;</a></h3>
+<p>在爬虫工作流中，<strong>URL种子队列与待抓取池（URL Seed Queue &amp; Frontier Pool）</strong> 是控制爬虫行进方向的调度大脑。当一个列表页包含 20 篇新闻详情页链接和 1 个“下一页”链接时，爬虫到底应该先把第 1 页的 20 篇详情全部抓完再去抓第 2 页，还是一路顺着某篇新闻里的“相关推荐”链接一直往下钻？这取决于我们在调度器中采用哪种图遍历算法：<strong>网页抓取广度优先策略（Breadth-First Search, BFS）</strong> 还是 <strong>网页抓取深度优先策略（Depth-First Search, DFS）</strong>。</p>
+<p>假设我们将一个小型网站的链接结构抽象为一棵包含 7 个页面的有向图，起始种子节点为首页 <code>A</code>：</p>
+<ul>
+<li>首页 <code>A</code> 包含两个栏目页链接：<code>B</code>（AI 新闻栏目）和 <code>C</code>（开源项目栏目）；</li>
+<li>栏目页 <code>B</code> 包含两篇详情页链接：<code>D</code> 和 <code>E</code>；</li>
+<li>
+<p>栏目页 <code>C</code> 包含两篇详情页链接：<code>F</code> 和 <code>G</code>。</p>
+</li>
+<li>
+<p><strong>网页抓取广度优先策略（BFS — 层级推进）</strong><br />
+   广度优先策略的核心原则是<strong>“先近后远、逐层扫荡”</strong>——即先抓完距离种子节点跳数（Depth）为 1 的所有页面，再抓取跳数为 2 的页面，以此类推。在代码实现上，BFS 使用 <strong>先进先出队列（FIFO Queue，即 <code>collections.deque</code> 的 <code>append()</code> 入队 + <code>popleft()</code> 出队）</strong>。<br />
+   在上述 7 节点网站图中，BFS 的精确访问顺序为：<strong><code>A → B → C → D → E → F → G</code></strong>。<br />
+<strong>工程优势</strong>：BFS 是绝大多数通用爬虫与列表分页爬虫的首选策略，因为它能保证爬虫优先采集距离首页最近的核心目录页与高价值页面，不会因为某个页面里的外链嵌套过深而迷失在边缘角落里。</p>
+</li>
+<li><strong>网页抓取深度优先策略（DFS — 纵深钻取）</strong><br />
+   深度优先策略的核心原则是<strong>“一条路走到黑，碰壁再回溯”</strong>——即顺着当前页面的第一个未访问链接一直往深处抓取，直到某个页面没有任何新的子链接（到达叶子节点）或达到预设的最大深度阈值（<code>max_depth</code>）时，才回退到上一层继续抓取其他分支。在代码实现上，DFS 使用 <strong>后进先出栈（LIFO Stack，即使用列表或 <code>deque</code> 的 <code>append()</code> 入栈 + <code>pop()</code> 从尾部弹出栈顶）</strong>。为了使左分支 <code>B</code> 先于右分支 <code>C</code> 被弹出访问，我们将子链接按逆字母序压入栈中。<br />
+   在同一个 7 节点网站图中，DFS 的精确访问顺序为：<strong><code>A → B → D → E → C → F → G</code></strong>。<br />
+<strong>工程优势</strong>：当我们需要完整追踪某个树状分类目录（如“省 → 市 → 区 → 街道”四级行政区划树）或顺着单条线索完成全链路深挖时，DFS 能够让同一个子分类下的数据在时间上连续产出。</li>
+</ul>
+<p>下面这段代码完整对比了在同一个网站链接图 <code>SITE_GRAPH</code> 上，仅通过改变弹出位置（<code>popleft()</code> 队列头 vs. <code>pop()</code> 栈顶）实现 BFS 与 DFS 抓取调度的过程：</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">deque</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="c1"># 模拟网站页面超链接拓扑图：键为当前页面，值为页面中包含的子链接列表</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="n">SITE_GRAPH</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>    <span class="s2">"A"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"B"</span><span class="p">,</span> <span class="s2">"C"</span><span class="p">],</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>    <span class="s2">"B"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"D"</span><span class="p">,</span> <span class="s2">"E"</span><span class="p">],</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>    <span class="s2">"C"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"F"</span><span class="p">,</span> <span class="s2">"G"</span><span class="p">],</span>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>    <span class="s2">"D"</span><span class="p">:</span> <span class="p">[],</span>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>    <span class="s2">"E"</span><span class="p">:</span> <span class="p">[],</span>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>    <span class="s2">"F"</span><span class="p">:</span> <span class="p">[],</span>
+</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>    <span class="s2">"G"</span><span class="p">:</span> <span class="p">[],</span>
+</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="p">}</span>
+</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>
+</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>
+</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a><span class="k">def</span><span class="w"> </span><span class="nf">crawl_bfs</span><span class="p">(</span><span class="n">graph</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span> <span class="n">seed</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a><span class="w">    </span><span class="sd">"""广度优先抓取策略 (BFS)：使用 FIFO 队列 (append + popleft)"""</span>
+</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>    <span class="n">queue</span> <span class="o">=</span> <span class="n">deque</span><span class="p">([</span><span class="n">seed</span><span class="p">])</span>
+</span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>    <span class="n">visited</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">seed</span><span class="p">}</span>
+</span><span id="__span-1-19"><a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>    <span class="n">visit_order</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span id="__span-1-20"><a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a>
+</span><span id="__span-1-21"><a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a>    <span class="k">while</span> <span class="n">queue</span><span class="p">:</span>
+</span><span id="__span-1-22"><a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a>        <span class="n">current_url</span> <span class="o">=</span> <span class="n">queue</span><span class="o">.</span><span class="n">popleft</span><span class="p">()</span>  <span class="c1"># 从队列头部取出最早加入的 URL</span>
+</span><span id="__span-1-23"><a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a>        <span class="n">visit_order</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">current_url</span><span class="p">)</span>
+</span><span id="__span-1-24"><a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a>
+</span><span id="__span-1-25"><a id="__codelineno-1-25" name="__codelineno-1-25" href="#__codelineno-1-25"></a>        <span class="k">for</span> <span class="n">link</span> <span class="ow">in</span> <span class="n">graph</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">current_url</span><span class="p">,</span> <span class="p">[]):</span>
+</span><span id="__span-1-26"><a id="__codelineno-1-26" name="__codelineno-1-26" href="#__codelineno-1-26"></a>            <span class="k">if</span> <span class="n">link</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">visited</span><span class="p">:</span>
+</span><span id="__span-1-27"><a id="__codelineno-1-27" name="__codelineno-1-27" href="#__codelineno-1-27"></a>                <span class="n">visited</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">link</span><span class="p">)</span>
+</span><span id="__span-1-28"><a id="__codelineno-1-28" name="__codelineno-1-28" href="#__codelineno-1-28"></a>                <span class="n">queue</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">link</span><span class="p">)</span>  <span class="c1"># 追加到队列尾部</span>
+</span><span id="__span-1-29"><a id="__codelineno-1-29" name="__codelineno-1-29" href="#__codelineno-1-29"></a>    <span class="k">return</span> <span class="n">visit_order</span>
+</span><span id="__span-1-30"><a id="__codelineno-1-30" name="__codelineno-1-30" href="#__codelineno-1-30"></a>
+</span><span id="__span-1-31"><a id="__codelineno-1-31" name="__codelineno-1-31" href="#__codelineno-1-31"></a>
+</span><span id="__span-1-32"><a id="__codelineno-1-32" name="__codelineno-1-32" href="#__codelineno-1-32"></a><span class="k">def</span><span class="w"> </span><span class="nf">crawl_dfs</span><span class="p">(</span><span class="n">graph</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span> <span class="n">seed</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+</span><span id="__span-1-33"><a id="__codelineno-1-33" name="__codelineno-1-33" href="#__codelineno-1-33"></a><span class="w">    </span><span class="sd">"""深度优先抓取策略 (DFS)：使用 LIFO 栈 (append + pop)"""</span>
+</span><span id="__span-1-34"><a id="__codelineno-1-34" name="__codelineno-1-34" href="#__codelineno-1-34"></a>    <span class="n">stack</span> <span class="o">=</span> <span class="n">deque</span><span class="p">([</span><span class="n">seed</span><span class="p">])</span>
+</span><span id="__span-1-35"><a id="__codelineno-1-35" name="__codelineno-1-35" href="#__codelineno-1-35"></a>    <span class="n">visited</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">seed</span><span class="p">}</span>
+</span><span id="__span-1-36"><a id="__codelineno-1-36" name="__codelineno-1-36" href="#__codelineno-1-36"></a>    <span class="n">visit_order</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span id="__span-1-37"><a id="__codelineno-1-37" name="__codelineno-1-37" href="#__codelineno-1-37"></a>
+</span><span id="__span-1-38"><a id="__codelineno-1-38" name="__codelineno-1-38" href="#__codelineno-1-38"></a>    <span class="k">while</span> <span class="n">stack</span><span class="p">:</span>
+</span><span id="__span-1-39"><a id="__codelineno-1-39" name="__codelineno-1-39" href="#__codelineno-1-39"></a>        <span class="n">current_url</span> <span class="o">=</span> <span class="n">stack</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>  <span class="c1"># 从栈顶取出最新加入的 URL</span>
+</span><span id="__span-1-40"><a id="__codelineno-1-40" name="__codelineno-1-40" href="#__codelineno-1-40"></a>        <span class="n">visit_order</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">current_url</span><span class="p">)</span>
+</span><span id="__span-1-41"><a id="__codelineno-1-41" name="__codelineno-1-41" href="#__codelineno-1-41"></a>
+</span><span id="__span-1-42"><a id="__codelineno-1-42" name="__codelineno-1-42" href="#__codelineno-1-42"></a>        <span class="c1"># 逆序压栈，确保正序第一个链接位于栈顶优先被访问</span>
+</span><span id="__span-1-43"><a id="__codelineno-1-43" name="__codelineno-1-43" href="#__codelineno-1-43"></a>        <span class="k">for</span> <span class="n">link</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">graph</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">current_url</span><span class="p">,</span> <span class="p">[])):</span>
+</span><span id="__span-1-44"><a id="__codelineno-1-44" name="__codelineno-1-44" href="#__codelineno-1-44"></a>            <span class="k">if</span> <span class="n">link</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">visited</span><span class="p">:</span>
+</span><span id="__span-1-45"><a id="__codelineno-1-45" name="__codelineno-1-45" href="#__codelineno-1-45"></a>                <span class="n">visited</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">link</span><span class="p">)</span>
+</span><span id="__span-1-46"><a id="__codelineno-1-46" name="__codelineno-1-46" href="#__codelineno-1-46"></a>                <span class="n">stack</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">link</span><span class="p">)</span>
+</span><span id="__span-1-47"><a id="__codelineno-1-47" name="__codelineno-1-47" href="#__codelineno-1-47"></a>    <span class="k">return</span> <span class="n">visit_order</span>
+</span><span id="__span-1-48"><a id="__codelineno-1-48" name="__codelineno-1-48" href="#__codelineno-1-48"></a>
+</span><span id="__span-1-49"><a id="__codelineno-1-49" name="__codelineno-1-49" href="#__codelineno-1-49"></a>
+</span><span id="__span-1-50"><a id="__codelineno-1-50" name="__codelineno-1-50" href="#__codelineno-1-50"></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
+</span><span id="__span-1-51"><a id="__codelineno-1-51" name="__codelineno-1-51" href="#__codelineno-1-51"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"BFS 广度优先抓取顺序:"</span><span class="p">,</span> <span class="s2">" -&gt; "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">crawl_bfs</span><span class="p">(</span><span class="n">SITE_GRAPH</span><span class="p">,</span> <span class="s2">"A"</span><span class="p">)))</span>
+</span><span id="__span-1-52"><a id="__codelineno-1-52" name="__codelineno-1-52" href="#__codelineno-1-52"></a>    <span class="c1"># 输出: A -&gt; B -&gt; C -&gt; D -&gt; E -&gt; F -&gt; G</span>
+</span><span id="__span-1-53"><a id="__codelineno-1-53" name="__codelineno-1-53" href="#__codelineno-1-53"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"DFS 深度优先抓取顺序:"</span><span class="p">,</span> <span class="s2">" -&gt; "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">crawl_dfs</span><span class="p">(</span><span class="n">SITE_GRAPH</span><span class="p">,</span> <span class="s2">"A"</span><span class="p">)))</span>
+</span><span id="__span-1-54"><a id="__codelineno-1-54" name="__codelineno-1-54" href="#__codelineno-1-54"></a>    <span class="c1"># 输出: A -&gt; B -&gt; D -&gt; E -&gt; C -&gt; F -&gt; G</span>
+</span></code></pre></div>
+<p>理解了 FIFO 队列与 LIFO 栈在 URL 调度中的区别后，请通过下方的交互式微仿真亲自预测 BFS 与 DFS 在每一步出队/出栈时所访问的下一个网页节点。</p>
+<h4 id="diagram-web-crawler-bfs-and-dfs-traversal-predictor">Diagram: Web Crawler BFS and DFS Traversal Predictor<a class="headerlink" href="#diagram-web-crawler-bfs-and-dfs-traversal-predictor" title="Permanent link">&para;</a></h4>
+<pre class="mermaid"><code>flowchart TD
+    A["首页 A (Seed) [BFS:1 / DFS:1]"] --&gt; B["栏目页 B (AI新闻) [BFS:2 / DFS:2]"]
+    A --&gt; C["栏目页 C (开源项目) [BFS:3 / DFS:5]"]
+    B --&gt; D["详情页 D [BFS:4 / DFS:3]"]
+    B --&gt; E["详情页 E [BFS:5 / DFS:4]"]
+    C --&gt; F["详情页 F [BFS:6 / DFS:6]"]
+    C --&gt; G["详情页 G [BFS:7 / DFS:7]"]</code></pre>
+<details>
+<summary>Web Crawler BFS and DFS Traversal Predictor</summary>
+<p>Type: microsim
+<strong>sim-id:</strong> crawler-bfs-dfs-predictor<br/>
+<strong>Library:</strong> p5.js<br/>
+<strong>Status:</strong> Specified<br/>
+<strong>Bloom Level:</strong> Analyze<br/>
+<strong>Bloom Verb:</strong> differentiate<br/>
+<strong>Learning Objective:</strong> The learner will differentiate breadth-first search (BFS) from depth-first search (DFS) web crawling strategies by predicting the next URL node visited at each step from the visible queue or stack state.</p>
+<p><strong>Prerequisites:</strong> URL Seed Queue, Visited Set, FIFO Queue (<code>popleft</code>), LIFO Stack (<code>pop</code>), Breadth-First Search (BFS), Depth-First Search (DFS) (all defined in Section 3.2 above).</p>
+<p><strong>Evidence of Mastery:</strong> Across two 6-step traversal challenges (first BFS, then DFS on the same 7-page website graph), the learner clicks the graph node they predict the crawler will fetch next at each step. A prediction is correct when it matches the visit order in Content. Mastery is completing both BFS and DFS traversals with at most 1 incorrect prediction per traversal (at least 5 of 6 correct in BFS and at least 5 of 6 correct in DFS).</p>
+<p><strong>Misconceptions:</strong> (1) BFS follows the left branch (<code>A -&gt; B -&gt; D</code>) all the way to the leaf page before visiting sibling category <code>C</code>. (2) DFS visits all immediate child links of the root page (<code>B</code> and <code>C</code>) before descending into detail page <code>D</code>.</p>
+<p><strong>Instructional Rationale:</strong> Analyze-level differentiation requires learners to actively apply the FIFO queue rule (<code>popleft</code> from front) versus the LIFO stack rule (<code>pop</code> from top) by committing a next-node prediction before each step advances, rather than passively watching an automated traversal animation.</p>
+<p><strong>Content:</strong></p>
+<p>Website link graph structure (7 pages, root seed is <code>A</code>):
+- Nodes and labels:
+  - <code>A</code>: <code>首页 A (Seed)</code>
+  - <code>B</code>: <code>栏目页 B (AI新闻)</code>
+  - <code>C</code>: <code>栏目页 C (开源项目)</code>
+  - <code>D</code>: <code>详情页 D</code>
+  - <code>E</code>: <code>详情页 E</code>
+  - <code>F</code>: <code>详情页 F</code>
+  - <code>G</code>: <code>详情页 G</code>
+- Directed Edges: <code>A -&gt; B</code>, <code>A -&gt; C</code>, <code>B -&gt; D</code>, <code>B -&gt; E</code>, <code>C -&gt; F</code>, <code>C -&gt; G</code>.
+- Complete BFS step-by-step trace (FIFO Queue, <code>popleft</code> from front, append unvisited children in alphabetical order to back):</p>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>Previously Visited</th>
+<th>Current Queue (Front -&gt; Back)</th>
+<th>Correct Next Node to Click</th>
+<th>Queue After Step</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>A</code></td>
+<td><code>[B, C]</code></td>
+<td><code>B</code></td>
+<td><code>[C, D, E]</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>A, B</code></td>
+<td><code>[C, D, E]</code></td>
+<td><code>C</code></td>
+<td><code>[D, E, F, G]</code></td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>A, B, C</code></td>
+<td><code>[D, E, F, G]</code></td>
+<td><code>D</code></td>
+<td><code>[E, F, G]</code></td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>A, B, C, D</code></td>
+<td><code>[E, F, G]</code></td>
+<td><code>E</code></td>
+<td><code>[F, G]</code></td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>A, B, C, D, E</code></td>
+<td><code>[F, G]</code></td>
+<td><code>F</code></td>
+<td><code>[G]</code></td>
+</tr>
+<tr>
+<td>6</td>
+<td><code>A, B, C, D, E, F</code></td>
+<td><code>[G]</code></td>
+<td><code>G</code></td>
+<td><code>[]</code> (Complete)</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>Complete DFS step-by-step trace (LIFO Stack, <code>pop</code> from top, push unvisited children in reverse alphabetical order so alphabetically first child sits on top of stack):</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>Previously Visited</th>
+<th>Current Stack (Top -&gt; Bottom)</th>
+<th>Correct Next Node to Click</th>
+<th>Stack After Step</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>A</code></td>
+<td><code>[B, C]</code> (Top is <code>B</code>)</td>
+<td><code>B</code></td>
+<td><code>[D, E, C]</code> (Top is <code>D</code>)</td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>A, B</code></td>
+<td><code>[D, E, C]</code> (Top is <code>D</code>)</td>
+<td><code>D</code></td>
+<td><code>[E, C]</code> (Top is <code>E</code>)</td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>A, B, D</code></td>
+<td><code>[E, C]</code> (Top is <code>E</code>)</td>
+<td><code>E</code></td>
+<td><code>[C]</code> (Top is <code>C</code>)</td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>A, B, D, E</code></td>
+<td><code>[C]</code> (Top is <code>C</code>)</td>
+<td><code>C</code></td>
+<td><code>[F, G]</code> (Top is <code>F</code>)</td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>A, B, D, E, C</code></td>
+<td><code>[F, G]</code> (Top is <code>F</code>)</td>
+<td><code>F</code></td>
+<td><code>[G]</code> (Top is <code>G</code>)</td>
+</tr>
+<tr>
+<td>6</td>
+<td><code>A, B, D, E, C, F</code></td>
+<td><code>[G]</code> (Top is <code>G</code>)</td>
+<td><code>G</code></td>
+<td><code>[]</code> (Complete)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Provenance:</strong> Matches the <code>SITE_GRAPH</code>, <code>crawl_bfs</code>, and <code>crawl_dfs</code> worked code example in Chapter 1 Section 3.2.</p>
+<p><strong>Rules:</strong> Seed node <code>A</code> starts already visited at Step 1. In BFS mode, the next node visited is always the front (first) element of the Current Queue, and its unvisited child nodes are appended to the back in alphabetical order. In DFS mode, the next node visited is always the top (first) element of the Current Stack, and its unvisited child nodes are pushed onto the top in reverse alphabetical order so the alphabetically first child is at the top. A node is added to the Visited Set when it enters the queue/stack and is never enqueued/pushed twice.</p>
+<p><strong>Learner Activity:</strong></p>
+<ol>
+<li>In Mode 1 (BFS Challenge), node <code>A</code> is marked visited and the FIFO Queue displays <code>[B, C]</code>. The learner clicks the graph node they predict BFS will fetch next.</li>
+<li>Upon clicking a node, the sim checks the prediction, updates the Visited list and the FIFO Queue display, and prompts for the next step until all 7 nodes (<code>A -&gt; B -&gt; C -&gt; D -&gt; E -&gt; F -&gt; G</code>) are visited.</li>
+<li>The learner activates Mode 2 (DFS Challenge) on the same 7-node graph. Node <code>A</code> is marked visited and the LIFO Stack displays <code>[B, C]</code> (with <code>B</code> at the top). The learner predicts each of the 6 steps (<code>A -&gt; B -&gt; D -&gt; E -&gt; C -&gt; F -&gt; G</code>).</li>
+<li>After both traversals finish, both completed visit sequences are displayed side by side for comparison.</li>
+</ol>
+<p><strong>Feedback:</strong> Two traversals of 6 predictions each, fixed order, 1 attempt per step. Correct prediction: "正确！已抓取节点 <node>，当前已访问序列更新。" Incorrect prediction in BFS: "预测有误：广度优先（BFS）使用先进先出队列，总是从队首取出最早入队的节点（当前队首为 <correct_node>），必须先扫完当前层级才会进入下一层。" Incorrect prediction in DFS: "预测有误：深度优先（DFS）使用后进先出栈，总是从栈顶弹出最新压入的节点（当前栈顶为 <correct_node>），会沿着当前分支一直深入到底部叶子节点后再回溯。" After a wrong prediction, the sim automatically advances using the correct node so the learner can continue the remaining steps. Separate score counters show <code>BFS 预测正确: n / 6</code> and <code>DFS 预测正确: n / 6</code>.</p>
+<p><strong>Starting State:</strong> Mode 1 (BFS) is active, node <code>A</code> is marked as visited (<code>Step 1 of 6</code>), the FIFO Queue panel shows <code>队首 -&gt; [B, C] &lt;- 队尾</code>, and the question prompt reads: "BFS 已抓取首页 A，观察当前队列状态，请点击爬虫下一个将要抓取的页面节点。"</p>
+<p><strong>Chapter Anchors:</strong> Section 3.2 explicitly states the 7 nodes <code>A</code> through <code>G</code>, the BFS visit order <code>A -&gt; B -&gt; C -&gt; D -&gt; E -&gt; F -&gt; G</code>, and the DFS visit order <code>A -&gt; B -&gt; D -&gt; E -&gt; C -&gt; F -&gt; G</code>.</p>
+</details>
+<hr />
+<h2 id="4-robotssitemap">4. 数据合规基石：Robots协议、Sitemap与法律法规红线<a class="headerlink" href="#4-robotssitemap" title="Permanent link">&para;</a></h2>
+<h3 id="41">4.1 数据合规与伦理意识<a class="headerlink" href="#41" title="Permanent link">&para;</a></h3>
+<p>在掌握了网络爬虫的强大自动化能力之后，每一位人工智能专业的学生都必须牢记一句话：<strong>“技术可行（Can do）绝不等于法律允许（May do）。”</strong> 在早期互联网野蛮生长阶段，曾发生过多起由于开发者缺乏<strong>数据合规与伦理意识（Data Compliance &amp; Ethical Awareness）</strong>，编写恶性高频爬虫拖垮目标网站服务器、非法抓取公民个人隐私信息倒卖、或原封不动抄袭竞争对手核心商业数据库而承担刑事责任（如“非法获取计算机信息系统数据罪”、“侵犯公民个人信息罪”）的真实司法判例。</p>
+<p>一个负责任的 AI 数据工程师在启动任何爬虫项目前，必须遵循三项基本工程伦理准则：</p>
+<ol>
+<li><strong>尊重网站意愿（Respect Opt-Out）</strong>：严格检查并遵守目标网站根目录下的 <code>robots.txt</code> 协议声明与服务条款（Terms of Service）。</li>
+<li><strong>控制采集速率（Rate Limiting &amp; Politeness）</strong>：绝不发起超出目标服务器正常承载能力的高并发洪泛请求；在请求之间设置合理的礼貌延迟（如每次请求间隔 1~3 秒），优先选择在目标网站业务低峰期（如凌晨）进行大规模语料同步，避免对正常人类用户访问造成干扰（即避免构成变相的 DDoS 拒绝服务攻击）。</li>
+<li><strong>恪守数据用途边界（Purpose Limitation）</strong>：采集的数据仅用于合法的学术研究、AI 模型统计训练或经授权的业务分析，绝不采集、存储或传播未脱敏的个人身份信息（PII）与受版权严密保护的付费专有内容。</li>
+</ol>
+<h3 id="42-robots">4.2 Robots协议与语法规范<a class="headerlink" href="#42-robots" title="Permanent link">&para;</a></h3>
+<p><strong>Robots协议与语法规范（Robots Exclusion Protocol）</strong>，全称为“网络爬虫排除标准”（2022 年正式成为互联网工程任务组标准 RFC 9309），是网站所有者放置在网站根目录下的一份纯文本文件，固定访问路径为 <code>https://&lt;域名&gt;/robots.txt</code>（例如 <code>https://www.baidu.com/robots.txt</code>）。它就像张贴在图书馆大门口的《访客借阅须知》，明确告知各类爬虫机器人：本网站的哪些目录允许抓取，哪些目录禁止入内。</p>
+<p>一份标准的 <code>robots.txt</code> 文件由一个或多个规则块组成，每个规则块包含以下核心指令字段：</p>
+<ul>
+<li><strong><code>User-agent</code></strong>：指定该规则块适用的爬虫名称（机器人标识符）。例如 <code>User-agent: Baiduspider</code> 表示仅针对百度爬虫生效；<code>User-agent: GPTBot</code> 针对 OpenAI 的大模型语料爬虫；而 <strong><code>User-agent: *</code> 中的星号通配符表示对所有未单独点名的网络爬虫均生效</strong>。</li>
+<li><strong><code>Disallow</code></strong>：指定禁止爬虫访问的相对路径前缀。</li>
+<li><code>Disallow: /admin/</code> 表示禁止抓取 <code>/admin/</code> 目录及其下属的所有子页面；</li>
+<li><code>Disallow: /private</code> 表示禁止抓取以 <code>/private</code> 开头的所有路径；</li>
+<li><code>Disallow: /</code> 表示<strong>禁止抓取全站任何页面</strong>；</li>
+<li><code>Disallow:</code>（冒号后面为空）表示<strong>允许抓取全站所有页面</strong>。</li>
+<li><strong><code>Allow</code></strong>：当某个父目录被 <code>Disallow</code> 禁止时，用于单独豁免允许抓取其下的某个子路径。例如同时配置 <code>Disallow: /api/</code> 和 <code>Allow: /api/public/</code>，意味着除了 <code>/api/public/</code> 下的公开接口外，其余 <code>/api/</code> 路径一律禁止爬取（遵循<strong>最长路径匹配优先</strong>或特定豁免优先原则）。</li>
+<li><strong><code>Crawl-delay</code></strong>：建议爬虫在两次连续请求之间保持的最小等待秒数（例如 <code>Crawl-delay: 5</code> 表示每次抓取至少间隔 5 秒）。</li>
+<li><strong><code>Sitemap</code></strong>：直接指明本网站的 XML 网站地图文件地址，方便爬虫快速定位全站有效链接。</li>
+</ul>
+<h3 id="43-sitemap">4.3 Sitemap网站地图解析<a class="headerlink" href="#43-sitemap" title="Permanent link">&para;</a></h3>
+<p>与用来“划定禁区”的 <code>robots.txt</code> 相反，<strong>Sitemap网站地图解析（Sitemap XML Parsing）</strong> 是网站主动为爬虫提供的“官方导航清单”。许多网站为了帮助搜索引擎更快收录新发布的文章，会在 <code>/sitemap.xml</code> 中按标准 XML 格式列出全站所有公开页面的 URL、最后修改时间（<code>&lt;lastmod&gt;</code>）、更新频率（<code>&lt;changefreq&gt;</code>）和权重优先级（<code>&lt;priority&gt;</code>）：</p>
+<div class="language-xml highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="cp">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="nt">&lt;urlset</span><span class="w"> </span><span class="na">xmlns=</span><span class="s">"http://www.sitemaps.org/schemas/sitemap/0.9"</span><span class="nt">&gt;</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">  </span><span class="nt">&lt;url&gt;</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">    </span><span class="nt">&lt;loc&gt;</span>https://ai.example.edu/articles/2026-llm-dataset.html<span class="nt">&lt;/loc&gt;</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">    </span><span class="nt">&lt;lastmod&gt;</span>2026-10-18<span class="nt">&lt;/lastmod&gt;</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">    </span><span class="nt">&lt;changefreq&gt;</span>daily<span class="nt">&lt;/changefreq&gt;</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">    </span><span class="nt">&lt;priority&gt;</span>0.8<span class="nt">&lt;/priority&gt;</span>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">  </span><span class="nt">&lt;/url&gt;</span>
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="nt">&lt;/urlset&gt;</span>
+</span></code></pre></div>
+<p>对于爬虫开发者而言，<strong>先检查目标站点是否存在 <code>sitemap.xml</code> 是一条极佳的工程捷径</strong>：如果目标网站提供了包含全量文章链接与 <code>&lt;lastmod&gt;</code> 最后更新日期的 Sitemap，我们甚至不需要去翻爬几百页的列表页，直接解析这一个 XML 文件就能拿到全站所有详情页 URL，并能根据 <code>&lt;lastmod&gt;</code> 轻松实现增量更新采集！</p>
+<p>Python 标准库中的 <code>urllib.robotparser.RobotFileParser</code> 模块为我们提供了开箱即用的 <code>robots.txt</code> 解析与权限判定能力。在下面的代码示例中，我们模拟加载一份目标网站的 <code>robots.txt</code> 文本，并使用 <code>.can_fetch(useragent, url)</code> 方法在爬虫发起请求前自动校验合规性：</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">urllib.robotparser</span><span class="w"> </span><span class="kn">import</span> <span class="n">RobotFileParser</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="c1"># 模拟从 https://ai.example.edu/robots.txt 获取到的规则文本</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="n">ROBOTS_TXT_CONTENT</span> <span class="o">=</span> <span class="s2">"""</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="s2">User-agent: BadBot</span>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="s2">Disallow: /</span>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="s2">User-agent: *</span>
+</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="s2">Disallow: /admin/</span>
+</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="s2">Disallow: /user/profile/</span>
+</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="s2">Allow: /user/profile/public</span>
+</span><span id="__span-3-12"><a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="s2">Crawl-delay: 2</span>
+</span><span id="__span-3-13"><a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a>
+</span><span id="__span-3-14"><a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a><span class="s2">Sitemap: https://ai.example.edu/sitemap.xml</span>
+</span><span id="__span-3-15"><a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a><span class="s2">"""</span>
+</span><span id="__span-3-16"><a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a>
+</span><span id="__span-3-17"><a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a>
+</span><span id="__span-3-18"><a id="__codelineno-3-18" name="__codelineno-3-18" href="#__codelineno-3-18"></a><span class="k">def</span><span class="w"> </span><span class="nf">check_crawl_permission</span><span class="p">(</span>
+</span><span id="__span-3-19"><a id="__codelineno-3-19" name="__codelineno-3-19" href="#__codelineno-3-19"></a>    <span class="n">robots_text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">bot_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">target_urls</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+</span><span id="__span-3-20"><a id="__codelineno-3-20" name="__codelineno-3-20" href="#__codelineno-3-20"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-3-21"><a id="__codelineno-3-21" name="__codelineno-3-21" href="#__codelineno-3-21"></a><span class="w">    </span><span class="sd">"""使用标准库 RobotFileParser 自动审计目标 URL 是否允许爬取"""</span>
+</span><span id="__span-3-22"><a id="__codelineno-3-22" name="__codelineno-3-22" href="#__codelineno-3-22"></a>    <span class="n">rp</span> <span class="o">=</span> <span class="n">RobotFileParser</span><span class="p">()</span>
+</span><span id="__span-3-23"><a id="__codelineno-3-23" name="__codelineno-3-23" href="#__codelineno-3-23"></a>    <span class="c1"># parse() 接收按行切分的字符串列表</span>
+</span><span id="__span-3-24"><a id="__codelineno-3-24" name="__codelineno-3-24" href="#__codelineno-3-24"></a>    <span class="n">rp</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">robots_text</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">splitlines</span><span class="p">())</span>
+</span><span id="__span-3-25"><a id="__codelineno-3-25" name="__codelineno-3-25" href="#__codelineno-3-25"></a>
+</span><span id="__span-3-26"><a id="__codelineno-3-26" name="__codelineno-3-26" href="#__codelineno-3-26"></a>    <span class="n">delay</span> <span class="o">=</span> <span class="n">rp</span><span class="o">.</span><span class="n">crawl_delay</span><span class="p">(</span><span class="n">bot_name</span><span class="p">)</span>
+</span><span id="__span-3-27"><a id="__codelineno-3-27" name="__codelineno-3-27" href="#__codelineno-3-27"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"🤖 当前爬虫标识: </span><span class="si">{</span><span class="n">bot_name</span><span class="si">}</span><span class="s2"> | 建议抓取间隔 Crawl-delay: </span><span class="si">{</span><span class="n">delay</span><span class="si">}</span><span class="s2"> 秒"</span><span class="p">)</span>
+</span><span id="__span-3-28"><a id="__codelineno-3-28" name="__codelineno-3-28" href="#__codelineno-3-28"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"🗺️ 发现 Sitemap 列表: </span><span class="si">{</span><span class="n">rp</span><span class="o">.</span><span class="n">site_maps</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</span><span id="__span-3-29"><a id="__codelineno-3-29" name="__codelineno-3-29" href="#__codelineno-3-29"></a>
+</span><span id="__span-3-30"><a id="__codelineno-3-30" name="__codelineno-3-30" href="#__codelineno-3-30"></a>    <span class="k">for</span> <span class="n">url</span> <span class="ow">in</span> <span class="n">target_urls</span><span class="p">:</span>
+</span><span id="__span-3-31"><a id="__codelineno-3-31" name="__codelineno-3-31" href="#__codelineno-3-31"></a>        <span class="n">allowed</span> <span class="o">=</span> <span class="n">rp</span><span class="o">.</span><span class="n">can_fetch</span><span class="p">(</span><span class="n">bot_name</span><span class="p">,</span> <span class="n">url</span><span class="p">)</span>
+</span><span id="__span-3-32"><a id="__codelineno-3-32" name="__codelineno-3-32" href="#__codelineno-3-32"></a>        <span class="n">status</span> <span class="o">=</span> <span class="s2">"✅ 允许爬取 (ALLOW)"</span> <span class="k">if</span> <span class="n">allowed</span> <span class="k">else</span> <span class="s2">"🚫 禁止爬取 (BLOCK)"</span>
+</span><span id="__span-3-33"><a id="__codelineno-3-33" name="__codelineno-3-33" href="#__codelineno-3-33"></a>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  </span><span class="si">{</span><span class="n">status</span><span class="si">}</span><span class="s2"> -&gt; </span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</span><span id="__span-3-34"><a id="__codelineno-3-34" name="__codelineno-3-34" href="#__codelineno-3-34"></a>
+</span><span id="__span-3-35"><a id="__codelineno-3-35" name="__codelineno-3-35" href="#__codelineno-3-35"></a>
+</span><span id="__span-3-36"><a id="__codelineno-3-36" name="__codelineno-3-36" href="#__codelineno-3-36"></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
+</span><span id="__span-3-37"><a id="__codelineno-3-37" name="__codelineno-3-37" href="#__codelineno-3-37"></a>    <span class="n">test_urls</span> <span class="o">=</span> <span class="p">[</span>
+</span><span id="__span-3-38"><a id="__codelineno-3-38" name="__codelineno-3-38" href="#__codelineno-3-38"></a>        <span class="s2">"https://ai.example.edu/news/index.html"</span><span class="p">,</span>
+</span><span id="__span-3-39"><a id="__codelineno-3-39" name="__codelineno-3-39" href="#__codelineno-3-39"></a>        <span class="s2">"https://ai.example.edu/admin/dashboard"</span><span class="p">,</span>
+</span><span id="__span-3-40"><a id="__codelineno-3-40" name="__codelineno-3-40" href="#__codelineno-3-40"></a>        <span class="s2">"https://ai.example.edu/user/profile/secret"</span><span class="p">,</span>
+</span><span id="__span-3-41"><a id="__codelineno-3-41" name="__codelineno-3-41" href="#__codelineno-3-41"></a>        <span class="s2">"https://ai.example.edu/user/profile/public/bio"</span><span class="p">,</span>
+</span><span id="__span-3-42"><a id="__codelineno-3-42" name="__codelineno-3-42" href="#__codelineno-3-42"></a>    <span class="p">]</span>
+</span><span id="__span-3-43"><a id="__codelineno-3-43" name="__codelineno-3-43" href="#__codelineno-3-43"></a>    <span class="n">check_crawl_permission</span><span class="p">(</span><span class="n">ROBOTS_TXT_CONTENT</span><span class="p">,</span> <span class="s2">"AIStudentBot/1.0"</span><span class="p">,</span> <span class="n">test_urls</span><span class="p">)</span>
+</span></code></pre></div>
+<h3 id="44">4.4 数据安全法与个人信息保护<a class="headerlink" href="#44" title="Permanent link">&para;</a></h3>
+<p>除了技术层面的 <code>robots.txt</code> 协议，我国近年来已建立起完善的数据安全与网络空间治理法律体系。作为人工智能技术应用专业的从业者，必须清晰掌握<strong>数据安全法与个人信息保护</strong>的四大法律红线（《中华人民共和国网络安全法》《中华人民共和国数据安全法》《中华人民共和国个人信息保护法》及《生成式人工智能服务管理暂行办法》）：</p>
+<ol>
+<li><strong>公民个人隐私信息（PII）绝对红线</strong>：凡涉及自然人的姓名、身份证号、手机号码、家庭住址、生物识别特征、医疗健康记录、行踪轨迹、金融账户等<strong>个人信息</strong>，未经个人明确单独同意，严禁任何爬虫进行自动化抓取、存储或用于 AI 模型训练。哪怕这些信息因某个网站配置疏漏而处于公开可访问状态，擅自批量爬取依然涉嫌构成《刑法》第二百五十三条之一的<strong>“侵犯公民个人信息罪”</strong>。</li>
+<li><strong>计算机信息系统安全红线</strong>：严禁采用暴力破解密码、伪造未授权身份凭证、利用系统漏洞绕过服务器安全防护措施的方式获取非公开数据；严禁以超高并发请求干扰目标网站正常经营服务，否则可能触犯《刑法》第二百八十五条<strong>“非法获取计算机信息系统数据罪”</strong>或第二百八十六条<strong>“破坏计算机信息系统罪”</strong>。</li>
+<li><strong>知识产权与不正当竞争红线</strong>：受《著作权法》保护的独创性付费作品，或构成竞争对手核心商业利益的平台数据（如某点评网站耗费巨资积累的商户评论库、某征信平台的企业风控数据），若未经许可通过技术手段大规模搬运并用于直接商业替代，将触发《反不正当竞争法》下的巨额民事索赔。</li>
+<li><strong>生成式 AI 训练语料合规义务</strong>：根据《生成式人工智能服务管理暂行办法》第七条规定，用于训练大模型的预训练和微调语料来源必须合法，不得侵害他人依法享有的知识产权，涉及个人信息的应当取得个人同意或符合法律规定的匿名化脱敏要求。</li>
+</ol>
+<div class="admonition warning">
+<p class="admonition-title">AI 数据采集工程『合规自检四问』（写代码前必做）</p>
+<p>在针对任何目标网站动手编写爬虫脚本之前，请务必逐条核对以下四道安全闸门：</p>
+<ol>
+<li><strong>查协议</strong>：目标网站的 <code>/robots.txt</code> 与用户服务协议（ToS）是否明确禁止抓取该路径？</li>
+<li><strong>看性质</strong>：拟采集的数据属于“公开非敏感信息”（如公开新闻、开源代码、政府公开统计公报），还是涉及“个人隐私（PII）、商业秘密或付费墙后受版权保护内容”？</li>
+<li><strong>控速率</strong>：是否配置了合理的请求间隔（如 <code>time.sleep(2)</code>）与并发上限，确保绝不影响目标网站对正常用户的服务？</li>
+<li><strong>做脱敏</strong>：采集后的文本在进入 AI 训练集前，是否经过了正则与命名实体识别（NER）清洗，彻底擦除了偶然夹杂的手机号、邮箱、身份证号等敏感字段？</li>
+</ol>
+</div>
+<p>在完成了对 <code>robots.txt</code> 语法规则与数据合规四问的学习后，请通过下方的交互式合规审计仿真器，对 8 个真实的 AI 数据采集请求场景逐一做出“允许采集（ALLOW）”或“拦截禁止（BLOCK）”的工程裁决。</p>
+<h4 id="diagram-robotstxt-and-ai-data-compliance-auditor">Diagram: Robots.txt and AI Data Compliance Auditor<a class="headerlink" href="#diagram-robotstxt-and-ai-data-compliance-auditor" title="Permanent link">&para;</a></h4>
+<pre class="mermaid"><code>flowchart TD
+    Start["发起采集任务前合规审查"] --&gt; R1{"1. 检查 /robots.txt 协议"}
+    R1 --&gt;|命中 Disallow 且无书面授权| Stop1["终止抓取: 遵守君子协定"]
+    R1 --&gt;|Allow 或已获公开授权| R2{"2. 评估服务器负载与 Crawl-delay"}
+    R2 --&gt;|高频并发阻塞正常服务| Stop2["限流整改: 严防破坏计算机信息系统罪"]
+    R2 --&gt;|温和限速礼貌抓取| R3{"3. 核查数据属性与个人信息 PII"}
+    R3 --&gt;|含未授权公民手机号/身份证/隐私| Stop3["脱敏或丢弃: 遵守个人信息保护法"]
+    R3 --&gt;|公开非敏感数据或已脱敏| Pass["合规放行: 注入 AI 训练语料库"]</code></pre>
+<details>
+<summary>Robots.txt and AI Data Compliance Auditor</summary>
+<p>Type: microsim
+<strong>sim-id:</strong> robots-compliance-auditor<br/>
+<strong>Library:</strong> p5.js<br/>
+<strong>Status:</strong> Specified<br/>
+<strong>Bloom Level:</strong> Evaluate<br/>
+<strong>Bloom Verb:</strong> judge<br/>
+<strong>Learning Objective:</strong> The learner will judge whether 8 candidate web scraping requests are compliant (ALLOW) or non-compliant (BLOCK) by evaluating them against a displayed <code>robots.txt</code> policy and Chinese data protection law criteria.</p>
+<p><strong>Prerequisites:</strong> <code>robots.txt</code> directives (<code>User-agent</code>, <code>Disallow</code>, <code>Allow</code>, <code>Crawl-delay</code>), longest-prefix path matching, Personal Identifiable Information (PII), Chinese Data Security Law and Personal Information Protection Law (all defined in Sections 4.1–4.4 above).</p>
+<p><strong>Evidence of Mastery:</strong> For each of the 8 scraping request cards, the learner commits a binary judgment (<code>✅ 允许合规采集 ALLOW</code> or <code>🚫 违规必须拦截 BLOCK</code>) and selects the primary reason category (<code>符合公开与Robots规则</code> / <code>违反Robots协议路径禁令</code> / <code>触犯个人信息与隐私红线</code> / <code>并发过高破坏系统服务</code>). Mastery is judging at least 7 of the 8 scenarios correctly on the first attempt.</p>
+<p><strong>Misconceptions:</strong> (1) If a webpage containing citizens' phone numbers and ID card numbers is publicly accessible without login, it is legal to scrape it for AI training. (2) When both <code>Disallow: /user/profile/</code> and <code>Allow: /user/profile/public</code> appear in <code>robots.txt</code>, the <code>Disallow</code> rule always blocks the <code>/user/profile/public/bio</code> subpath. (3) If a path is allowed by <code>robots.txt</code>, sending 2,000 requests per second is acceptable.</p>
+<p><strong>Instructional Rationale:</strong> Evaluate-level judgment requires learners to weigh technical protocol rules (<code>robots.txt</code> path matching and <code>Crawl-delay</code>) alongside legal/ethical boundaries (PII protection and server load impact) on concrete engineering scenarios and receive immediate legal/technical feedback on each decision.</p>
+<p><strong>Content:</strong></p>
+<p>Reference <code>robots.txt</code> policy displayed in the auditor panel for <code>https://portal.example.edu/robots.txt</code>:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>User-agent: BadBot
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>Disallow: /
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>User-agent: *
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>Disallow: /admin/
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>Disallow: /user/profile/
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>Allow: /user/profile/public
+</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>Crawl-delay: 2
+</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>
+</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>Sitemap: https://portal.example.edu/sitemap.xml
+</span></code></pre></div>
+<p>The 8 candidate scraping request scenarios evaluated by the learner (fixed order):</p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Request Scenario Shown to Learner</th>
+<th>Correct Judgment</th>
+<th>Primary Reason Category</th>
+<th>Feedback &amp; Explanation (Why)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>爬虫 <code>AIStudentBot</code> 以每 3 秒 1 次的速率抓取 <code>https://portal.example.edu/news/2026-ai.html</code> 公开学院新闻正文</td>
+<td><code>ALLOW</code></td>
+<td><code>符合公开与Robots规则</code></td>
+<td><code>/news/</code> 未被 <code>Disallow</code> 限制，请求间隔 3 秒满足 <code>Crawl-delay: 2</code> 要求，且内容为公开非敏感新闻。</td>
+</tr>
+<tr>
+<td>2</td>
+<td>爬虫 <code>AIStudentBot</code> 访问 <code>https://portal.example.edu/admin/login</code> 尝试采集后台管理页面结构</td>
+<td><code>BLOCK</code></td>
+<td><code>违反Robots协议路径禁令</code></td>
+<td><code>robots.txt</code> 中明确声明了 <code>Disallow: /admin/</code>，禁止任何爬虫抓取后台管理目录。</td>
+</tr>
+<tr>
+<td>3</td>
+<td>爬虫 <code>AIStudentBot</code> 以每 2.5 秒 1 次的速率抓取 <code>https://portal.example.edu/user/profile/public/teacher-bio</code> 公开教师简介</td>
+<td><code>ALLOW</code></td>
+<td><code>符合公开与Robots规则</code></td>
+<td>虽然 <code>/user/profile/</code> 被禁止，但 <code>Allow: /user/profile/public</code> 遵循最长路径匹配豁免了公开子目录，且速率合规。</td>
+</tr>
+<tr>
+<td>4</td>
+<td>爬虫 <code>BadBot</code> 请求抓取 <code>https://portal.example.edu/news/index.html</code> 首页公开文章列表</td>
+<td><code>BLOCK</code></td>
+<td><code>违反Robots协议路径禁令</code></td>
+<td><code>robots.txt</code> 专门针对 <code>User-agent: BadBot</code> 配置了 <code>Disallow: /</code> 全站禁令，专属规则优先于 <code>*</code> 通配符。</td>
+</tr>
+<tr>
+<td>5</td>
+<td>爬虫 <code>AIStudentBot</code> 在未获授权情况下抓取某公开论坛帖子中意外泄露的 5,000 条真实学生姓名、手机号与身份证号列表</td>
+<td><code>BLOCK</code></td>
+<td><code>触犯个人信息与隐私红线</code></td>
+<td>即使页面公开可访问且未被 <code>robots.txt</code> 禁止，批量抓取未授权公民个人敏感信息（PII）直接违反《个人信息保护法》与《刑法》。</td>
+</tr>
+<tr>
+<td>6</td>
+<td>爬虫 <code>AIStudentBot</code> 读取并解析 <code>https://portal.example.edu/sitemap.xml</code> 获取全站公开文章链接与最后更新时间</td>
+<td><code>ALLOW</code></td>
+<td><code>符合公开与Robots规则</code></td>
+<td><code>Sitemap</code> 是网站在 <code>robots.txt</code> 中主动公开引导爬虫读取的导航索引文件，优先利用 Sitemap 是推荐的礼貌采集实践。</td>
+</tr>
+<tr>
+<td>7</td>
+<td>爬虫 <code>AIStudentBot</code> 抓取允许访问的 <code>/news/</code> 目录，但开启了 500 个并发线程且设置请求间隔为 0 秒（每秒发起 1,500 次请求）</td>
+<td><code>BLOCK</code></td>
+<td><code>并发过高破坏系统服务</code></td>
+<td>完全无视 <code>Crawl-delay: 2</code> 声明，超高频洪泛请求会耗尽目标服务器带宽与连接池，涉嫌构成破坏计算机信息系统行为。</td>
+</tr>
+<tr>
+<td>8</td>
+<td>爬虫 <code>AIStudentBot</code> 抓取 <code>https://portal.example.edu/user/profile/private-grades</code> 学生私有成绩单页面</td>
+<td><code>BLOCK</code></td>
+<td><code>违反Robots协议路径禁令</code></td>
+<td>该路径匹配 <code>Disallow: /user/profile/</code> 且不在 <code>Allow</code> 豁免范围内，同时私有成绩单也属于受保护的个人隐私数据。</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Provenance:</strong> Scenarios 1–4 and 6, 8 match the <code>ROBOTS_TXT_CONTENT</code> worked example in Chapter 1 Section 4.3; Scenarios 5 and 7 directly apply the legal red lines in Section 4.4.</p>
+<p><strong>Rules:</strong> A scenario is judged correct only when the binary decision (<code>ALLOW</code> or <code>BLOCK</code>) matches the <code>Correct Judgment</code> column in Content. Selecting the <code>Primary Reason Category</code> provides secondary diagnostic confirmation. Under RFC 9309 <code>robots.txt</code> matching rules, a more specific <code>User-agent</code> block (<code>BadBot</code>) overrides the wildcard (<code>*</code>), and within a block, a longer matching path (<code>Allow: /user/profile/public</code>) overrides a shorter prefix (<code>Disallow: /user/profile/</code>). Legal red lines (PII and DDoS-level rate abuse) always force <code>BLOCK</code> even if <code>robots.txt</code> path matching would otherwise permit the URL.</p>
+<p><strong>Learner Activity:</strong></p>
+<ol>
+<li>The learner inspects the reference <code>robots.txt</code> file on the left and reads Scenario Card 1 on the right.</li>
+<li>The learner selects the Primary Reason Category and clicks either <code>✅ 允许合规采集 (ALLOW)</code> or <code>🚫 违规必须拦截 (BLOCK)</code>.</li>
+<li>The sim immediately evaluates the judgment, displays the detailed legal/protocol explanation from the Content table, and advances to the next scenario until all 8 cards are audited.</li>
+<li>At the end of the 8 scenarios, an audit summary table shows all 8 cases with their rulings and the learner's final accuracy score.</li>
+</ol>
+<p><strong>Feedback:</strong> 8 scenarios in fixed order, 1 committed attempt per scenario. Correct judgment: "裁决正确！" followed by the <code>Feedback &amp; Explanation (Why)</code> text. Incorrect judgment: "裁决有误（正确裁决应为 <Correct Judgment>）：" followed by the <code>Feedback &amp; Explanation (Why)</code> text exposing the specific protocol or legal misconception. Running counter shown at top: <code>合规审计进度：第 k / 8 题 | 当前正确数：n</code>.</p>
+<p><strong>Starting State:</strong> The reference <code>robots.txt</code> policy for <code>portal.example.edu</code> is displayed alongside Scenario Card 1 (<code>AIStudentBot</code> fetching <code>/news/2026-ai.html</code> at 1 request per 3 seconds), with the prompt: "请对照左侧 robots.txt 协议与数据安全法规，对该采集请求做出合规裁决。"</p>
+<p><strong>Chapter Anchors:</strong> The <code>robots.txt</code> rules (<code>BadBot</code>, <code>/admin/</code>, <code>/user/profile/</code>, <code>/user/profile/public</code>, <code>Crawl-delay: 2</code>, <code>sitemap.xml</code>) and tested URLs match the Python <code>RobotFileParser</code> code listing in Section 4.3 and the four-point compliance checklist in Section 4.4.</p>
+</details>
+<hr />
+<h2 id="5">5. 本章小结与思考练习<a class="headerlink" href="#5" title="Permanent link">&para;</a></h2>
+<h3 id="51">5.1 核心要点回顾<a class="headerlink" href="#51" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>AI 数据的源头活水</strong>：网络爬虫是连接互联网海量非结构化网页与人工智能结构化训练集（LLM 预训练语料、垂直领域 SFT 微调集、RAG 实时向量知识库）的核心工程桥梁。</li>
+<li><strong>七大先修基石协同</strong>：计算机网络（IP/DNS/TCP）、万维网与 HTTP 协议、Web 浏览器工作原理、HTML DOM 树结构、Python 编程与异常处理、队列/字典/集合数据结构以及 UTF-8 文件 IO，共同构成了网络爬虫的技术底座。</li>
+<li><strong>三大爬虫分类与数据冰山</strong>：通用爬虫追求全网广度覆盖，聚焦爬虫追求特定主题的精准结构化提取，增量爬虫追求只抓新增与变更内容以节省带宽；爬虫工程应聚焦于合法的表层网页与经授权的深层网页（Deep Web），严禁触碰暗网。</li>
+<li><strong>五阶段标准工作流与图遍历</strong>：种子调度（含 <code>Visited</code> 集合去重）<span class="arithmatex">\(\rightarrow\)</span> 网络下载 <span class="arithmatex">\(\rightarrow\)</span> 双路解析（提取业务字段 <code>Item</code> + 回流新发现 <code>URL</code>）<span class="arithmatex">\(\rightarrow\)</span> 数据清洗校验 <span class="arithmatex">\(\rightarrow\)</span> 持久化存储；广度优先（BFS）基于先进先出队列（<code>popleft</code>）逐层抓取，深度优先（DFS）基于后进先出栈（<code>pop</code>）纵深抓取。</li>
+<li><strong>合规伦理是生命线</strong>：动笔写代码前必须执行“合规自检四问”，使用 <code>urllib.robotparser</code> 解析并尊重 <code>robots.txt</code> 与 <code>Sitemap</code>，坚决不触碰公民个人隐私（PII）、暴力绕过鉴权与高频攻击服务器的法律红线。</li>
+</ul>
+<h3 id="52">5.2 思考与自测练习<a class="headerlink" href="#52" title="Permanent link">&para;</a></h3>
+<details class="question">
+<summary>思考题 1：为什么在爬虫调度器中，我们使用 Python 的 <code>set</code>（集合）而不是 <code>list</code>（列表）来存储『已访问过的 URL（Visited URLs）』？</summary>
+<p>当爬虫累计抓取了 100 万个网页时，每遇到一个新链接都需要判断 <code>if url in visited:</code>。如果使用 <code>list</code>（列表），Python 需要从头到尾顺序扫描比对，查找时间复杂度为 <span class="arithmatex">\(O(N)\)</span>，越抓越慢；而 <code>set</code>（集合）底层基于哈希表（Hash Table）实现，无论集合里有 10 个还是 100 万个网址，判断 <code>url in visited</code> 的平均时间复杂度始终是常数级 <span class="arithmatex">\(O(1)\)</span>，且天然保证元素不重复。</p>
+</details>
+<details class="question">
+<summary>思考题 2：在采集一个包含『新闻列表分页（第1页~第100页）』和『每页20篇新闻详情页』的网站时，应该优先选择广度优先（BFS）还是深度优先（DFS）策略？为什么？</summary>
+<p>应当优先选择<strong>广度优先策略（BFS）</strong>（或按层级优先级调度）。因为新闻详情页里往往包含“相关推荐新闻”的交叉链接，如果采用无深度限制的 DFS，爬虫会顺着第一篇新闻里的相关推荐无限钻下去，导致迟迟无法回到列表页抓取第 1 页剩下的 19 篇新闻。而使用 BFS 能确保先稳定遍历列表层级和距离首页仅有 1~2 跳的正文页面。</p>
+</details>
+<details class="question">
+<summary>思考题 3：某公开招聘网站无需登录即可在网页上看到求职者公开填写的简历姓名与联系电话，且该网站的 <code>robots.txt</code> 为空（未禁止抓取）。请问能否编写爬虫批量采集这些简历中的姓名和电话用于训练 AI 电销机器人？</summary>
+<p><strong>绝对不能！</strong> <code>robots.txt</code> 未禁止仅代表网站在技术协议层面未设防，但求职者的姓名与联系电话属于受《中华人民共和国个人信息保护法》与《刑法》严格保护的<strong>公民个人信息（PII）</strong>。未经个人信息主体明确同意，擅自批量抓取并用于商业营销或 AI 训练，直接涉嫌构成“侵犯公民个人信息罪”。</p>
+</details>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../" class="md-footer__link md-footer__link--prev" aria-label="Previous: List of Chapters">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                List of Chapters
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../02-web-and-http-fundamentals/" class="md-footer__link md-footer__link--next" aria-label="Next: 2. Web前端基石与HTTP通信原理">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                2. Web前端基石与HTTP通信原理
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2026 AI教材编写组. Licensed under <a href="license/">CC BY-NC-SA 4.0</a> for non-commercial use.
+    </div>
+  
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["content.code.copy", "content.action.edit", "navigation.expand", "navigation.path", "navigation.prune", "navigation.indexes", "navigation.top", "navigation.footer", "toc.follow", "search.suggest", "search.highlight", "search.share"], "search": "../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.c21346df.min.js"></script>
+      
+    
+  </body>
+</html>
