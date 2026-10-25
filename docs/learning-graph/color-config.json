@@ -1,0 +1,14 @@
+{
+  "FOUND": "SteelBlue",
+  "HTTP": "DodgerBlue",
+  "REQ": "DarkGreen",
+  "PARSE": "LimeGreen",
+  "API": "Gold",
+  "DYN": "DarkGoldenrod",
+  "ANTI": "Crimson",
+  "ASYNC": "MediumPurple",
+  "STORE": "Teal",
+  "SCRP": "Indigo",
+  "AICRP": "Orange",
+  "PROJ": "DeepPink"
+}

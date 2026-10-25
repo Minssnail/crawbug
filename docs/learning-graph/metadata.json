@@ -1,0 +1,10 @@
+{
+  "title": "网络爬虫技术（Web Scraping & Data Acquisition for AI）",
+  "description": "面向高职专科人工智能技术应用专业的《网络爬虫技术》240概念依赖图谱（DAG），涵盖HTTP协议、静态解析、API逆向、Playwright动态渲染、反爬对抗、异步并发、多源存储、Scrapy框架与大模型AI智能爬虫。",
+  "creator": "AI教材编写组",
+  "date": "2026-10-20",
+  "version": "1.0",
+  "format": "Learning Graph JSON v1.0",
+  "schema": "https://raw.githubusercontent.com/dmccreary/learning-graphs/refs/heads/main/src/schema/learning-graph-schema.json",
+  "license": "CC BY-NC-SA 4.0 DEED"
+}
