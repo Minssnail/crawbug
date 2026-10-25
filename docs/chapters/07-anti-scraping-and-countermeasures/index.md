@@ -221,6 +221,15 @@ def decrypt_webfont_numbers(
 
 #### Diagram: 滑块验证码生物动力学轨迹与风控评分模拟器
 
+```mermaid
+flowchart LR
+    Img["获取验证码背景图与拼图块"] --> OCR["1. ddddocr.slide_match() 识别缺口坐标 X"]
+    OCR --> Scale["2. 乘以网页 CSS 渲染缩放系数 scale_ratio"]
+    Scale --> Track["3. 生成拟人轨迹: 前75%匀加速 -> 后25%匀减速 -> 末端过冲3px回退 + Y轴微抖动"]
+    Track --> Drag["4. Playwright mouse.down -> 逐点 move -> 随机停顿后 mouse.up"]
+    Drag --> Pass["通过行为风控校验"]
+```
+
 <details markdown="1">
 <summary>Interactive MicroSim: 滑块验证码生物动力学轨迹与风控评分模拟器</summary>
 
@@ -358,6 +367,17 @@ def solve_slider_captcha(page: Page, bg_bytes: bytes, slice_bytes: bytes, scale_
 4. 查看右侧的 **Call Stack（调用栈）** 列表：顺着调用栈从栈顶（底层发送函数）往下逐层点击回溯 2～4 层，就能在 **Scope（作用域变量）** 面板中亲眼看到 `sign` 参数从明文字符串刚刚被计算出来的案发现场！
 
 #### Diagram: DevTools XHR 断点回溯与接口签名逆向沙盒
+
+```mermaid
+flowchart TD
+    Step1["1. Network 面板发现加密参数 sign / token"] --> Step2["2. Sources 面板添加 XHR/fetch Breakpoint (匹配接口路径)"]
+    Step2 --> Step3["3. 点击网页翻页触发断点暂停在 xhr.send()"]
+    Step3 --> Step4["4. 顺着 Call Stack 调用栈向下回溯 2~4 层业务栈帧"]
+    Step4 --> Step5["5. 在 Scope 作用域面板锁定明文参数排序拼接与盐值 Salt"]
+    Step5 --> Step6{"6. 评估算法复杂度选择工程落地方案"}
+    Step6 -->|标准 MD5 / HMAC-SHA256 / AES| Py["使用 Python hashlib / hmac / pycryptodome 原生重写"]
+    Step6 -->|超长混淆 JS / 瑞数 / WebAssembly| RPC["使用 WebSocket 注入浏览器执行 JSRPC 远程调用"]
+```
 
 <details markdown="1">
 <summary>Interactive MicroSim: DevTools XHR 断点回溯与接口签名逆向沙盒</summary>

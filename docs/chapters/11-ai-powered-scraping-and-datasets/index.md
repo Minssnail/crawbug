@@ -204,6 +204,17 @@ def zero_shot_extract_with_llm(raw_html: str, api_key: str, base_url: str) -> di
 
 #### Diagram: LLM 零样本网页解析与 XPath 选择器自愈修复工作台
 
+```mermaid
+flowchart TD
+    Fetch["获取网页 HTML"] --> FastPath["常态模式: 本地 lxml 执行缓存 XPath (零 Token 成本)"]
+    FastPath --> Check{"字段非空率检查是否触发结构漂移?"}
+    Check -->|"正常: 非空率达标"| Output["直接输出结构化字典"]
+    Check -->|"异常: 网站改版导致提取为空"| Prune["启动自愈: DOM 树精简 Pruning 降本 90%"]
+    Prune --> LLM["调用 LLM Structured Outputs 推断新版 XPath 规则"]
+    LLM --> Sandbox{"本地 lxml 沙盒验证新 XPath 是否非空?"}
+    Sandbox -->|"沙盒验证通过"| HotUpdate["热更新配置中心选择器并恢复高速采集"]
+```
+
 <details markdown="1">
 <summary>Interactive MicroSim: LLM 零样本网页解析与 XPath 选择器自愈修复工作台</summary>
 
@@ -336,6 +347,16 @@ def auto_heal_xpath_with_llm(
    调用文本嵌入模型（如开源王者 `BAAI/bge-m3` 或在线 Embedding API）将每个文本块映射为高维稠密向量（如 1024 维浮点数数组），并以 `url + chunk_index` 的哈希值作为唯一主键写入向量数据库（如轻量级本地库 `ChromaDB` 或分布式引擎 `Milvus` / `Qdrant`）。
 
 #### Diagram: 面向 RAG 与 SFT 的智能网页语料清洗及分块沙盒
+
+```mermaid
+flowchart LR
+    RawHTML["原始嘈杂网页 HTML"] --> Clean["1. Trafilatura / Crawl4AI<br/>剔除导航广告噪音并转结构化 Markdown"]
+    Clean --> PII["2. 合规净化流水线<br/>正则/NER 擦除手机号身份证 PII + MinHash 去重"]
+    PII --> Branch{"语料下游用途"}
+    Branch -->|有监督微调 SFT| SFT["组装 Alpaca / ShareGPT 多轮问答 JSONL"]
+    Branch -->|检索增强生成 RAG| Chunk["3. 按 Markdown 标题层级与段落边界语义分块 (Chunking + Overlap)"]
+    Chunk --> Vec["4. 绑定 source_url 元数据 + BGE Embedding 写入 ChromaDB/Milvus"]
+```
 
 <details markdown="1">
 <summary>Interactive MicroSim: 面向 RAG 与 SFT 的智能网页语料清洗及分块沙盒</summary>

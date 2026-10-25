@@ -321,6 +321,20 @@ if __name__ == "__main__":
 
 #### Diagram: API Pagination Reverse Engineering Simulator
 
+```mermaid
+sequenceDiagram
+    participant S as Python 逆向采集脚本
+    participant API as 服务端异步数据接口 (REST / GraphQL)
+    Note over S,API: 模式一：传统页码偏移翻页 (page / offset)
+    S->>API: GET /api/articles?page=1&size=20
+    API-->>S: 返回前 20 条 + total=500
+    Note over S,API: 模式二：游标瀑布流翻页 (Cursor / MaxID，防实时插队重复)
+    S->>API: GET /api/feed?cursor=0&limit=20
+    API-->>S: 返回 items + next_cursor="eyJpZCI6OTg1fQ==" + has_more=true
+    S->>API: GET /api/feed?cursor=eyJpZCI6OTg1fQ==&limit=20
+    API-->>S: 返回下一批紧邻记录 + next_cursor="..."
+```
+
 <details markdown="1">
 <summary>API Pagination Reverse Engineering Simulator</summary>
 Type: microsim
@@ -703,6 +717,19 @@ if __name__ == "__main__":
 在进入本章小结之前，请通过下方的交互式工程选型决策器，根据 6 个真实网站的 DevTools 抓包特征为其匹配最优的数据采集技术方案。
 
 #### Diagram: Web Scraping Protocol and Strategy Decision Matrix
+
+```mermaid
+flowchart TD
+    Inspect["打开 Chrome DevTools 勘察目标站点"] --> C1{"Ctrl+U 网页源码含核心数据?"}
+    C1 -->|"是: 含完整 HTML 标签文本"| S1["方案 S1: 静态 HTML 请求 + CSS/XPath 解析"]
+    C1 -->|"是: 含 __NEXT_DATA__ 内嵌脚本"| S1B["方案 S1-SSR: 提取 script JSON 直接反序列化"]
+    C1 -->|"否: 空挂载点 div#app"| C2{"观察 Network 面板数据包类型"}
+    C2 -->|"标准 application/json 响应"| S2["方案 S2: RESTful API 直采 + JMESPath 提取"]
+    C2 -->|"带 callback 函数外壳"| S3["方案 S3: 正则剥离 JSONP 外壳 + json.loads"]
+    C2 -->|"单一端点 POST /graphql"| S4["方案 S4: 复用 query 语法树 + 循环更新 variables"]
+    C2 -->|"状态码 101 wss 长连接"| S5["方案 S5: websockets 异步订阅实时帧"]
+    C2 -->|"响应头 text/event-stream"| S6["方案 S6: httpx.stream 逐行消费 SSE 事件流"]
+```
 
 <details markdown="1">
 <summary>Web Scraping Protocol and Strategy Decision Matrix</summary>

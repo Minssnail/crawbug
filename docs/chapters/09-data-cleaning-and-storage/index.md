@@ -302,6 +302,17 @@ if __name__ == "__main__":
 
 #### Diagram: Web Data ETL Cleaning and SimHash Deduplication Workbench
 
+```mermaid
+flowchart LR
+    Raw["原始脏网页数据"] --> S1["1. HTML 标签剥离与实体反转义 (html.unescape)"]
+    S1 --> S2["2. Unicode NFKC 全角转半角与空白符归一化"]
+    S2 --> S3["3. 日期时间标准化与万/亿数值单位换算"]
+    S3 --> S4["4. Pydantic BaseModel 强类型校验门禁"]
+    S4 --> S5{"5. MD5 精确去重与 64位 SimHash 海明距离 <= 3 检测"}
+    S5 -->|判定为重复/近重复样本| Drop["丢弃重复语料"]
+    S5 -->|唯一高质量记录| Store["写入持久化数据库 / 数据湖"]
+```
+
 <details markdown="1">
 <summary>Web Data ETL Cleaning and SimHash Deduplication Workbench</summary>
 Type: microsim
@@ -652,6 +663,15 @@ m = -\frac{n \ln p}{(\ln 2)^2} \approx -2.081 \times n \ln p, \qquad k = \frac{m
 下面请通过交互式存储架构选型与布隆过滤器容量计算器，亲自对比不同规模下的内存消耗并为典型 AI 采集场景匹配最佳存储引擎。
 
 #### Diagram: Storage Architecture Selector and Bloom Filter Sizing Calculator
+
+```mermaid
+flowchart TD
+    Data["清洗合格的结构化数据 / 待去重 URL"] --> Type{"存储与去重场景选型"}
+    Type -->|大模型训练语料流式交付| JSONL["JSON Lines (.jsonl) + Parquet 列式压缩归档"]
+    Type -->|强 Schema 业务报表与事务关联| MySQL["MySQL (utf8mb4) + ON DUPLICATE KEY UPDATE 幂等写入"]
+    Type -->|异构嵌套 JSON 与弹性字段| Mongo["MongoDB + update_one(upsert=True) 幂等文档存储"]
+    Type -->|亿级分布式 URL 内存极速判重| Bloom["Redis BitArray 布隆过滤器 (Bloom Filter)<br/>1亿 URL 仅占 ~114MB 内存 (误判率 0.1%)"]
+```
 
 <details markdown="1">
 <summary>Storage Architecture Selector and Bloom Filter Sizing Calculator</summary>

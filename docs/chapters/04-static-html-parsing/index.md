@@ -75,16 +75,16 @@ This chapter builds on concepts from:
 - **祖先节点（Ancestors）与后代节点（Descendants）**：从当前节点向上直到根部 `<html>` 路径上的所有外层容器统称祖先节点；当前节点内部嵌套的所有层级的子孙标签统称后代节点。
 - **同胞/兄弟节点（Siblings）**：拥有同一个父节点的平级节点互为兄弟节点。按出现先后顺序又分为前序兄弟节点（Preceding Siblings）与后续兄弟节点（Following Siblings）。当目标元素本身没有任何 `id` 或 `class` 特征，但它紧挨着一个带有明确文字的 `<label>联系电话：</label>` 标签时，通过“先定位特征标签、再横移到下一个兄弟节点”的策略即可稳健破局。
 
-```
-                     [ <article class="post-card"> ]  <-- 祖先/父节点 (Parent)
-                      /             |              \
-                     /              |               \
-      [ <h2 class="title"> ]  [ <div class="meta"> ]  [ <p class="summary"> ]
-       (前序兄弟 Preceding)     (当前基准节点 Self)     (后续兄弟 Following)
-              |                  /              \                |
-        [ <a href="..."> ]  [ <span> ]      [ <span> ]     "摘要正文文本..."
-              |                 |               |          (文本节点 Text)
-         "深度学习导论"      "2026-10-25"     "阅读: 1.2w"
+```mermaid
+flowchart TD
+    Root["article.post-card (祖先/父节点 Parent)"] --> H2["h2.title (前序兄弟节点 Preceding Sibling)"]
+    Root --> Meta["div.meta (当前基准节点 Self)"]
+    Root --> P["p.summary (后续兄弟节点 Following Sibling)"]
+    H2 --> A["a[href='...']"]
+    A --> T1["文本节点: '深度学习导论'"]
+    Meta --> S1["span: '2026-10-25'"]
+    Meta --> S2["span: '阅读: 1.2w'"]
+    P --> T2["文本节点: '摘要正文文本...'"]
 ```
 
 ### 1.3 网页字符集 UTF-8 与 GBK 乱码治理
@@ -323,6 +323,17 @@ if __name__ == "__main__":
 
 #### Diagram: CSS 选择器与 XPath 双向定位沙盒
 
+```mermaid
+flowchart TD
+    Root["div.course-list (列表根容器)"] --> Card1["div.course-card (真实课程卡片 1)"]
+    Root --> CardAd["div.course-card.ad-item (穿插广告卡片 - 用 not 过滤)"]
+    Root --> Card2["div.course-card (真实课程卡片 2)"]
+    Card1 --> H3["h3.title > a 提取标题与链接"]
+    Card1 --> Info["div.info"]
+    Info --> SpanLabel["span: 主讲教师 (基准节点)"]
+    SpanLabel -.->|"following-sibling 横向兄弟轴"| SpanVal["span: 林工 (目标兄弟节点)"]
+```
+
 <details markdown="1">
 <summary>Interactive MicroSim: CSS 选择器与 XPath 双向定位沙盒</summary>
 
@@ -539,6 +550,17 @@ if __name__ == "__main__":
 | **Cython 极速引擎** | `selectolax` (Lexbor) | **~0.14 秒** | 平缓（标准 CSS） | 强 | **大模型海量语料清洗**、高并发异步爬虫（配合 `aiohttp`/`httpx`）避免阻塞事件循环 |
 
 #### Diagram: 静态网页解析器选型决策与性能基准仪
+
+```mermaid
+flowchart TD
+    Task["待解析静态网页任务"] --> Q1{"数据位于何处?"}
+    Q1 -->|内嵌于 script 变量的 JSON 或纯文本段落| Re["选用 Python re (预编译正则表达式)<br/>耗时: ~0.18s / 1000页"]
+    Q1 -->|规整的 HTML table 二维数据表| Pd["选用 pandas.read_html()<br/>一行代码直接转 DataFrame"]
+    Q1 -->|常规 HTML DOM 树节点| Q2{"采集规模与定位复杂度?"}
+    Q2 -->|百万级预训练语料 / 极致高吞吐| Sel["选用 Selectolax (Lexbor Cython 引擎)<br/>耗时: ~0.14s / 1000页"]
+    Q2 -->|需按文本模糊匹配或向上反查父/兄弟节点| Lxml["选用 lxml.etree / Parsel (XPath + CSS 链式)<br/>耗时: ~0.52s / 1000页"]
+    Q2 -->|快速教学原型或极度残缺老旧网页| BS4["选用 BeautifulSoup4 (配 lxml 解析器)<br/>耗时: ~3.45s / 1000页"]
+```
 
 <details markdown="1">
 <summary>Interactive MicroSim: 静态网页解析器选型决策与性能基准仪</summary>

@@ -232,6 +232,16 @@ print(f"✅ 成功清洗并写入 {len(cleaned_records)} 条唯一样本至 {out
 
 #### Diagram: Standard Web Crawler Workflow Architecture
 
+```mermaid
+flowchart LR
+    N1["1. 种子URL池 (Seed URLs)"] -->|注入初始种子网址| N2["2. 调度器与去重集合 (Scheduler & Visited Set)"]
+    N2 -->|分发未访问URL| N3["3. 下载器 (HTTP Downloader)"]
+    N3 -->|交付HTML/JSON响应源码| N4["4. 解析器 (HTML/JSON Parser)"]
+    N4 -->|分支A: 回流新发现链接URL| N2
+    N4 -->|分支B: 推送业务数据字典Item| N5["5. 清洗与校验管道 (Cleaning Pipeline)"]
+    N5 -->|写入校验合格数据| N6["6. 持久化存储 (Persistent Storage)"]
+```
+
 <details markdown="1">
 <summary>Standard Web Crawler Workflow Architecture</summary>
 Type: workflow
@@ -373,6 +383,16 @@ if __name__ == "__main__":
 理解了 FIFO 队列与 LIFO 栈在 URL 调度中的区别后，请通过下方的交互式微仿真亲自预测 BFS 与 DFS 在每一步出队/出栈时所访问的下一个网页节点。
 
 #### Diagram: Web Crawler BFS and DFS Traversal Predictor
+
+```mermaid
+flowchart TD
+    A["首页 A (Seed) [BFS:1 / DFS:1]"] --> B["栏目页 B (AI新闻) [BFS:2 / DFS:2]"]
+    A --> C["栏目页 C (开源项目) [BFS:3 / DFS:5]"]
+    B --> D["详情页 D [BFS:4 / DFS:3]"]
+    B --> E["详情页 E [BFS:5 / DFS:4]"]
+    C --> F["详情页 F [BFS:6 / DFS:6]"]
+    C --> G["详情页 G [BFS:7 / DFS:7]"]
+```
 
 <details markdown="1">
 <summary>Web Crawler BFS and DFS Traversal Predictor</summary>
@@ -560,6 +580,17 @@ if __name__ == "__main__":
 在完成了对 `robots.txt` 语法规则与数据合规四问的学习后，请通过下方的交互式合规审计仿真器，对 8 个真实的 AI 数据采集请求场景逐一做出“允许采集（ALLOW）”或“拦截禁止（BLOCK）”的工程裁决。
 
 #### Diagram: Robots.txt and AI Data Compliance Auditor
+
+```mermaid
+flowchart TD
+    Start["发起采集任务前合规审查"] --> R1{"1. 检查 /robots.txt 协议"}
+    R1 -->|命中 Disallow 且无书面授权| Stop1["终止抓取: 遵守君子协定"]
+    R1 -->|Allow 或已获公开授权| R2{"2. 评估服务器负载与 Crawl-delay"}
+    R2 -->|高频并发阻塞正常服务| Stop2["限流整改: 严防破坏计算机信息系统罪"]
+    R2 -->|温和限速礼貌抓取| R3{"3. 核查数据属性与个人信息 PII"}
+    R3 -->|含未授权公民手机号/身份证/隐私| Stop3["脱敏或丢弃: 遵守个人信息保护法"]
+    R3 -->|公开非敏感数据或已脱敏| Pass["合规放行: 注入 AI 训练语料库"]
+```
 
 <details markdown="1">
 <summary>Robots.txt and AI Data Compliance Auditor</summary>

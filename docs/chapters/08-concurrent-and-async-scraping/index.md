@@ -415,6 +415,21 @@ if __name__ == "__main__":
 
 #### Diagram: Synchronous vs Threaded vs Asyncio Event Loop Concurrency Simulator
 
+```mermaid
+sequenceDiagram
+    participant EvLoop as asyncio单线程事件循环
+    participant T1 as 协程Task1_URL1
+    participant T2 as 协程Task2_URL2
+    participant T3 as 协程Task3_URL3
+    EvLoop->>T1: 1. 启动请求, 遇到 await client.get 挂起并让出控制权
+    EvLoop->>T2: 2. 微秒级零开销切换, 发起请求并 await 挂起
+    EvLoop->>T3: 3. 微秒级零开销切换, 发起请求并 await 挂起
+    Note over T1,T3: 三个网络 I/O 在操作系统内核态同时并行等待响应
+    T2-->>EvLoop: 4. URL2 响应率先到达, 唤醒 Task2 解析数据
+    T1-->>EvLoop: 5. URL1 响应到达, 唤醒 Task1 解析数据
+    T3-->>EvLoop: 6. URL3 响应到达, 唤醒 Task3 解析数据
+```
+
 <details markdown="1">
 <summary>Synchronous vs Threaded vs Asyncio Event Loop Concurrency Simulator</summary>
 Type: microsim
@@ -652,6 +667,14 @@ M(T) \le B + r \times T
 下面请通过交互式仿真器亲自调整 `Semaphore` 并发上限与令牌桶速率参数，观察爬虫如何在“超高吞吐量”与“零 429 封禁率”之间找到最优工程平衡点。
 
 #### Diagram: Asyncio Semaphore and Token Bucket Rate Limiter Simulator
+
+```mermaid
+flowchart LR
+    Tasks["1000 个待执行协程任务"] --> Sem["第一道阀门: asyncio.Semaphore(20)<br/>控制同一时刻最大在途连接数 <= 20"]
+    Sem --> Bucket["第二道阀门: AsyncLimiter / 令牌桶<br/>控制每秒新增发包速率 <= 10 QPS"]
+    Bucket --> Client["httpx.AsyncClient / aiohttp 连接池复用发送"]
+    Client --> FileIO["aiofiles 异步非阻塞流式追加写入 .jsonl"]
+```
 
 <details markdown="1">
 <summary>Asyncio Semaphore and Token Bucket Rate Limiter Simulator</summary>

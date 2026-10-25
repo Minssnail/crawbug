@@ -92,6 +92,20 @@ This chapter builds on concepts from:
 
 #### Diagram: Scrapy Six Core Components and Data Flow Architecture
 
+```mermaid
+flowchart TB
+    Spiders["Spiders (爬虫解析组件)"] -->|"1. 产出 Request"| Engine["Scrapy Engine (核心引擎)"]
+    Engine -->|"2. 请求入队调度"| Scheduler["Scheduler (调度器与去重队列)"]
+    Scheduler -->|"3. 弹出下一个 Request"| Engine
+    Engine -->|"4. 经 process_request 注入代理与UA"| DM["Downloader Middlewares (下载器中间件)"]
+    DM --> Downloader["Downloader (Twisted 异步下载器)"]
+    Downloader -->|"5. 经 process_response 校验状态"| DM
+    DM -->|"6. 返回 Response"| Engine
+    Engine -->|"7. 交付 parse 方法解析"| Spiders
+    Spiders -->|"8. 产出 Item 或新 Request"| Engine
+    Engine -->|"9. 送入多级清洗存储管道"| Pipeline["Item Pipelines (数据管道)"]
+```
+
 <details markdown="1">
 <summary>Scrapy Six Core Components and Data Flow Architecture</summary>
 Type: workflow
@@ -642,6 +656,15 @@ class DistributedAINewsSpider(RedisSpider):
 在结束本章之前，请通过下方的交互式 Scrapy 生产配置与分布式调优仿真器，亲自诊断并修复 5 个真实生产故障场景中的 `settings.py` 与中间件/管道优先级配置。
 
 #### Diagram: Scrapy Production Tuning and Distributed Cluster Configurator
+
+```mermaid
+flowchart LR
+    Seeds["lpush 注入起始种子"] --> Redis[("共享 Redis 主实例<br/>1. ZSet 优先级请求队列<br/>2. Set / BloomFilter 指纹去重")]
+    Redis <-->|拉取 Request / 回传新链接| W1["Scrapy-Redis Worker 节点 1 (Scrapyd 容器)"]
+    Redis <-->|拉取 Request / 回传新链接| W2["Scrapy-Redis Worker 节点 2 (Scrapyd 容器)"]
+    Redis <-->|拉取 Request / 回传新链接| W3["Scrapy-Redis Worker 节点 3 (Scrapyd 容器)"]
+    W1 & W2 & W3 -->|并发幂等写入| DB[("分布式 MongoDB / MySQL 集群")]
+```
 
 <details markdown="1">
 <summary>Scrapy Production Tuning and Distributed Cluster Configurator</summary>

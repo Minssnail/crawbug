@@ -336,6 +336,16 @@ if __name__ == "__main__":
 
 #### Diagram: HTTP Status Code and Header Triage Simulator
 
+```mermaid
+flowchart TD
+    Req["发送 HTTP 请求"] --> Status{"检查响应状态码 Status Code"}
+    Status -->|200 OK / 206 Partial| CheckBody["校验响应体编码与格式后送入解析器"]
+    Status -->|301 / 302 / 307 重定向| CheckLoc["追踪 Location 头 (警惕重定向至登录/验证码页)"]
+    Status -->|401 / 403 权限拒绝| FixAuth["补齐 User-Agent / Referer / Cookie / 签名 Token"]
+    Status -->|429 Too Many Requests| FixRate["解析 Retry-After 头 + 切换高匿代理 + 指数退避限流"]
+    Status -->|500 / 502 / 503 / 504 服务端异常| Retry["触发幂等重试机制 (最多 3 次)"]
+```
+
 <details markdown="1">
 <summary>HTTP Status Code and Header Triage Simulator</summary>
 Type: microsim
@@ -614,6 +624,17 @@ if __name__ == "__main__":
 在完整学习了从 URL 拆解、DNS/TCP/TLS 握手、HTTP 请求/响应报文到 Chrome DevTools 抓包与 Cookie/JWT 会话跟踪的全链路知识后，请通过下方的交互式微仿真，亲自动手完成“从 URL 输入到建立认证会话”的端到端协议栈生命周期推演。
 
 #### Diagram: End-to-End HTTP Lifecycle and Session Inspector
+
+```mermaid
+sequenceDiagram
+    participant C as Python爬虫客户端_Session
+    participant S as 目标Web服务器
+    C->>S: 1. POST /login 提交账号密码表单与User-Agent
+    S-->>C: 2. 302 Found 并下发 Set-Cookie: session_id=xyz987
+    Note over C: Session 自动解析并持久化保存 CookieJar
+    C->>S: 3. GET /dashboard/data 自动携带 Cookie: session_id=xyz987
+    S-->>C: 4. 200 OK 返回已鉴权专属 HTML 与 JSON 数据
+```
 
 <details markdown="1">
 <summary>End-to-End HTTP Lifecycle and Session Inspector</summary>

@@ -76,12 +76,15 @@ This chapter builds on concepts from:
 
 在自动化控制框架层面，理解 **Selenium 与 Playwright 架构对比** 是技术选型的关键。由微软开源的新一代框架 **Playwright** 之所以在爬虫与 AI 智能体领域全面取代传统的 Selenium，核心源于其底层通信协议的代际跨越：
 
-```
-【传统 Selenium WebDriver 架构（HTTP 轮询转发，慢且易断连）】
-Python 代码  ──(HTTP 请求)──►  chromedriver 独立进程  ──(协议转换)──►  Chrome 浏览器
-
-【现代 Playwright 架构（WebSocket 持久双向全双工通道，极速且支持事件推送）】
-Python 代码  ◄═════(WebSocket 持久双向连接 / CDP 协议)═════►  Chromium / Firefox / WebKit
+```mermaid
+flowchart LR
+    subgraph Sel["传统 Selenium WebDriver 架构 (HTTP 三段式轮询转发)"]
+        S_Py["Python 代码"] -->|HTTP 请求| S_Drv["chromedriver 独立进程"]
+        S_Drv -->|协议转换转发| S_Brw["Chrome 浏览器"]
+    end
+    subgraph Pw["现代 Playwright 架构 (WebSocket 持久双向全双工直连)"]
+        P_Py["Python 代码"] <-->|WebSocket 持久连接 / CDP 协议| P_Brw["Chromium / Firefox / WebKit"]
+    end
 ```
 
 | 对比维度 | 传统 Selenium (WebDriver) | 新一代 Playwright | 对爬虫工程的实际影响 |
@@ -93,6 +96,16 @@ Python 代码  ◄═════(WebSocket 持久双向连接 / CDP 协议)═�
 | **网络层拦截能力** | 原生不支持（需额外挂载缓慢的 `selenium-wire` 中间人代理） | **原生支持 `page.route` 改写请求与 `on("response")` 截获响应** | 可直接屏蔽图片广告并从底层无损捞取解密后的 JSON 接口数据 |
 
 #### Diagram: Selenium 与 Playwright 通信架构及渲染生命周期对比器
+
+```mermaid
+flowchart TB
+    subgraph PW["新一代 Playwright 架构 (WebSocket 持久全双工直连)"]
+        P1["Python 爬虫进程"] <-->|WebSocket 持久通道 / CDP 协议| B1["单实例 Browser (Chromium)"]
+        B1 --> Ctx1["隔离上下文 BrowserContext 1 (独立 Cookie/代理)"]
+        B1 --> Ctx2["隔离上下文 BrowserContext 2 (独立 Cookie/代理)"]
+        Ctx1 --> Pg1["Page 标签页: HTML -> JS Event Loop -> 动态 DOM 挂载"]
+    end
+```
 
 <details markdown="1">
 <summary>Interactive MicroSim: Selenium 与 Playwright 通信架构及渲染生命周期对比器</summary>
@@ -289,6 +302,16 @@ def scrape_infinite_scroll_feed(target_url: str, max_scrolls: int = 5) -> list[d
    当遇到第 5 章中提到的复杂加密签名接口时，我们完全不需要去逆向它的 JS 加密算法！只需注册 `page.on("response", handle_response)` 监听器：当我们在页面上点击“下一页”按钮时，浏览器会自动执行网页自带的加密 JS 并向服务器发送合法请求；一旦服务器返回 JSON 数据包，我们的 `handle_response` 函数就会在同一毫秒内直接调用 `response.json()` 拿到解密后的纯净结构化字典，连 HTML 解析都省了！
 
 #### Diagram: Playwright 网络路由拦截与 API 响应截获流水线
+
+```mermaid
+flowchart LR
+    Page["Playwright Page 发起网络请求"] --> Route{"page.route('**/*') 路由网关"}
+    Route -->|image / media / font / 广告域名| Abort["route.abort() 直接掐断 (节省 70%+ 带宽)"]
+    Route -->|document / script / xhr / fetch| Cont["route.continue_() 放行请求"]
+    Cont --> Server["目标服务器返回响应 (含前端自动签名的加密接口)"]
+    Server --> RespListener{"page.on('response') 监听器"}
+    RespListener -->|匹配目标 API URL 且 status==200| Extract["response.json() 直接截获明文 JSON 字典"]
+```
 
 <details markdown="1">
 <summary>Interactive MicroSim: Playwright 网络路由拦截与 API 响应截获流水线</summary>

@@ -10,7 +10,34 @@
 
 - **紧扣 AI 专业数据底座需求**：告别脱离时代的陈旧案例，全书围绕“为大模型预训练、指令微调（SFT）与 RAG 知识库供给高信噪比数据”的主线展开。
 - **主流 Python 3.10+ 工程实战栈**：全面覆盖 `requests`、`httpx`、`curl_cffi`、`BeautifulSoup4`、`lxml`（XPath）、`parsel`、`selectolax`、`Playwright`、`DrissionPage`、`ddddocr`、`asyncio`/`aiohttp`、`Pydantic`、`Scrapy`、`scrapy-redis`、`Trafilatura`、`Crawl4AI` 与向量数据库。
-- **240 个知识图谱概念与交互式微仿真（MicroSims）**：全书基于无环依赖知识图谱（DAG）科学编排，每章均配备完整可运行的 Python 代码、对比决策表、2～3 个交互式微仿真实验规格及课后折叠思考题。
+- **240 个知识图谱概念与交互式微仿真（MicroSims）**：全书基于无环依赖知识图谱（DAG）科学编排，每章均配备完整可运行的 Python 代码、对比决策表、Mermaid 架构流程图、2～3 个交互式微仿真实验规格及课后折叠思考题。
+
+---
+
+## 全书 12 章知识演进架构图
+
+```mermaid
+flowchart TB
+    subgraph Phase1["第一阶段：基础协议与静态解析 (Ch 01 - Ch 04)"]
+        C1["第1章: 爬虫导论与合规基石"] --> C2["第2章: Web前端与HTTP通信原理"]
+        C2 --> C3["第3章: Python网络请求核心编程"]
+        C3 --> C4["第4章: 静态网页解析与正则提取"]
+    end
+    subgraph Phase2["第二阶段：动态逆向与反爬对抗 (Ch 05 - Ch 07)"]
+        C4 --> C5["第5章: 异步加载与Web接口逆向"]
+        C5 --> C6["第6章: Playwright浏览器自动化"]
+        C6 --> C7["第7章: 反爬虫机制原理与工程对抗"]
+    end
+    subgraph Phase3["第三阶段：高并发、存储与工业框架 (Ch 08 - Ch 10)"]
+        C7 --> C8["第8章: 高性能并发与异步协程爬虫"]
+        C8 --> C9["第9章: 数据清洗流水线与多源存储"]
+        C9 --> C10["第10章: Scrapy工业级分布式框架"]
+    end
+    subgraph Phase4["第四阶段：大模型智能爬虫与综合实训 (Ch 11 - Ch 12)"]
+        C10 --> C11["第11章: 面向大模型与RAG的AI智能爬虫"]
+        C11 --> C12["第12章: 工程化运维部署与四大综合实训"]
+    end
+```
 
 ---
 

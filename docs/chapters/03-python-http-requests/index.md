@@ -273,6 +273,20 @@ def download_media_stream(
 
 #### Diagram: Python HTTP Request Parameter and Payload Builder
 
+```mermaid
+flowchart LR
+    subgraph Input["Python 请求参数字典"]
+        P["params = {'page': 1}"]
+        D["data = {'user': 'admin'}"]
+        J["json = {'query': 'LLM'}"]
+        H["headers = {'User-Agent': 'Mozilla/5.0'}"]
+    end
+    P -->|"URL 查询字符串编码"| Out1["GET /search?page=1"]
+    D -->|"表单编码 x-www-form-urlencoded"| Out2["Request Body: user=admin"]
+    J -->|"JSON 序列化 application/json"| Out3["Request Body: {'query': 'LLM'}"]
+    H -->|"覆盖默认请求头"| Out4["HTTP Request Headers"]
+```
+
 <details markdown="1">
 <summary>Python HTTP Request Parameter and Payload Builder</summary>
 Type: microsim
@@ -462,6 +476,16 @@ if __name__ == "__main__":
 为了直观理解为什么 `Session` 连接池复用与指数退避（Exponential Backoff）能显著提升采集效率并避免触发防火墙永久封禁，请操作下方的交互式微仿真进行对比实验。
 
 #### Diagram: Session Connection Pool and Exponential Backoff Simulator
+
+```mermaid
+flowchart TD
+    Start["发起网络请求 (复用 Session TCP 连接池)"] --> Resp{"是否捕获网络超时或 5xx/429?"}
+    Resp -->|"否: 200 OK 正常响应"| Success["成功返回 Response 并复用底层 Keep-Alive 连接"]
+    Resp -->|"是: 第 n 次请求失败"| CheckMax{"重试次数 n 是否未超上限?"}
+    CheckMax -->|"未超上限: 继续重试"| Wait["指数退避等待: sleep(2^n + jitter) 秒"]
+    Wait --> Start
+    CheckMax -->|"已耗尽最大重试次数"| DeadLetter["记录结构化错误日志并推入死信队列 DLQ"]
+```
 
 <details markdown="1">
 <summary>Session Connection Pool and Exponential Backoff Simulator</summary>

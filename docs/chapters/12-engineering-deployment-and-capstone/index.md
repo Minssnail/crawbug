@@ -213,6 +213,14 @@ def check_layout_drift_and_audit(records: list[dict[str, Any]], required_fields:
 
 #### Diagram: 页面结构漂移巡检与数据集信噪比质量审计仪
 
+```mermaid
+flowchart LR
+    Batch["每批次采集完成 (如 50 页)"] --> Metrics["计算四大巡检指标:<br/>1. HTTP 200 成功率<br/>2. 核心必填字段非空率<br/>3. 正文信噪比 SNR 与平均字数<br/>4. 代理池健康分"]
+    Metrics --> Gate{"必填字段非空率 < 85% 或 正文字数 < 100?"}
+    Gate -->|是: 判定发生页面改版漂移或软拦截| Alert["触发熔断暂停入库 + 推送飞书/钉钉 Webhook 告警卡片"]
+    Gate -->|否: 质量门禁通过| Audit["生成 JSON 数据集质量评估报告并写入生产库"]
+```
+
 <details markdown="1">
 <summary>Interactive MicroSim: 页面结构漂移巡检与数据集信噪比质量审计仪</summary>
 
@@ -269,6 +277,18 @@ Type: microsim
 为了帮助同学们将全书 12 章、240 个核心概念彻底内化为工程实战能力，本节设计了四个由浅入深、覆盖不同技术栈组合的综合实训项目。建议按顺序完成实训一至实训三，并将最后一个综合实训作为课程期末大作业或毕业设计课题。
 
 #### Diagram: 企业级爬虫技术栈选型与故障巡检架构沙盒
+
+```mermaid
+flowchart TB
+    subgraph Orchestration["调度与容器化基础设施层 (Docker Compose)"]
+        Sched["APScheduler / Airflow 定时增量调度"] --> Engine["采集执行层: httpx 异步协程 / Playwright 上下文池 / Scrapy-Redis"]
+    end
+    Engine --> Anti["反爬对抗中间件: 高匿隧道代理池 + curl_cffi TLS 指纹 + ddddocr"]
+    Anti --> Parse["解析与智能抽取层: Parsel / Selectolax / Trafilatura Markdown / LLM 自愈"]
+    Parse --> Pipe["清洗与合规门禁: Pydantic 强校验 + PII 隐私脱敏 + SimHash/MinHash 去重"]
+    Pipe --> Storage[("多模态与向量存储层: MySQL / MongoDB / JSONL / ChromaDB 向量库")]
+    Pipe --> Obs["可观测性闭环: Loguru 结构化日志 + 字段漂移巡检 + 飞书 Webhook 告警"]
+```
 
 <details markdown="1">
 <summary>Interactive MicroSim: 企业级爬虫技术栈选型与故障巡检架构沙盒</summary>
